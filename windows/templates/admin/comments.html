@@ -65,7 +65,7 @@
                                 </div>
                                 <code class="small text-muted">{{.Comment.ID.Hex}}</code>
                             </div>
-                            <div class="bg-light rounded-3 border p-3" style="white-space:pre-wrap;">{{.Comment.Content}}</div>
+                            <div class="bg-light rounded-3 border p-3" style="white-space:pre-wrap;">{{emojiifyComment .Comment.Content}}</div>
                         </div>
                     </div>
                 </article>

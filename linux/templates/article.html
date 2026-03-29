@@ -270,7 +270,7 @@
                                 {{end}}
                             </div>
                         </div>
-                        <p class="comment-content" id="content-{{.ID.Hex}}">{{.Content}}</p>
+                        <p class="comment-content" id="content-{{.ID.Hex}}">{{emojiifyComment .Content}}</p>
                     </div>
                 </div>
                 {{end}}
@@ -345,6 +345,37 @@
         return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    function emojiifyText(s) {
+        return (s || '')
+            .replace(/:-D|:D|=D/g, '😁')
+            .replace(/X-D|x-D/g, '😆')
+            .replace(/:-\)|:\)|=\)/g, '😀')
+            .replace(/:-\]|:\]/g, '🙂')
+            .replace(/:-\(|:\(|=\(/g, '🙁')
+            .replace(/;-\)|;\)/g, '😉')
+            .replace(/:-P|:P|:-p|:p/g, '😛')
+            .replace(/;-P|;P|;-p|;p/g, '😜')
+            .replace(/:-O|:O|:-o|:o/g, '😮')
+            .replace(/:-\||:\|/g, '😐')
+            .replace(/:-\/|:\/|:-\\|:\\/g, '😕')
+            .replace(/:-\*|:\*/g, '😘')
+            .replace(/<3/g, '❤️')
+            .replace(/<\/3/g, '💔')
+            .replace(/:'-\(|:'\(/g, '😢')
+            .replace(/:'D/g, '😂')
+            .replace(/8-\)|8\)|B-\)|B\)/g, '😎')
+            .replace(/O:-\)|O:\)/g, '😇')
+            .replace(/>:-\(|>:\(/g, '😠')
+            .replace(/>:-\)|>:\)/g, '😈')
+            .replace(/:3|\^\^/g, '😊')
+            .replace(/-_-/g, '😑')
+            .replace(/o_O|O_o|o_0|0_o/g, '🤨')
+            .replace(/:\$/g, '😊')
+            .replace(/:-X|:X|:-x|:x/g, '🤐')
+            .replace(/:-S|:S|:-s|:s/g, '😖')
+            .replace(/:-!|:!/g, '🤭');
+    }
+
     // Magyar hosszú dátumformátum: "2026. március 8. 14:32"
     var HU_MONTHS = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
     function formatHuDate(isoStr) {
@@ -375,7 +406,7 @@
                 editedBadge +
                 '<div class="comment-actions ms-auto">' + replyBtn + editBtn + delBtn + '</div>' +
               '</div>' +
-              '<p class="comment-content" id="content-' + c.id + '">' + escHTML(c.content) + '</p>' +
+              '<p class="comment-content" id="content-' + c.id + '">' + escHTML(emojiifyText(c.content)) + '</p>' +
             '</div>';
         return div;
     }
@@ -536,7 +567,7 @@
             if (editForm) editForm.remove();
             var contentEl = document.getElementById('content-' + commentId);
             if (contentEl) {
-                contentEl.textContent = comment.content;
+                contentEl.textContent = emojiifyText(comment.content);
                 contentEl.style.display = '';
             }
             // Show "edited" badge if not already present
@@ -590,4 +621,4 @@
         onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js';s.onload=function(){hljs.highlightAll();};document.head.appendChild(s);"
         onload="hljs.highlightAll()"></script>
 {{template "footer" .}}
-{{end}}
+{{end}}
