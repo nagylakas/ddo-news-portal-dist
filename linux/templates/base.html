@@ -43,7 +43,7 @@
     <!-- Primary color override -->
     <style>:root { --primary-color: {{.PrimaryColor}}; --bs-primary: {{.PrimaryColor}}; --bs-link-color: {{.PrimaryColor}}; --bs-link-hover-color: {{.PrimaryColor}}; }</style>
     <!-- RSS Autodiscovery -->
-    <link rel="alternate" type="application/rss+xml" title="{{.SiteNameLong}} – összes hír" href="{{siteURL}}/rss.xml">
+    {{if .RSSURL}}<link rel="alternate" type="application/rss+xml" title="{{.SiteNameLong}} RSS" href="{{.RSSURL}}">{{end}}
     <!-- SEO: meta description -->
     {{if .Article}}
     <meta name="description" content="{{truncate .Article.Summary 160}}">
@@ -173,6 +173,7 @@
                     <i class="bi bi-newspaper me-2"></i>{{.SiteNameLong}}
                 </div>
                 <div class="footer-social">
+                    {{if .RSSURL}}<a href="{{.RSSURL}}" aria-label="RSS"><i class="bi bi-rss-fill"></i></a>{{end}}
                     {{if socialFacebook}}<a href="{{socialFacebook}}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{{end}}
                     {{if socialTwitter}}<a href="{{socialTwitter}}" target="_blank" rel="noopener" aria-label="Twitter/X"><i class="bi bi-twitter-x"></i></a>{{end}}
                     {{if socialInstagram}}<a href="{{socialInstagram}}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{{end}}
@@ -212,4 +213,4 @@
     <script src="/static/js/main.js"></script>
 
 </html>
-{{end}}
+{{end}}
