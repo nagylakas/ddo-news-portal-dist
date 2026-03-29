@@ -31,6 +31,30 @@
                 </div>
             </div>
 
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                        <div>
+                            <h5 class="mb-1 fw-semibold"><i class="bi bi-cloud-arrow-down me-2 text-primary"></i>{{t .Lang "settings.update_title"}}</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{t .Lang "settings.current_version"}}: v{{.CurrentVersion}}</span>
+                                <span class="badge {{if .LatestVersion}}{{if .UpdateAvailable}}bg-success-subtle text-success border border-success-subtle{{else}}bg-light text-secondary border{{end}}{{else}}bg-light text-secondary border{{end}}">
+                                    {{t .Lang "settings.latest_version"}}: {{if .LatestVersion}}v{{.LatestVersion}}{{else}}—{{end}}
+                                </span>
+                            </div>
+                            <div class="text-muted" style="font-size:.95rem;">
+                                {{if .UpdateError}}{{.UpdateError}}{{else}}{{.UpdateStatusText}}{{end}}
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-success btn-sm" id="updateBtn" onclick="triggerSelfUpdate()" {{if or (not .UpdateEnabled) (not .UpdateAvailable)}}disabled{{end}}>
+                                <i class="bi bi-download me-1"></i>{{t .Lang "settings.update_btn"}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{if .Entries}}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -127,8 +151,17 @@ window.adminI18n = {
     ready:           "{{t .Lang "settings.ready"}}",
     waiting:         "{{t .Lang "settings.waiting"}}",
     confirmRestart:  "{{t .Lang "settings.confirm_restart"}}",
+    confirmUpdate:   "{{t .Lang "settings.confirm_update"}}",
     success:         "{{t .Lang "settings.success"}}",
+    updateSuccess:   "{{t .Lang "settings.update_success"}}",
     loading:         "{{t .Lang "settings.loading"}}",
+    updateOverlayTitle: "{{t .Lang "settings.update_overlay_title"}}",
+    updateOverlayText:  "{{t .Lang "settings.update_overlay_text"}}",
+    updateChecking:  "{{t .Lang "settings.update_checking"}}",
+    updateDownloading: "{{t .Lang "settings.update_downloading"}}",
+    updateInstalling: "{{t .Lang "settings.update_installing"}}",
+    updateRestarting: "{{t .Lang "settings.update_restarting"}}",
+    updateFailed:    "{{t .Lang "settings.update_failed"}}",
     keyPh:           "{{t .Lang "settings.key_ph"}}",
     valuePh:         "{{t .Lang "settings.value_ph"}}",
     apiKeyInvalid:   "{{t .Lang "settings.api_key_invalid"}}",
@@ -214,11 +247,86 @@ function triggerRestart() {
     // Wait a moment, then start polling until the server is back
     setTimeout(function() {
         status.textContent = window.adminI18n.restarting;
-        pollUntilAlive(0);
+        pollUntilAlive(0, window.adminI18n.success);
     }, 2000);
 }
 
-function pollUntilAlive(attempts) {
+function triggerSelfUpdate() {
+    if (!confirm(window.adminI18n.confirmUpdate)) return;
+
+    var overlay = document.getElementById('restartOverlay');
+    var overlayTitle = document.getElementById('restartOverlayTitle');
+    var overlayText  = document.getElementById('restartOverlayText');
+    var status  = document.getElementById('restartStatus');
+    var updateBtn = document.getElementById('updateBtn');
+    var restartBtn = document.getElementById('restartBtn');
+
+    overlayTitle.textContent = window.adminI18n.updateOverlayTitle;
+    overlayText.textContent  = window.adminI18n.updateOverlayText;
+    status.textContent = window.adminI18n.updateChecking;
+    overlay.style.display = 'flex';
+    updateBtn.disabled = true;
+    restartBtn.disabled = true;
+
+    fetch('/admin/update', { method: 'POST' })
+        .then(function(response) {
+            return response.json().catch(function() { return {}; }).then(function(data) {
+                if (!response.ok) {
+                    throw new Error(data.error || window.adminI18n.updateFailed);
+                }
+                return data;
+            });
+        })
+        .then(function(data) {
+            status.textContent = data.message || window.adminI18n.updateDownloading;
+            setTimeout(function() { pollUpdateStatus(); }, 1200);
+        })
+        .catch(function(err) {
+            overlay.style.display = 'none';
+            updateBtn.disabled = false;
+            restartBtn.disabled = false;
+            alert(err.message || window.adminI18n.updateFailed);
+        });
+}
+
+function pollUpdateStatus() {
+    var status = document.getElementById('restartStatus');
+    var overlay = document.getElementById('restartOverlay');
+    var updateBtn = document.getElementById('updateBtn');
+    var restartBtn = document.getElementById('restartBtn');
+
+    fetch('/admin/update/status', { cache: 'no-store' })
+        .then(function(response) {
+            if (!response.ok) throw new Error('status');
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.error && !data.in_progress) {
+                overlay.style.display = 'none';
+                updateBtn.disabled = false;
+                restartBtn.disabled = false;
+                alert(data.error);
+                return;
+            }
+            if (data.in_progress) {
+                status.textContent = data.message || window.adminI18n.updateInstalling;
+                setTimeout(pollUpdateStatus, 1500);
+                return;
+            }
+            if (data.step === 'restarting') {
+                status.textContent = window.adminI18n.updateRestarting;
+                setTimeout(function() { pollUntilAlive(0, window.adminI18n.updateSuccess); }, 1000);
+                return;
+            }
+            setTimeout(pollUpdateStatus, 1500);
+        })
+        .catch(function() {
+            status.textContent = window.adminI18n.updateRestarting;
+            setTimeout(function() { pollUntilAlive(0, window.adminI18n.updateSuccess); }, 1000);
+        });
+}
+
+function pollUntilAlive(attempts, successMessage) {
     var status = document.getElementById('restartStatus');
     var maxAttempts = 30; // 30 × 2s = 60s timeout
 
@@ -231,7 +339,7 @@ function pollUntilAlive(attempts) {
         .then(function(r) {
             if (r.ok || r.status === 302 || r.status === 200) {
                 status.textContent = window.adminI18n.ready;
-                window.location.href = '/admin/settings?flash=' + encodeURIComponent(window.adminI18n.success);
+                window.location.href = '/admin/settings?flash=' + encodeURIComponent(successMessage || window.adminI18n.success);
             } else {
                 retry(attempts);
             }
