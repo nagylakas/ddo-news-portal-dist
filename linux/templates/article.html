@@ -1,0 +1,593 @@
+{{define "article"}}
+{{template "header" .}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"name":"Kezdőlap","item":"{{siteURL}}/"},
+    {"@type":"ListItem","position":2,"name":{{js .Article.Category}},"item":"{{siteURL}}/category/{{lower .Article.Category}}"},
+    {"@type":"ListItem","position":3,"name":{{js .Article.Title}},"item":"{{siteURL}}/article/{{.Article.Slug}}"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": {{js .Article.Title}},
+  "description": {{js (truncate .Article.Summary 200)}},
+  "url": "{{siteURL}}/article/{{.Article.Slug}}",
+  {{if .Article.ImageURL}}"image": ["{{.Article.ImageURL}}"],{{end}}
+  "datePublished": "{{rfc3339 .Article.PublishedAt}}",
+  "dateModified": "{{rfc3339 .Article.UpdatedAt}}",
+  "author": {
+    "@type": "Person",
+    "name": {{js .Article.Author}},
+    "url": "{{siteURL}}/author/{{authorSlug .Article.Author}}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": {{js .SiteNameLong}},
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{siteURL}}/static/img/logo/{{.IconPack}}.png"
+    }
+  },
+  "articleSection": {{js .Article.Category}}
+}
+</script>
+
+<!-- ===== ARTICLE HERO ===== -->
+<div class="art-hero">
+    {{if .Article.ImageURL}}
+    <img src="{{.Article.ImageURL}}" class="art-hero-img" alt="{{.Article.Title}}">
+    {{else}}
+    <div class="art-hero-img art-hero-placeholder"></div>
+    {{end}}
+    <div class="art-hero-overlay"></div>
+    <div class="art-hero-content">
+        <!-- Breadcrumb -->
+        <nav class="art-breadcrumb mb-3" aria-label="breadcrumb">
+            <a href="/">KEZDŐLAP</a>
+            <span class="art-bc-sep">›</span>
+            <a href="/category/{{lower .Article.Category}}">{{upper .Article.Category}}</a>
+            <span class="art-bc-sep">›</span>
+            <span>{{upper .Article.Title}}</span>
+        </nav>
+        <!-- Badges -->
+        <div class="art-hero-badges mb-3">
+            <span class="hero-badge hero-badge-cat">{{.Article.Category}}</span>
+        </div>
+        <!-- Title -->
+        <h1 class="art-hero-title">{{.Article.Title}}</h1>
+        <!-- Summary/deck -->
+        <p class="art-hero-deck">{{truncate .Article.Summary 180}}</p>
+        <!-- Meta -->
+        <div class="art-hero-meta">
+            <span class="art-hero-avatar">
+                {{if .AuthorAvatarURL}}<img src="{{secureURL .AuthorAvatarURL}}" alt="{{.Article.Author}}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">{{else}}<i class="bi bi-person-circle"></i>{{end}}
+            </span>
+            <a href="/author/{{authorSlug .Article.Author}}" class="art-hero-author">Szerző: {{.Article.Author}}</a>
+            <span class="art-hero-dot">•</span>
+            <span>{{formatDateTime .Article.PublishedAt}}</span>
+            <span class="art-hero-dot">•</span>
+            <span><i class="bi bi-clock me-1"></i>{{.ReadingMinutes}} perc olvasás</span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ARTICLE BODY ===== -->
+<div class="art-body-wrap">
+
+    <!-- Main column -->
+    <main class="art-main">
+
+        <!-- Table of Contents (only for articles ≥ 3 min read with ≥ 2 headings) -->
+        {{if .ShowTOC}}
+        <div class="art-toc mb-4">
+            <div class="art-toc-title">
+                <i class="bi bi-list-nested me-2"></i>Tartalomjegyzék
+            </div>
+            <nav class="art-toc-nav">
+                {{range .TOCItems}}
+                <a href="#{{.ID}}" class="art-toc-link art-toc-h{{.Level}}">{{.Text}}</a>
+                {{end}}
+            </nav>
+        </div>
+        {{end}}
+
+        <!-- Article content -->
+        <div class="article-content">
+            {{.ContentHTML}}
+        </div>
+
+        <!-- Tags -->
+        {{if .Article.Tags}}
+        <div class="art-tags mt-4">
+            <span class="art-tags-label">TAGEK</span>
+            {{range .Article.Tags}}
+            <a href="/tag/{{.}}" class="art-tag">{{.}}</a>
+            {{end}}
+        </div>
+        {{end}}
+
+        <!-- Share buttons -->
+        <div class="art-share mt-4">
+            <span class="art-share-label">MEGOSZTÁS</span>
+            <div class="art-share-buttons">
+                {{if shareEnabled "facebook"}}
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{siteURL}}/article/{{.Article.Slug}}"
+                   target="_blank" rel="noopener" class="art-share-btn art-share-fb"
+                   aria-label="Megosztás Facebookon" title="Facebook">
+                    <i class="bi bi-facebook"></i>
+                </a>
+                {{end}}
+                {{if shareEnabled "twitter"}}
+                <a href="https://x.com/intent/tweet?url={{siteURL}}/article/{{.Article.Slug}}&amp;text={{pathEscape .Article.Title}}"
+                   target="_blank" rel="noopener" class="art-share-btn art-share-tw"
+                   aria-label="Megosztás X-en (Twitter)" title="X / Twitter">
+                    <i class="bi bi-twitter-x"></i>
+                </a>
+                {{end}}
+                {{if shareEnabled "linkedin"}}
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{siteURL}}/article/{{.Article.Slug}}"
+                   target="_blank" rel="noopener" class="art-share-btn art-share-li"
+                   aria-label="Megosztás LinkedInen" title="LinkedIn">
+                    <i class="bi bi-linkedin"></i>
+                </a>
+                {{end}}
+                {{if shareEnabled "reddit"}}
+                <a href="https://reddit.com/submit?url={{siteURL}}/article/{{.Article.Slug}}&amp;title={{pathEscape .Article.Title}}"
+                   target="_blank" rel="noopener" class="art-share-btn art-share-reddit"
+                   aria-label="Megosztás Redditen" title="Reddit">
+                    <i class="bi bi-reddit"></i>
+                </a>
+                {{end}}
+                {{if shareEnabled "whatsapp"}}
+                <a href="https://api.whatsapp.com/send?text={{pathEscape .Article.Title}}%20{{siteURL}}/article/{{.Article.Slug}}"
+                   target="_blank" rel="noopener" class="art-share-btn art-share-whatsapp"
+                   aria-label="Megosztás WhatsApp-on" title="WhatsApp">
+                    <i class="bi bi-whatsapp"></i>
+                </a>
+                {{end}}
+                {{if shareEnabled "mastodon"}}
+                <a href="https://mastodon.social/share?text={{pathEscape .Article.Title}}%20{{siteURL}}/article/{{.Article.Slug}}"
+                   target="_blank" rel="noopener" class="art-share-btn art-share-mastodon"
+                   aria-label="Megosztás Mastodonon" title="Mastodon">
+                    <i class="bi bi-mastodon"></i>
+                </a>
+                {{end}}
+                {{if shareEnabled "bluesky"}}
+                <a href="https://bsky.app/intent/compose?text={{pathEscape .Article.Title}}%20{{siteURL}}/article/{{.Article.Slug}}"
+                   target="_blank" rel="noopener" class="art-share-btn art-share-bluesky"
+                   aria-label="Megosztás Bluesky-n" title="Bluesky">
+                    <i class="bi bi-clouds"></i>
+                </a>
+                {{end}}
+                {{if shareEnabled "copy"}}
+                <button onclick="copyArticleLink()" class="art-share-btn art-share-copy"
+                        id="copyBtn" aria-label="Link másolása" title="Link másolása">
+                    <i class="bi bi-link-45deg"></i>
+                </button>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Horizontal ad banner (visible only when sidebar is hidden, i.e. below xl) -->
+        <div class="art-banner-horizontal d-xl-none mt-4">
+            <span class="art-banner-label">HIRDETÉS</span>
+            <div class="art-banner-horizontal-inner">
+                {{if .BannerHorizontal}}
+                <a href="/banner/click/{{.BannerHorizontal.ID.Hex}}" target="_blank" rel="noopener sponsored">
+                    <img src="{{.BannerHorizontal.ImageURL}}"
+                         alt="{{.BannerHorizontal.AltText}}"
+                         style="max-width:100%;max-height:90px;display:block;">
+                </a>
+                {{else}}
+                <i class="bi bi-display text-muted" style="font-size:2rem;"></i>
+                <p class="text-muted small mb-0 ms-3">728 × 90</p>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Prev / Next navigation -->
+        <div class="art-prevnext mt-4">
+            <div class="art-prev">
+                {{range $i, $art := .RelatedArticles}}
+                {{if eq $i 0}}
+                <span class="art-pn-label">ELŐZŐ CIKK</span>
+                <a href="/article/{{$art.Slug}}" class="art-pn-link">
+                    <span class="art-pn-arrow art-pn-arrow-left"><i class="bi bi-chevron-left"></i></span>
+                    <span class="art-pn-text">{{truncate $art.Title 55}}</span>
+                </a>
+                {{end}}
+                {{end}}
+            </div>
+            <div class="art-next">
+                {{range $i, $art := .RelatedArticles}}
+                {{if eq $i 1}}
+                <span class="art-pn-label">KÖVETKEZŐ CIKK</span>
+                <a href="/article/{{$art.Slug}}" class="art-pn-link art-pn-link-right">
+                    <span class="art-pn-text">{{truncate $art.Title 55}}</span>
+                    <span class="art-pn-arrow art-pn-arrow-right"><i class="bi bi-chevron-right"></i></span>
+                </a>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Comments section -->
+        <section class="comments-section" id="comments">
+            <h3><i class="bi bi-chat-dots me-2"></i>Hozzászólások</h3>
+
+            {{if .CurrentUser}}
+            <div class="comment-form-wrap" id="main-comment-form-wrap">
+                <div class="d-flex gap-2 align-items-start">
+                    {{if .CurrentUser.AvatarURL}}
+                    <img src="{{.CurrentUser.AvatarURL}}" alt="" class="comment-avatar mt-1" referrerpolicy="no-referrer">
+                    {{else}}
+                    <div class="comment-avatar-fallback mt-1">{{initial .CurrentUser.Name}}</div>
+                    {{end}}
+                    <form id="comment-form" class="flex-1 w-100">
+                        <textarea id="comment-content" maxlength="2000" placeholder="Írd ide a hozzászólásodat..."></textarea>
+                        <div class="comment-form-actions">
+                            <button type="submit" class="btn btn-sm" style="background:var(--primary-color);color:#fff;">
+                                <i class="bi bi-send me-1"></i>Küldés
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {{else if .OIDCEnabled}}
+            <p class="comment-login-hint">
+                <a href="/auth/login">Jelentkezz be</a> a hozzászóláshoz.
+            </p>
+            {{end}}
+
+            <div id="comments-list">
+                {{range .Comments}}
+                {{$isOwn := false}}
+                {{if $.CurrentUser}}{{if eq $.CurrentUser.ID .UserID.Hex}}{{$isOwn = true}}{{end}}{{end}}
+                <div class="comment-item{{if .ParentID}} comment-reply{{end}}" data-comment-id="{{.ID.Hex}}" data-created-at="{{rfc3339 .CreatedAt}}"{{if .ParentID}} data-parent-id="{{.ParentID.Hex}}"{{end}}>
+                    {{if .UserAvatarURL}}
+                    <img src="{{.UserAvatarURL}}" alt="" class="comment-avatar" referrerpolicy="no-referrer">
+                    {{else}}
+                    <div class="comment-avatar-fallback">{{initial .UserName}}</div>
+                    {{end}}
+                    <div class="comment-body">
+                        <div class="comment-meta">
+                            <span class="comment-author">{{.UserName}}</span>
+                            <time class="comment-time" datetime="{{rfc3339 .CreatedAt}}">{{formatDateTime .CreatedAt}}</time>
+                            {{if .EditedAt}}<span class="comment-edited">(szerkesztve)</span>{{end}}
+                            <div class="comment-actions ms-auto">
+                                {{if $.CurrentUser}}
+                                <button class="comment-reply-btn" onclick="startReply('{{.ID.Hex}}')" title="Válasz"><i class="bi bi-reply"></i></button>
+                                {{end}}
+                                {{if $isOwn}}
+                                <button class="comment-edit-btn" onclick="startEdit('{{.ID.Hex}}')" title="Szerkesztés" data-created-at="{{rfc3339 .CreatedAt}}"><i class="bi bi-pencil"></i></button>
+                                <button class="comment-delete-btn" onclick="deleteComment('{{.ID.Hex}}')" title="Törlés"><i class="bi bi-trash"></i></button>
+                                {{end}}
+                            </div>
+                        </div>
+                        <p class="comment-content" id="content-{{.ID.Hex}}">{{.Content}}</p>
+                    </div>
+                </div>
+                {{end}}
+                {{if not .Comments}}
+                <p class="text-muted small" id="no-comments-msg">Még nincs hozzászólás. Legyél az első!</p>
+                {{end}}
+            </div>
+        </section>
+
+        <!-- Related articles grid -->
+        {{if .RelatedArticles}}
+        <section class="art-related mt-5 pt-4 border-top">
+            <h4 class="art-related-title mb-4">További érdekes <span class="text-primary">cikkek</span></h4>
+            <div class="row g-3">
+                {{range $i, $art := .RelatedArticles}}
+                <div class="col-6 col-lg-4 {{if eq $i 2}}d-none d-lg-block{{end}}">
+                    <a href="/article/{{.Slug}}" class="text-decoration-none text-dark">
+                        <div class="art-rel-card">
+                            {{if .ImageURL}}
+                            <img src="{{.ImageURL}}" class="art-rel-img" alt="{{.Title}}">
+                            {{else}}
+                            <div class="art-rel-img art-rel-img-placeholder"></div>
+                            {{end}}
+                            <div class="art-rel-overlay"></div>
+                            <div class="art-rel-content">
+                                <span class="hero-badge hero-badge-cat mb-1 d-inline-block">{{.Category}}</span>
+                                <h6 class="art-rel-card-title">{{truncate .Title 65}}</h6>
+                                <div class="art-rel-meta">
+                                    <span>szerző: {{upper .Author}}</span>
+                                    <span class="mx-1">•</span>
+                                    <span>{{formatDate .PublishedAt}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {{end}}
+            </div>
+        </section>
+        {{end}}
+
+    </main>
+
+    <!-- Sidebar: banner (desktop only) -->
+    <aside class="art-sidebar d-none d-xl-block">
+        <div class="art-sidebar-inner">
+            <div class="art-banner">
+                <div class="art-banner-inner">
+                    <span class="art-banner-label">HIRDETÉS</span>
+                    <div class="art-banner-content">
+                        {{if .BannerSidebar}}
+                        <a href="/banner/click/{{.BannerSidebar.ID.Hex}}" target="_blank" rel="noopener sponsored">
+                            <img src="{{.BannerSidebar.ImageURL}}"
+                                 alt="{{.BannerSidebar.AltText}}"
+                                 style="max-width:100%;max-height:600px;display:block;">
+                        </a>
+                        {{else}}
+                        <i class="bi bi-display text-muted" style="font-size:3rem;"></i>
+                        <p class="text-muted small mt-2 mb-0">300 × 600</p>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+</div>
+
+<script>
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function escHTML(s) {
+        return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Magyar hosszú dátumformátum: "2026. március 8. 14:32"
+    var HU_MONTHS = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
+    function formatHuDate(isoStr) {
+        var dt = new Date(isoStr);
+        return dt.getFullYear() + '. ' + HU_MONTHS[dt.getMonth()] + ' ' + dt.getDate() + '. ' +
+               String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0');
+    }
+
+    // ── Build comment element ─────────────────────────────────────────────────
+    function buildCommentEl(c, isOwn, isReply) {
+        var div = document.createElement('div');
+        div.className = 'comment-item' + (isReply ? ' comment-reply' : '');
+        div.dataset.commentId = c.id;
+        if (c.created_at) div.dataset.createdAt = c.created_at;
+        if (c.parent_id) div.dataset.parentId = c.parent_id;
+        var avatarHTML = c.user_avatar_url
+            ? '<img src="' + escHTML(c.user_avatar_url) + '" alt="" class="comment-avatar" referrerpolicy="no-referrer">'
+            : '<div class="comment-avatar-fallback">' + escHTML((c.user_name||'?')[0]) + '</div>';
+        var replyBtn = '<button class="comment-reply-btn" onclick="startReply(\'' + c.id + '\')" title="Válasz"><i class="bi bi-reply"></i></button>';
+        var editBtn  = isOwn ? '<button class="comment-edit-btn" onclick="startEdit(\'' + c.id + '\')" title="Szerkesztés" data-created-at="' + (c.created_at||'') + '"><i class="bi bi-pencil"></i></button>' : '';
+        var delBtn   = isOwn ? '<button class="comment-delete-btn" onclick="deleteComment(\'' + c.id + '\')" title="Törlés"><i class="bi bi-trash"></i></button>' : '';
+        var editedBadge = c.edited_at ? '<span class="comment-edited">(szerkesztve)</span>' : '';
+        div.innerHTML = avatarHTML +
+            '<div class="comment-body">' +
+              '<div class="comment-meta">' +
+                '<span class="comment-author">' + escHTML(c.user_name) + '</span>' +
+                '<time class="comment-time">' + (c.created_at ? formatHuDate(c.created_at) : '') + '</time>' +
+                editedBadge +
+                '<div class="comment-actions ms-auto">' + replyBtn + editBtn + delBtn + '</div>' +
+              '</div>' +
+              '<p class="comment-content" id="content-' + c.id + '">' + escHTML(c.content) + '</p>' +
+            '</div>';
+        return div;
+    }
+
+    // ── Main comment form ─────────────────────────────────────────────────────
+    (function() {
+        var articleID = "{{.Article.ID.Hex}}";
+        var currentParentID = null;
+
+        var form = document.getElementById('comment-form');
+        if (!form) return;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var content = document.getElementById('comment-content').value.trim();
+            if (!content) return;
+            var btn = form.querySelector('button[type=submit]');
+            btn.disabled = true;
+            var body = {article_id: articleID, content: content};
+            if (currentParentID) body.parent_id = currentParentID;
+            fetch('/api/comments', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            }).then(function(res) {
+                if (!res.ok) return res.json().then(function(d) { throw new Error(d.error || 'Hiba történt'); });
+                return res.json();
+            }).then(function(comment) {
+                document.getElementById('comment-content').value = '';
+                var noMsg = document.getElementById('no-comments-msg');
+                if (noMsg) noMsg.remove();
+                var list = document.getElementById('comments-list');
+                var isReply = !!currentParentID;
+                var el = buildCommentEl(comment, true, isReply);
+                if (isReply) {
+                    // Insert after the parent comment
+                    var parent = document.querySelector('[data-comment-id="' + currentParentID + '"]');
+                    // Find the last reply after this parent
+                    var insertAfter = parent;
+                    var next = parent ? parent.nextElementSibling : null;
+                    while (next && next.classList.contains('comment-reply')) {
+                        insertAfter = next;
+                        next = next.nextElementSibling;
+                    }
+                    if (insertAfter && insertAfter.nextSibling) {
+                        list.insertBefore(el, insertAfter.nextSibling);
+                    } else {
+                        list.appendChild(el);
+                    }
+                    cancelReply();
+                } else {
+                    list.appendChild(el);
+                }
+            }).catch(function(err) {
+                alert(err.message);
+            }).finally(function() {
+                btn.disabled = false;
+            });
+        });
+
+        // Expose to global for reply/cancel
+        window._commentSetParent = function(parentID, authorName) {
+            currentParentID = parentID;
+            var hint = document.getElementById('reply-hint');
+            if (!hint) {
+                hint = document.createElement('div');
+                hint.id = 'reply-hint';
+                hint.className = 'reply-hint';
+                form.insertBefore(hint, form.firstChild);
+            }
+            hint.innerHTML = '<i class="bi bi-reply me-1"></i>Válasz: <strong>' + escHTML(authorName) + '</strong>' +
+                '<button type="button" class="reply-cancel-btn" onclick="cancelReply()"><i class="bi bi-x"></i></button>';
+            document.getElementById('comment-content').focus();
+        };
+    })();
+
+    function startReply(commentId) {
+        var el = document.querySelector('[data-comment-id="' + commentId + '"]');
+        var authorName = el ? el.querySelector('.comment-author').textContent : '';
+        if (window._commentSetParent) window._commentSetParent(commentId, authorName);
+        var wrap = document.getElementById('main-comment-form-wrap');
+        if (wrap) wrap.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+
+    function cancelReply() {
+        if (window._commentSetParent) window._commentSetParent(null, '');
+        var hint = document.getElementById('reply-hint');
+        if (hint) hint.remove();
+    }
+
+    // ── Inline edit ───────────────────────────────────────────────────────────
+    var EDIT_WINDOW_MS = 15 * 60 * 1000;
+
+    function hasReplies(commentId) {
+        return document.querySelector('[data-parent-id="' + commentId + '"]') !== null;
+    }
+
+    function startEdit(commentId) {
+        var el = document.querySelector('[data-comment-id="' + commentId + '"]');
+        if (!el) return;
+
+        // Cannot edit if replies exist
+        if (hasReplies(commentId)) {
+            alert('Ezt a hozzászólást már nem szerkesztheted, mert érkezett rá válasz.');
+            return;
+        }
+
+        // Check edit window
+        var createdAt = el.dataset.createdAt;
+        if (createdAt && (Date.now() - new Date(createdAt).getTime()) > EDIT_WINDOW_MS) {
+            alert('A szerkesztési idő (15 perc) lejárt.');
+            return;
+        }
+
+        var contentEl = document.getElementById('content-' + commentId);
+        if (!contentEl || el.querySelector('.comment-edit-form')) return;
+
+        var original = contentEl.textContent;
+        contentEl.style.display = 'none';
+
+        var editForm = document.createElement('div');
+        editForm.className = 'comment-edit-form';
+        editForm.innerHTML =
+            '<textarea class="comment-edit-textarea" maxlength="2000">' + escHTML(original) + '</textarea>' +
+            '<div class="comment-edit-actions">' +
+              '<button class="btn btn-sm btn-primary" onclick="submitEdit(\'' + commentId + '\')"><i class="bi bi-check me-1"></i>Mentés</button>' +
+              '<button class="btn btn-sm btn-outline-secondary ms-1" onclick="cancelEdit(\'' + commentId + '\', ' + JSON.stringify(original) + ')"><i class="bi bi-x me-1"></i>Mégse</button>' +
+            '</div>';
+        contentEl.parentNode.insertBefore(editForm, contentEl.nextSibling);
+        editForm.querySelector('textarea').focus();
+    }
+
+    function cancelEdit(commentId, original) {
+        var el = document.querySelector('[data-comment-id="' + commentId + '"]');
+        if (!el) return;
+        var editForm = el.querySelector('.comment-edit-form');
+        if (editForm) editForm.remove();
+        var contentEl = document.getElementById('content-' + commentId);
+        if (contentEl) contentEl.style.display = '';
+    }
+
+    function submitEdit(commentId) {
+        var el = document.querySelector('[data-comment-id="' + commentId + '"]');
+        if (!el) return;
+        var textarea = el.querySelector('.comment-edit-textarea');
+        var content = textarea ? textarea.value.trim() : '';
+        if (!content) return;
+
+        fetch('/api/comments/' + commentId, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({content: content})
+        }).then(function(res) {
+            if (!res.ok) return res.json().then(function(d) { throw new Error(d.error || 'Hiba történt'); });
+            return res.json();
+        }).then(function(comment) {
+            var editForm = el.querySelector('.comment-edit-form');
+            if (editForm) editForm.remove();
+            var contentEl = document.getElementById('content-' + commentId);
+            if (contentEl) {
+                contentEl.textContent = comment.content;
+                contentEl.style.display = '';
+            }
+            // Show "edited" badge if not already present
+            var meta = el.querySelector('.comment-meta');
+            if (meta && !meta.querySelector('.comment-edited')) {
+                var badge = document.createElement('span');
+                badge.className = 'comment-edited';
+                badge.textContent = '(szerkesztve)';
+                var timeEl = meta.querySelector('.comment-time');
+                if (timeEl && timeEl.nextSibling) {
+                    meta.insertBefore(badge, timeEl.nextSibling);
+                }
+            }
+        }).catch(function(err) {
+            alert(err.message);
+        });
+    }
+
+    // ── Delete ────────────────────────────────────────────────────────────────
+    function deleteComment(id) {
+        if (hasReplies(id)) {
+            alert('Ezt a hozzászólást nem törölheted, mert érkezett rá válasz.');
+            return;
+        }
+        if (!confirm('Biztosan törlöd ezt a hozzászólást?')) return;
+        fetch('/api/comments/' + id, {method: 'DELETE'})
+            .then(function(res) {
+                if (res.status === 204) {
+                    var el = document.querySelector('[data-comment-id="' + id + '"]');
+                    if (el) el.remove();
+                } else {
+                    alert('Nem sikerült törölni a hozzászólást.');
+                }
+            });
+    }
+
+    function copyArticleLink() {
+        navigator.clipboard.writeText(window.location.href).then(function() {
+            var btn = document.getElementById('copyBtn');
+            btn.querySelector('i').className = 'bi bi-check-lg';
+            setTimeout(function() { btn.querySelector('i').className = 'bi bi-link-45deg'; }, 2000);
+        });
+    }
+</script>
+<!-- Syntax highlighting (local-first, CDN fallback) -->
+<link id="hljs-css" href="/static/vendor/highlightjs@11.10.0/styles/github.min.css" rel="stylesheet">
+<script>
+    (function(){var l=document.getElementById('hljs-css');if(!l)return;l.onerror=function(){var f=document.createElement('link');f.rel='stylesheet';f.href='https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css';document.head.appendChild(f);};})();
+</script>
+<script src="/static/vendor/highlightjs@11.10.0/highlight.min.js"
+        onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js';s.onload=function(){hljs.highlightAll();};document.head.appendChild(s);"
+        onload="hljs.highlightAll()"></script>
+{{template "footer" .}}
+{{end}}

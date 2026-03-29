@@ -1,0 +1,253 @@
+{{define "admin/create"}}
+{{template "admin-header" .}}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin" class="text-decoration-none">{{t .Lang "nav.dashboard"}}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{t .Lang "article.create_title"}}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>{{t .Lang "article.create_header"}}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{if .ErrorMessage}}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-circle me-2"></i>{{.ErrorMessage}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {{end}}
+
+                    <form action="/admin/create" method="POST">
+                        <div class="row g-4">
+                            <!-- Title -->
+                            <div class="col-12">
+                                <label for="title" class="form-label fw-semibold">{{t .Lang "article.field_title"}} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-lg" id="title" name="title" required placeholder="Enter article title">
+                            </div>
+
+                            <!-- Category & Author -->
+                            <div class="col-md-6">
+                                <label for="category_id" class="form-label fw-semibold">{{t .Lang "article.field_category"}} <span class="text-danger">*</span></label>
+                                <select class="form-select" id="category_id" name="category_id" required
+                                    onchange="document.getElementById('category_name').value = this.options[this.selectedIndex].text">
+                                    <option value="">{{t .Lang "article.choose_category"}}</option>
+                                    {{range .Categories}}
+                                    <option value="{{.ID.Hex}}">{{.Name}}</option>
+                                    {{end}}
+                                </select>
+                                <input type="hidden" id="category_name" name="category_name">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="author_id" class="form-label fw-semibold">{{t .Lang "article.field_author"}} <span class="text-danger">*</span></label>
+                                <select class="form-select" id="author_id" name="author_id" required
+                                    onchange="document.getElementById('author_name').value = this.options[this.selectedIndex].text">
+                                    <option value="">{{t .Lang "article.choose_author"}}</option>
+                                    {{range .Authors}}
+                                    <option value="{{.ID.Hex}}">{{.Name}}</option>
+                                    {{end}}
+                                </select>
+                                <input type="hidden" id="author_name" name="author_name">
+                                {{if not .Authors}}
+                                <div class="form-text text-warning"><i class="bi bi-exclamation-triangle me-1"></i>{{t .Lang "article.no_authors"}} <a href="/admin/authors/create" target="_blank">{{t .Lang "article.create_author_link"}}</a></div>
+                                {{end}}
+                            </div>
+
+                            <!-- Tags -->
+                            <div class="col-12">
+                                <label for="tags" class="form-label fw-semibold">{{t .Lang "article.field_tags"}}</label>
+                                <input type="text" class="form-control" id="tags" name="tags" placeholder="{{t .Lang "article.tags_hint"}}">
+                                <div class="form-text">{{t .Lang "article.tags_hint"}}</div>
+                            </div>
+
+                            <!-- Image URL -->
+                            <div class="col-12">
+                                <label for="image_url" class="form-label fw-semibold">{{t .Lang "article.field_image"}}</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="image_url" name="image_url" placeholder="https://example.com/image.jpg">
+                                    {{if .S3Enabled}}
+                                    <button type="button" class="btn btn-outline-secondary" onclick="openMediaPicker()">
+                                        <i class="bi bi-images me-1"></i><span id="pick_label"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="uploadToMedia()">
+                                        <i class="bi bi-upload me-1"></i><span id="upload_label"></span>
+                                    </button>
+                                    {{end}}
+                                </div>
+                                {{if .S3Enabled}}
+                                <input type="file" id="media_file_input" accept="image/*" style="display:none" onchange="doUploadToMedia(this)">
+                                {{end}}
+                                <div class="form-text">{{t .Lang "article.image_hint"}}</div>
+                            </div>
+
+                            <!-- Summary -->
+                            <div class="col-12">
+                                <label for="summary" class="form-label fw-semibold">{{t .Lang "article.field_summary"}} <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="summary" name="summary" rows="3" required placeholder="{{t .Lang "article.summary_hint"}}"></textarea>
+                                <div class="form-text">{{t .Lang "article.summary_hint"}}</div>
+                            </div>
+
+                            <!-- Content (Markdown editor) -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">{{t .Lang "article.field_content"}} <span class="text-danger">*</span></label>
+                                <div class="md-toolbar mb-1 d-flex gap-1 flex-wrap align-items-center">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('content','**','**')" title="{{t .Lang "article.md_bold"}}"><b>B</b></button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary fst-italic" onclick="mdWrap('content','*','*')" title="{{t .Lang "article.md_italic"}}">I</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary text-decoration-line-through" onclick="mdWrap('content','~~','~~')" title="{{t .Lang "article.md_strike"}}">S</button>
+                                    <span class="text-muted" style="font-size:0.8rem;">|</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','## ')" title="{{t .Lang "article.md_h2"}}">H2</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','### ')" title="{{t .Lang "article.md_h3"}}">H3</button>
+                                    <span class="text-muted" style="font-size:0.8rem;">|</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','- ')" title="{{t .Lang "article.md_list"}}">&#8226; {{t .Lang "article.md_list"}}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','1. ')" title="{{t .Lang "article.md_numlist"}}">1. {{t .Lang "article.md_numlist"}}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('content','`','`')" title="{{t .Lang "article.md_code"}}"><code>code</code></button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','> ')" title="{{t .Lang "article.md_quote"}}">&ldquo; {{t .Lang "article.md_quote"}}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdInsertLink('content')" title="{{t .Lang "article.md_link"}}">&#128279; {{t .Lang "article.md_link"}}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','---')" title="{{t .Lang "article.md_hr"}}">&#8212;</button>
+                                    <div class="ms-auto">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-preview-create" onclick="togglePreview('content','md-preview-create','btn-preview-create')">&#128065; {{t .Lang "common.preview"}}</button>
+                                    </div>
+                                </div>
+                                <div class="md-editor-wrap">
+                                    <textarea class="form-control font-monospace" id="content" name="content" rows="20" required
+                                        placeholder="{{t .Lang "article.content_ph"}}"
+                                        oninput="livePreview('content','md-preview-create')"></textarea>
+                                    <div id="md-preview-create" class="md-preview d-none article-content border rounded p-3 bg-white"></div>
+                                </div>
+                                <div class="form-text">{{t .Lang "article.markdown_hint"}}</div>
+                            </div>
+
+                            <!-- Published -->
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="published" name="published" role="switch">
+                                    <label class="form-check-label fw-semibold" for="published">{{t .Lang "article.publish_now"}}</label>
+                                </div>
+                                <div class="form-text">{{t .Lang "article.publish_hint"}}</div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="/admin" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-2"></i>{{t .Lang "common.cancel"}}
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-2"></i>{{t .Lang "article.create_title"}}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{if .S3Enabled}}
+<div class="modal fade" id="mediaPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="picker_modal_title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="picker_grid" class="row g-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+window._mediaI18n = {
+    pickTitle:    '{{t .Lang "media.pick_title"}}',
+    pickEmpty:    '{{t .Lang "media.pick_empty"}}',
+    uploadDone:   '{{t .Lang "media.upload_done"}}',
+    uploadError:  '{{t .Lang "media.upload_error_label"}}',
+    uploadLabel:  '{{t .Lang "media.upload_to_library"}}',
+    pickLabel:    '{{t .Lang "media.pick_from_library"}}',
+    alreadyExists:'{{t .Lang "media.already_exists"}}',
+};
+document.getElementById('pick_label').textContent = window._mediaI18n.pickLabel;
+document.getElementById('upload_label').textContent = window._mediaI18n.uploadLabel;
+function secureMediaURL(u) {
+    if (!u || u.startsWith('http://') || u.startsWith('https://') || u.startsWith('/')) return u;
+    return 'https://' + u;
+}
+function openMediaPicker() {
+    var modal = new bootstrap.Modal(document.getElementById('mediaPickerModal'));
+    document.getElementById('picker_modal_title').textContent = window._mediaI18n.pickTitle;
+    var grid = document.getElementById('picker_grid');
+    grid.innerHTML = '<div class="col-12"><p class="text-muted">Loading...</p></div>';
+    fetch('/admin/media/picker')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var allItems = (data && data.all) ? data.all : [];
+            if (allItems.length === 0) {
+                grid.innerHTML = '<div class="col-12"><p class="text-muted">' + window._mediaI18n.pickEmpty + '</p></div>';
+                return;
+            }
+            grid.innerHTML = allItems.map(function(item) {
+                var url = secureMediaURL(item.url);
+                var label = item.title || item.filename || '';
+                var safeUrl = url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+                var safeLabel = label.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+                return '<div class="col-6 col-md-3 col-lg-2">' +
+                    '<div class="card h-100 picker-item" style="cursor:pointer" data-url="' + safeUrl + '">' +
+                    '<img src="' + safeUrl + '" class="card-img-top" style="height:80px;object-fit:cover;pointer-events:none" alt="">' +
+                    '<div class="card-body p-1"><small class="text-muted text-truncate d-block" style="pointer-events:none">' + safeLabel + '</small></div>' +
+                    '</div></div>';
+            }).join('');
+        })
+        .catch(function() {
+            grid.innerHTML = '<div class="col-12"><p class="text-muted">' + window._mediaI18n.pickEmpty + '</p></div>';
+        });
+    modal.show();
+}
+document.getElementById('picker_grid').addEventListener('click', function(e) {
+    var card = e.target.closest('.picker-item');
+    if (card) selectMedia(card.dataset.url);
+});
+function selectMedia(url) {
+    document.getElementById('image_url').value = url;
+    bootstrap.Modal.getInstance(document.getElementById('mediaPickerModal')).hide();
+}
+function uploadToMedia() {
+    document.getElementById('media_file_input').click();
+}
+function doUploadToMedia(input) {
+    if (!input.files || !input.files[0]) return;
+    var lbl = document.getElementById('upload_label');
+    lbl.textContent = '...';
+    var fd = new FormData();
+    fd.append('image', input.files[0]);
+    fetch('/admin/media/upload?json=1', {method: 'POST', body: fd})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            lbl.textContent = window._mediaI18n.uploadLabel;
+            if (d.url) {
+                document.getElementById('image_url').value = secureMediaURL(d.url);
+                if (d.existing) { alert(window._mediaI18n.alreadyExists); }
+            } else {
+                alert(window._mediaI18n.uploadError + (d.error ? ': ' + d.error : ''));
+            }
+        })
+        .catch(function() {
+            lbl.textContent = window._mediaI18n.uploadLabel;
+            alert(window._mediaI18n.uploadError);
+        });
+    input.value = '';
+}
+</script>
+{{end}}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/js/md-editor.js"></script>
+{{template "admin-footer" .}}
+{{end}}

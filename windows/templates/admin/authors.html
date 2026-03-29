@@ -1,0 +1,74 @@
+{{define "admin/authors"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 fw-bold">
+            <i class="bi bi-people me-2 text-primary"></i>{{t .Lang "author.manage_title"}}
+        </h4>
+        <a href="/admin/authors/create" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>{{t .Lang "author.new_btn"}}
+        </a>
+    </div>
+
+    {{template "admin-flash" .}}
+
+    {{if .Authors}}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{t .Lang "author.col_name"}}</th>
+                        <th>{{t .Lang "author.col_slug"}}</th>
+                        <th>{{t .Lang "author.col_bio"}}</th>
+                        <th>{{t .Lang "author.col_avatar"}}</th>
+                        <th class="text-center">{{t .Lang "author.col_created"}}</th>
+                        <th class="text-end">{{t .Lang "author.col_actions"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Authors}}
+                    <tr>
+                        <td class="fw-semibold">{{.Name}}</td>
+                        <td><code class="text-muted">{{.Slug}}</code></td>
+                        <td class="text-muted small">{{truncate .Bio 60}}</td>
+                        <td>
+                            {{if .AvatarURL}}
+                            <img src="{{.AvatarURL}}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;" alt="{{.Name}}">
+                            {{else}}
+                            <span class="text-muted">—</span>
+                            {{end}}
+                        </td>
+                        <td class="text-center text-muted small text-nowrap">{{formatDate .CreatedAt}}</td>
+                        <td class="text-end text-nowrap">
+                            <a href="/admin/authors/edit/{{.ID.Hex}}" class="btn btn-sm btn-outline-secondary" title="{{t $.Lang "common.edit"}}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form action="/admin/authors/delete/{{.ID.Hex}}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm(this.dataset.confirm)"
+                                        data-confirm="{{t $.Lang "author.confirm_delete"}}"
+                                        title="{{t $.Lang "common.delete"}}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-people text-muted" style="font-size:4rem;"></i>
+        <h5 class="mt-3 text-muted">{{t .Lang "author.no_authors"}}</h5>
+        <p class="text-muted">{{t .Lang "author.no_authors_sub"}}</p>
+        <a href="/admin/authors/create" class="btn btn-primary mt-2">
+            <i class="bi bi-plus-lg me-1"></i>{{t .Lang "author.create_first"}}
+        </a>
+    </div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}

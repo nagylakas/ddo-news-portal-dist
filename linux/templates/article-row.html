@@ -1,0 +1,32 @@
+{{define "article-row"}}
+<div class="listing-row listing-row-clickable" data-category="{{.Category}}" onclick="location.href='/article/{{.Slug}}'">
+    <!-- Thumbnail -->
+    <div class="listing-thumb">
+        {{if .ImageURL}}
+        <img src="{{.ImageURL}}" alt="{{.Title}}">
+        {{else}}
+        <div class="listing-thumb-placeholder"></div>
+        {{end}}
+    </div>
+    <!-- Text -->
+    <div class="listing-text">
+        <div class="listing-meta-top">
+            <span class="latest-badge latest-badge-sm">{{.Category}}</span>
+            <span class="listing-date">{{formatDate .PublishedAt}}</span>
+        </div>
+        <a href="/article/{{.Slug}}" class="text-decoration-none text-dark">
+            <h4 class="listing-title">{{.Title}}</h4>
+        </a>
+        <p class="listing-summary">{{truncate .Summary 180}}</p>
+        <div class="latest-meta latest-meta-xs">
+            <a href="/author/{{authorSlug .Author}}" class="latest-meta-author text-decoration-none" onclick="event.stopPropagation()">Szerző: {{upper .Author}}</a>
+            {{if .Tags}}
+            <span class="latest-meta-dot">•</span>
+            {{range .Tags}}
+            <a href="/tag/{{.}}" class="art-tag art-tag-xs" onclick="event.stopPropagation()">{{.}}</a>
+            {{end}}
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}

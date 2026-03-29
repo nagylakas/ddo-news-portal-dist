@@ -1,0 +1,215 @@
+{{define "header"}}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/img/icons/{{.IconPack}}/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/img/icons/{{.IconPack}}/icon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/icons/{{.IconPack}}/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/img/icons/{{.IconPack}}/icon-96x96.png">
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="57x57"   href="/static/img/icons/{{.IconPack}}/icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60"   href="/static/img/icons/{{.IconPack}}/icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72"   href="/static/img/icons/{{.IconPack}}/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76"   href="/static/img/icons/{{.IconPack}}/icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/img/icons/{{.IconPack}}/icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/static/img/icons/{{.IconPack}}/icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/static/img/icons/{{.IconPack}}/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/img/icons/{{.IconPack}}/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/img/icons/{{.IconPack}}/icon-180x180.png">
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="{{.PrimaryColor}}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{.SiteNameShort}}">
+    <!-- Bootstrap 5.3 CSS (local-first, CDN fallback) -->
+    <link id="bs-css" href="/static/vendor/bootstrap@5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        (function(){var l=document.getElementById('bs-css');if(!l)return;l.onerror=function(){var f=document.createElement('link');f.rel='stylesheet';f.href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';f.integrity='sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN';f.crossOrigin='anonymous';document.head.appendChild(f);};})();
+    </script>
+    <!-- Bootstrap Icons (local-first, CDN fallback) -->
+    <link id="bi-css" href="/static/vendor/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script>
+        (function(){var l=document.getElementById('bi-css');if(!l)return;l.onerror=function(){var f=document.createElement('link');f.rel='stylesheet';f.href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css';document.head.appendChild(f);};})();
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Primary color override -->
+    <style>:root { --primary-color: {{.PrimaryColor}}; --bs-primary: {{.PrimaryColor}}; --bs-link-color: {{.PrimaryColor}}; --bs-link-hover-color: {{.PrimaryColor}}; }</style>
+    <!-- RSS Autodiscovery -->
+    <link rel="alternate" type="application/rss+xml" title="{{.SiteNameLong}} – összes hír" href="{{siteURL}}/rss.xml">
+    <!-- SEO: meta description -->
+    {{if .Article}}
+    <meta name="description" content="{{truncate .Article.Summary 160}}">
+    {{else if .MetaDescription}}
+    <meta name="description" content="{{.MetaDescription}}">
+    {{end}}
+    <!-- SEO: canonical URL -->
+    {{if .Article}}
+    <link rel="canonical" href="{{siteURL}}/article/{{.Article.Slug}}">
+    {{else if .CanonicalURL}}
+    <link rel="canonical" href="{{.CanonicalURL}}">
+    {{end}}
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="{{.SiteNameLong}}">
+    <meta property="og:locale" content="hu_HU">
+    {{if .Article}}
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{.Article.Title}}">
+    <meta property="og:description" content="{{truncate .Article.Summary 200}}">
+    <meta property="og:url" content="{{siteURL}}/article/{{.Article.Slug}}">
+    {{if .Article.ImageURL}}<meta property="og:image" content="{{.Article.ImageURL}}">{{end}}
+    <meta property="article:published_time" content="{{rfc3339 .Article.PublishedAt}}">
+    <meta property="article:modified_time" content="{{rfc3339 .Article.UpdatedAt}}">
+    <meta property="article:author" content="{{.Article.Author}}">
+    <meta property="article:section" content="{{.Article.Category}}">
+    {{range .Article.Tags}}<meta property="article:tag" content="{{.}}">
+    {{end}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{.Article.Title}}">
+    <meta name="twitter:description" content="{{truncate .Article.Summary 200}}">
+    {{if .Article.ImageURL}}<meta name="twitter:image" content="{{.Article.ImageURL}}">{{end}}
+    {{else}}
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{.Title}}">
+    {{if .MetaDescription}}<meta property="og:description" content="{{.MetaDescription}}">{{end}}
+    {{if .CanonicalURL}}<meta property="og:url" content="{{.CanonicalURL}}">{{end}}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{.Title}}">
+    {{if .MetaDescription}}<meta name="twitter:description" content="{{.MetaDescription}}">{{end}}
+    {{end}}
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm site-navbar">
+        <div class="container-fluid px-4 px-lg-5">
+            <a class="navbar-brand" href="/">
+                <img src="/static/img/logo/{{.IconPack}}.png" alt="{{.SiteNameShort}}" height="40" style="display:block;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Kezdőlap</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Kategóriák
+                        </a>
+                        <ul class="dropdown-menu">
+                            {{range .Categories}}
+                            <li><a class="dropdown-item" href="/category/{{lower .}}">{{.}}</a></li>
+                            {{end}}
+                        </ul>
+                    </li>
+                </ul>
+                <form class="d-flex me-3 search-wrap" action="/search" method="GET" role="search" autocomplete="off">
+                    <div class="input-group search-input-group">
+                        <input class="form-control search-input" type="search" name="q"
+                               id="navSearchInput" placeholder="Keresés..." aria-label="Keresés"
+                               value="{{.Query}}" autocomplete="off">
+                        <button class="btn btn-light" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                    <div class="search-dropdown" id="searchDropdown" hidden></div>
+                </form>
+                {{if .CurrentUser}}
+                <div class="dropdown user-nav-dropdown me-2">
+                    <button class="btn btn-link p-0 user-nav-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{if .CurrentUser.AvatarURL}}
+                        <img src="{{.CurrentUser.AvatarURL}}" alt="" class="user-nav-avatar rounded-circle" width="36" height="36" referrerpolicy="no-referrer">
+                        {{else}}
+                        <span class="user-nav-initials rounded-circle">{{initial .CurrentUser.Name}}</span>
+                        {{end}}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end user-nav-menu">
+                        <li class="user-nav-info">
+                            <div class="user-nav-name">{{.CurrentUser.Name}}</div>
+                            <div class="user-nav-email">{{.CurrentUser.Email}}</div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        {{if .OIDCIssuer}}
+                        <li><a class="dropdown-item" href="{{.OIDCIssuer}}/profile" target="_blank" rel="noopener"><i class="bi bi-person-gear me-2"></i>Fiók kezelése</a></li>
+                        {{end}}
+                        <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Kilépés</a></li>
+                    </ul>
+                </div>
+                {{else if .OIDCEnabled}}
+                <a href="/auth/login?force=1" class="btn btn-outline-light me-2">
+                    <i class="bi bi-person me-1"></i>Bejelentkezés
+                </a>
+                {{end}}
+                {{if .IsAdmin}}
+                <a href="/admin" class="btn btn-outline-light">
+                    <i class="bi bi-gear me-1"></i>Admin
+                </a>
+                {{end}}
+            </div>
+        </div>
+    </nav>
+    <main>
+        {{end}}
+
+        {{define "footer"}}
+    </main>
+    <!-- Footer -->
+    <footer class="site-footer mt-5">
+        <!-- Top footer bar: logo + social -->
+        <div class="footer-top">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <i class="bi bi-newspaper me-2"></i>{{.SiteNameLong}}
+                </div>
+                <div class="footer-social">
+                    {{if socialFacebook}}<a href="{{socialFacebook}}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{{end}}
+                    {{if socialTwitter}}<a href="{{socialTwitter}}" target="_blank" rel="noopener" aria-label="Twitter/X"><i class="bi bi-twitter-x"></i></a>{{end}}
+                    {{if socialInstagram}}<a href="{{socialInstagram}}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{{end}}
+                    {{if socialLinkedIn}}<a href="{{socialLinkedIn}}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>{{end}}
+                    {{if socialYouTube}}<a href="{{socialYouTube}}" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube"></i></a>{{end}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Category nav strip -->
+        <div class="footer-cats">
+            <div class="footer-inner">
+                <span class="footer-cats-label">Böngészd kategóriák szerint:</span>
+                {{range .Categories}}
+                <a href="/category/{{lower .}}" class="footer-cat-link">{{.}}</a>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Bottom bar: copyright + tagline -->
+        <div class="footer-bottom">
+            <div class="footer-inner">
+                <span class="footer-copy">&copy; 2025{{if gt (currentYear) 2025}}-{{currentYear}}{{end}} {{.SiteNameLong}} &mdash; A megbízható hírforrás.</span>
+                <span class="footer-built">
+                    A Diffusi csoport tagja.
+                    <img src="/static/img/diffusi/diffusi_white_footer.png" alt="Diffusi" style="height:20px; vertical-align:middle; margin-left:8px;">
+                </span>
+            </div>
+        </div>
+    </footer>
+    <!-- Bootstrap 5.3 JS Bundle (local-first, CDN fallback) -->
+    <script src="/static/vendor/bootstrap@5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        if(typeof bootstrap==='undefined'){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';s.integrity='sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL';s.crossOrigin='anonymous';document.head.appendChild(s);}
+    </script>
+    <!-- Custom JS -->
+    <script src="/static/js/main.js"></script>
+
+</html>
+{{end}}

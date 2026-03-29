@@ -1,0 +1,85 @@
+{{define "admin/category_edit"}}
+{{template "admin-header" .}}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-4">
+                <a href="/admin/categories" class="btn btn-outline-secondary me-3">
+                    <i class="bi bi-arrow-left"></i> {{t .Lang "common.back"}}
+                </a>
+                <h2 class="mb-0">{{t .Lang "cat.edit_title"}}</h2>
+            </div>
+
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{.ErrorMessage}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{end}}
+
+            {{if .Category}}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form action="/admin/categories/edit/{{.Category.ID.Hex}}" method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">{{t .Lang "cat.field_name"}} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{.Category.Name}}" required>
+                            <div class="form-text">{{t .Lang "cat.current_slug"}} <code>{{.Category.Slug}}</code></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">{{t .Lang "cat.field_desc"}}</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{.Category.Description}}</textarea>
+                            <div class="form-text">{{t .Lang "cat.desc_hint"}}</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="icon" class="form-label">{{t .Lang "cat.field_icon"}}</label>
+                            <input type="text" class="form-control" id="icon" name="icon" value="{{.Category.Icon}}" placeholder="folder2-open">
+                            <div class="form-text">
+                                {{t .Lang "cat.icon_hint"}}
+                                {{if .Category.Icon}}
+                                {{t .Lang "cat.current_icon"}} <i class="bi bi-{{.Category.Icon}}"></i> {{.Category.Icon}}
+                                {{end}}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="display_order" class="form-label">{{t .Lang "cat.field_order"}}</label>
+                            <input type="number" class="form-control" id="display_order" name="display_order" value="{{.Category.DisplayOrder}}">
+                            <div class="form-text">{{t .Lang "cat.order_hint"}}</div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/admin/categories" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>{{t .Lang "common.save_changes"}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-3 border-danger">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "common.danger_zone"}}
+                    </h5>
+                    <p class="card-text text-muted">
+                        {{t .Lang "cat.danger_text"}}
+                    </p>
+                    <form action="/admin/categories/delete/{{.Category.ID.Hex}}" method="POST">
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm(this.dataset.confirm)"
+                                data-confirm="{{t .Lang "cat.confirm_delete2"}}">
+                            <i class="bi bi-trash me-2"></i>{{t .Lang "common.delete"}}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}

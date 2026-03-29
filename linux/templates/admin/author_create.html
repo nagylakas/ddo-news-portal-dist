@@ -1,0 +1,171 @@
+{{define "admin/author_create"}}
+{{template "admin-header" .}}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-4">
+                <a href="/admin/authors" class="btn btn-outline-secondary me-3">
+                    <i class="bi bi-arrow-left"></i> {{t .Lang "common.back"}}
+                </a>
+                <h2 class="mb-0">{{t .Lang "author.create_title"}}</h2>
+            </div>
+
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{.ErrorMessage}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{end}}
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form action="/admin/authors/create" method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold">{{t .Lang "author.field_name"}} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required placeholder="pl. Kiss János">
+                            <div class="form-text">{{t .Lang "author.name_hint"}}</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bio" class="form-label fw-semibold">{{t .Lang "author.field_bio"}}</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="4" placeholder="{{t .Lang "author.bio_ph"}}"></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">{{t .Lang "author.field_avatar"}}</label>
+                            {{if .S3Enabled}}
+                            <div class="input-group">
+                                <input type="text" name="avatar_url" id="author_avatar_url" class="form-control" readonly
+                                       placeholder="{{t .Lang "author.avatar_pick"}}...">
+                                <button type="button" class="btn btn-outline-secondary" onclick="openAvatarPicker()">
+                                    <i class="bi bi-images me-1"></i>{{t .Lang "author.avatar_pick"}}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="uploadAvatarImage()">
+                                    <i class="bi bi-upload me-1"></i>{{t .Lang "author.avatar_upload"}}
+                                </button>
+                            </div>
+                            <input type="file" id="avatar_file_input" accept="image/*" class="d-none"
+                                   onchange="doUploadAvatarImage(this)">
+                            <div id="avatar_upload_status" class="form-text"></div>
+                            <div class="mt-2" id="avatar_preview_wrap" style="display:none">
+                                <img id="avatar_preview_img" src="" class="rounded-circle" style="width:64px;height:64px;object-fit:cover;" alt="">
+                            </div>
+                            {{else}}
+                            <input type="url" class="form-control" id="author_avatar_url" name="avatar_url" placeholder="https://example.com/avatar.jpg">
+                            <div class="form-text">{{t .Lang "author.avatar_hint"}}</div>
+                            {{end}}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/admin/authors" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-2"></i>{{t .Lang "author.create_title"}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{if .S3Enabled}}
+<!-- Avatar picker modal -->
+<div class="modal fade" id="avatarPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{t .Lang "author.avatar_pick"}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="avatar_picker_grid" class="row g-2">
+                    <div class="col-12 text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm me-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window._avatarI18n = {
+    pickEmpty:   '{{t .Lang "media.pick_empty"}}',
+    uploadDone:  '{{t .Lang "media.upload_done"}}',
+    uploadError: '{{t .Lang "media.upload_error_label"}}',
+};
+
+function secureAvatarURL(u) {
+    if (!u) return u;
+    if (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('/')) return u;
+    return 'https://' + u;
+}
+
+function openAvatarPicker() {
+    var modal = new bootstrap.Modal(document.getElementById('avatarPickerModal'));
+    modal.show();
+    fetch('/admin/media/picker?category=avatar')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var items = (data && data.all) ? data.all : [];
+            var grid = document.getElementById('avatar_picker_grid');
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="col-12 text-center text-muted py-4">' + window._avatarI18n.pickEmpty + '</div>';
+                return;
+            }
+            grid.innerHTML = items.map(function(item) {
+                var url = secureAvatarURL(item.url);
+                var lbl = item.title || item.filename || '';
+                var safeUrl = url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+                var safeLabel = lbl.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+                return '<div class="col-6 col-sm-4 col-md-3 col-lg-2">' +
+                    '<div class="card h-100 border-0 shadow-sm picker-item" style="cursor:pointer" data-url="' + safeUrl + '">' +
+                    '<img src="' + safeUrl + '" class="card-img-top" style="height:80px;object-fit:cover;pointer-events:none" loading="lazy">' +
+                    '<div class="card-body p-1"><small class="text-truncate d-block" style="pointer-events:none" title="' + safeLabel + '">' + safeLabel + '</small></div>' +
+                    '</div></div>';
+            }).join('');
+        })
+        .catch(function() {
+            document.getElementById('avatar_picker_grid').innerHTML =
+                '<div class="col-12 text-center text-danger py-4">' + window._avatarI18n.uploadError + '</div>';
+        });
+}
+
+document.getElementById('avatar_picker_grid').addEventListener('click', function(e) {
+    var card = e.target.closest('.picker-item');
+    if (card) selectAvatarImage(card.dataset.url);
+});
+
+function selectAvatarImage(url) {
+    document.getElementById('author_avatar_url').value = url;
+    var img = document.getElementById('avatar_preview_img');
+    img.src = url;
+    document.getElementById('avatar_preview_wrap').style.display = '';
+    bootstrap.Modal.getInstance(document.getElementById('avatarPickerModal')).hide();
+}
+
+function uploadAvatarImage() {
+    document.getElementById('avatar_file_input').click();
+}
+
+function doUploadAvatarImage(input) {
+    if (!input.files || !input.files[0]) return;
+    var status = document.getElementById('avatar_upload_status');
+    status.textContent = '...';
+    var fd = new FormData();
+    fd.append('image', input.files[0]);
+    fd.append('category', 'avatar');
+    input.value = '';
+    fetch('/admin/media/upload?json=1', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.error) { status.textContent = window._avatarI18n.uploadError; return; }
+            selectAvatarImage(data.url);
+            status.textContent = window._avatarI18n.uploadDone;
+        })
+        .catch(function() { status.textContent = window._avatarI18n.uploadError; });
+}
+</script>
+{{end}}
+{{template "admin-footer" .}}
+{{end}}

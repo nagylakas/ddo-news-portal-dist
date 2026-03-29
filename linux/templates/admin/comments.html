@@ -1,0 +1,88 @@
+{{define "admin/comments"}}
+{{template "admin-header" .}}
+
+<div class="container-fluid px-4">
+
+    {{template "admin-flash" .}}
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-4">
+        <h4 class="mb-0 fw-bold">
+            <i class="bi bi-chat-left-text me-2 text-primary"></i>{{t .Lang "comment.manage_title"}}
+        </h4>
+        <span class="badge rounded-pill text-bg-secondary fs-6">{{t .Lang "comment.total"}}: {{.TotalComments}}</span>
+    </div>
+
+    {{if .CommentGroups}}
+    {{$lang := .Lang}}
+    {{range .CommentGroups}}
+    <section class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                <div>
+                    <h5 class="mb-1 fw-semibold">{{.ArticleTitle}}</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                            <i class="bi bi-chat-left-text me-1"></i>{{.CommentCount}}
+                        </span>
+                        <span class="badge bg-light text-secondary border">{{formatDateTime .LastCommentAt}}</span>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    {{if .Article}}
+                    <a href="/article/{{.Article.Slug}}" class="btn btn-outline-secondary btn-sm" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-eye me-1"></i>{{t $lang "comment.open_article"}}
+                    </a>
+                    <a href="/admin/edit/{{.Article.ID.Hex}}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil me-1"></i>{{t $lang "comment.edit_article"}}
+                    </a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="list-group list-group-flush">
+                {{range .Comments}}
+                <article class="list-group-item px-0 py-3 border-bottom-0" {{if gt .Depth 0}}style="margin-left: {{if eq .Depth 1}}1rem{{else if eq .Depth 2}}2rem{{else if eq .Depth 3}}3rem{{else}}4rem{{end}};"{{end}}>
+                    <div class="d-flex gap-3">
+                        {{if .Comment.UserAvatarURL}}
+                        <img src="{{.Comment.UserAvatarURL}}" alt="" class="rounded-circle border flex-shrink-0" style="width:40px;height:40px;object-fit:cover;">
+                        {{else}}
+                        <div class="rounded-circle bg-secondary-subtle text-secondary d-flex align-items-center justify-content-center flex-shrink-0 fw-semibold" style="width:40px;height:40px;">
+                            {{initial .Comment.UserName}}
+                        </div>
+                        {{end}}
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-2 mb-2">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span class="fw-semibold">{{.Comment.UserName}}</span>
+                                    <span class="text-muted small">{{formatDateTime .Comment.CreatedAt}}</span>
+                                    {{if .ParentID}}
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle">{{t $lang "comment.reply"}}</span>
+                                    {{end}}
+                                    {{if .Comment.EditedAt}}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">{{t $lang "comment.edited"}}</span>
+                                    {{end}}
+                                </div>
+                                <code class="small text-muted">{{.Comment.ID.Hex}}</code>
+                            </div>
+                            <div class="bg-light rounded-3 border p-3" style="white-space:pre-wrap;">{{.Comment.Content}}</div>
+                        </div>
+                    </div>
+                </article>
+                {{end}}
+            </div>
+        </div>
+    </section>
+    {{end}}
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-chat-left-text text-muted" style="font-size:4rem;"></i>
+        <h5 class="mt-3 text-muted">{{t .Lang "comment.empty"}}</h5>
+        <p class="text-muted mb-0">{{t .Lang "comment.empty_sub"}}</p>
+    </div>
+    {{end}}
+
+</div>
+
+{{template "admin-footer" .}}
+{{end}}

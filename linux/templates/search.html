@@ -1,0 +1,122 @@
+{{define "search"}}
+{{template "header" .}}
+
+<!-- Search Hero Banner -->
+<div class="listing-hero listing-hero-search">
+    <div class="listing-hero-inner">
+        <nav class="art-breadcrumb mb-2" aria-label="breadcrumb">
+            <a href="/">KEZDŐLAP</a>
+            <span class="art-bc-sep">›</span>
+            <span>KERESÉS</span>
+        </nav>
+        <h1 class="listing-hero-title">Keresési eredmények</h1>
+        {{if .Query}}
+        <p class="listing-hero-sub">Eredmények: &ldquo;<strong>{{.Query}}</strong>&rdquo;</p>
+        {{end}}
+    </div>
+</div>
+
+<!-- Content -->
+<div class="container-fluid px-4 px-lg-5 py-5">
+
+    {{if .Articles}}
+    <p class="listing-count mb-4">
+        <span class="listing-count-num">{{len .Articles}}</span> találat
+        {{if .Query}}&ldquo;<strong>{{.Query}}</strong>&rdquo; keresésre{{end}}
+    </p>
+
+    <!-- Two-column layout: list left, sidebar right -->
+    <div class="search-layout">
+
+        <!-- Results list -->
+        <div class="search-results">
+            <div class="listing-list">
+                {{range .Articles}}
+                {{template "article-row" .}}
+                {{end}}
+            </div>
+
+            <!-- Pagination -->
+            {{if or .HasPrev .HasNext}}
+            <nav aria-label="Search pagination" class="mt-5">
+                <ul class="pagination justify-content-start">
+                    <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                        <a class="page-link" href="/search?q={{.Query}}&page={{subtract .CurrentPage 1}}"
+                            aria-label="Previous">
+                            <i class="bi bi-chevron-left"></i> Előző
+                        </a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link">{{.CurrentPage}}. oldal</span>
+                    </li>
+                    <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                        <a class="page-link" href="/search?q={{.Query}}&page={{add .CurrentPage 1}}" aria-label="Next">
+                            Következő <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {{end}}
+        </div>
+
+        <!-- Sidebar: categories -->
+        <aside class="search-sidebar d-none d-lg-block">
+            <div class="search-sidebar-inner">
+                <div class="section-header mb-3">
+                    <h5 class="section-title" style="font-size:1rem;">Szűrés <span
+                            class="text-primary">kategória</span> szerint</h5>
+                </div>
+                <div class="search-cat-list" id="searchCatList">
+                    <button type="button" class="search-cat-item search-cat-active" data-cat="">
+                        <i class="bi bi-globe2 text-primary me-2"></i>
+                        <span>Bárhonnan</span>
+                        <span class="search-cat-count ms-auto">{{.TotalCount}}</span>
+                    </button>
+                    {{range .Categories}}
+                    {{$count := index $.CategoryCounts .}}
+                    <button type="button" class="search-cat-item{{if eq $count 0}} search-cat-disabled{{end}}" data-cat="{{.}}"{{if eq $count 0}} disabled{{end}}>
+                        <i class="bi bi-folder2-open {{if eq $count 0}}text-muted{{else}}text-primary{{end}} me-2"></i>
+                        <span>{{.}}</span>
+                        {{if gt $count 0}}<span class="search-cat-count ms-auto">{{$count}}</span>{{end}}
+                    </button>
+                    {{end}}
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+        <h4 class="mt-3 text-muted">Nincs találat</h4>
+        <p class="text-muted">Próbálj más kulcsszavakat, vagy böngéssz kategóriák szerint.</p>
+        <a href="/" class="btn btn-primary mt-2">
+            <i class="bi bi-arrow-left me-2"></i>Vissza a főoldalra
+        </a>
+    </div>
+
+    <!-- Categories (empty state) -->
+    {{if .Categories}}
+    <hr class="section-divider my-5">
+    <div class="section-header mb-4">
+        <h4 class="section-title"><i class="bi bi-grid-3x3-gap me-2 text-primary"></i>Böngéssz kategóriák szerint</h4>
+    </div>
+    <div class="row row-cols-2 row-cols-md-4 g-3">
+        {{range .Categories}}
+        <div class="col">
+            <a href="/category/{{lower .}}" class="card text-decoration-none category-card border-0 bg-light">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-folder2-open text-primary mb-2" style="font-size: 2rem;"></i>
+                    <h6 class="card-title mb-0 text-dark">{{.}}</h6>
+                </div>
+            </a>
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+    {{end}}
+
+</div>
+{{template "footer" .}}
+{{end}}

@@ -1,0 +1,251 @@
+{{define "admin/dashboard"}}
+{{template "admin-header" .}}
+
+<div class="container-fluid px-4">
+
+    {{template "admin-flash" .}}
+
+    <!-- Page header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-4">
+        <h4 class="mb-0 fw-bold">
+            <i class="bi bi-speedometer2 me-2 text-primary"></i>{{t .Lang "dash.title"}}
+        </h4>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/admin/articles" class="btn btn-primary btn-sm">
+                <i class="bi bi-file-earmark-text me-1"></i>{{t .Lang "dash.manage_articles"}}
+            </a>
+            <a href="/admin/categories" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-folder2-open me-1"></i>{{t .Lang "dash.categories"}}
+            </a>
+            <a href="/admin/authors" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-people me-1"></i>{{t .Lang "dash.authors"}}
+            </a>
+        </div>
+    </div>
+
+    <!-- Stat cards row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-file-earmark-text text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.total_articles"}}</div>
+                        <div class="fw-bold fs-4 lh-1">{{.TotalArticles}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-check-circle text-success fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.published"}}</div>
+                        <div class="fw-bold fs-4 lh-1">{{.PublishedArticles}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-pencil-square text-warning fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.drafts"}}</div>
+                        <div class="fw-bold fs-4 lh-1">{{.DraftArticles}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-folder2-open text-info fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.categories"}}</div>
+                        <div class="fw-bold fs-4 lh-1">{{.TotalCategories}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-people text-secondary fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.authors"}}</div>
+                        <div class="fw-bold fs-4 lh-1">{{.TotalAuthors}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Views summary row -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-eye text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.views_today"}}</div>
+                        <div class="fw-bold fs-3 lh-1">{{.ViewsToday}}</div>
+                        <div class="text-muted" style="font-size:.75rem;">{{t .Lang "dash.views"}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-graph-up text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.views_7days"}}</div>
+                        <div class="fw-bold fs-3 lh-1">{{.Views7Days}}</div>
+                        <div class="text-muted" style="font-size:.75rem;">{{t .Lang "dash.views"}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-bar-chart text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.views_30days"}}</div>
+                        <div class="fw-bold fs-3 lh-1">{{.Views30Days}}</div>
+                        <div class="text-muted" style="font-size:.75rem;">{{t .Lang "dash.views"}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments summary row -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-chat-left-text text-success fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.comments_today"}}</div>
+                        <div class="fw-bold fs-3 lh-1">{{.CommentsToday}}</div>
+                        <div class="text-muted" style="font-size:.75rem;">{{t .Lang "dash.comments"}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-chat-left-dots text-success fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.comments_7days"}}</div>
+                        <div class="fw-bold fs-3 lh-1">{{.Comments7Days}}</div>
+                        <div class="text-muted" style="font-size:.75rem;">{{t .Lang "dash.comments"}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-chat-square-text text-success fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.comments_30days"}}</div>
+                        <div class="fw-bold fs-3 lh-1">{{.Comments30Days}}</div>
+                        <div class="text-muted" style="font-size:.75rem;">{{t .Lang "dash.comments"}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top articles row -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <span class="text-muted small fw-semibold">
+                        <i class="bi bi-trophy me-1 text-warning"></i>{{t .Lang "dash.top_article"}} &mdash; {{t .Lang "dash.views_today"}}
+                    </span>
+                </div>
+                <div class="card-body pt-2">
+                    {{if .TopToday}}
+                    <p class="mb-2 fw-semibold lh-sm" style="font-size:.9rem;">{{truncate .TopToday.Title 70}}</p>
+                    <a href="/admin/edit/{{.TopToday.ID.Hex}}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil me-1"></i>{{t .Lang "dash.open_article"}}
+                    </a>
+                    {{else}}
+                    <p class="text-muted mb-0" style="font-size:.85rem;">{{t .Lang "dash.no_data"}}</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <span class="text-muted small fw-semibold">
+                        <i class="bi bi-trophy me-1 text-warning"></i>{{t .Lang "dash.top_article"}} &mdash; {{t .Lang "dash.views_7days"}}
+                    </span>
+                </div>
+                <div class="card-body pt-2">
+                    {{if .Top7Days}}
+                    <p class="mb-2 fw-semibold lh-sm" style="font-size:.9rem;">{{truncate .Top7Days.Title 70}}</p>
+                    <a href="/admin/edit/{{.Top7Days.ID.Hex}}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil me-1"></i>{{t .Lang "dash.open_article"}}
+                    </a>
+                    {{else}}
+                    <p class="text-muted mb-0" style="font-size:.85rem;">{{t .Lang "dash.no_data"}}</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <span class="text-muted small fw-semibold">
+                        <i class="bi bi-trophy me-1 text-warning"></i>{{t .Lang "dash.top_article"}} &mdash; {{t .Lang "dash.views_30days"}}
+                    </span>
+                </div>
+                <div class="card-body pt-2">
+                    {{if .Top30Days}}
+                    <p class="mb-2 fw-semibold lh-sm" style="font-size:.9rem;">{{truncate .Top30Days.Title 70}}</p>
+                    <a href="/admin/edit/{{.Top30Days.ID.Hex}}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil me-1"></i>{{t .Lang "dash.open_article"}}
+                    </a>
+                    {{else}}
+                    <p class="text-muted mb-0" style="font-size:.85rem;">{{t .Lang "dash.no_data"}}</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{{template "admin-footer" .}}
+{{end}}

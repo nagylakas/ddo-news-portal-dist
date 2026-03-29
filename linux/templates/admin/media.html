@@ -1,0 +1,103 @@
+{{template "admin-header" .}}
+<div class="container-fluid">
+    {{template "admin-flash" .}}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0"><i class="bi bi-images me-2"></i>{{t .Lang "media.title"}}</h1>
+    </div>
+
+    {{if not .S3Enabled}}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "media.s3_disabled"}}
+    </div>
+    {{end}}
+
+    {{if .S3Enabled}}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="post" action="/admin/media/upload" enctype="multipart/form-data">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">{{t .Lang "media.field_title"}}</label>
+                        <input type="text" name="title" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">{{t .Lang "media.field_alt"}}</label>
+                        <input type="text" name="alt_text" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">{{t .Lang "media.upload"}}</label>
+                        <input type="file" name="image" class="form-control"
+                            accept="image/jpeg,image/png,image/webp,image/gif" required>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-primary w-100" type="submit" title="{{t .Lang " media.upload"}}">
+                            <i class="bi bi-upload"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{end}}
+
+    {{if .Items}}
+    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3 mb-4">
+        {{range .Items}}
+        <div class="col">
+            <a href="/admin/media/{{.ID.Hex}}" class="text-decoration-none">
+                <div class="card h-100 shadow-sm">
+                    <div class="position-relative">
+                        <img src="{{secureURL .URL}}" class="card-img-top" style="height:120px;object-fit:cover;"
+                            alt="{{.AltText}}">
+                        {{if eq .Category "banner"}}
+                        <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-1" style="font-size:0.65rem;">
+                            <i class="bi bi-badge-ad me-1"></i>{{t $.Lang "media.banner_badge"}}
+                        </span>
+                        {{else if eq .Category "avatar"}}
+                        <span class="badge bg-info text-dark position-absolute top-0 end-0 m-1" style="font-size:0.65rem;">
+                            <i class="bi bi-person-circle me-1"></i>{{t $.Lang "media.avatar_badge"}}
+                        </span>
+                        {{end}}
+                    </div>
+                    <div class="card-body p-2">
+                        <p class="card-text small text-truncate mb-0 text-dark fw-semibold">
+                            {{if .Title}}{{.Title}}{{else}}{{.Filename}}{{end}}
+                        </p>
+                        <p class="card-text text-muted" style="font-size:0.7rem;">
+                            {{.MIMEType}}
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{end}}
+    </div>
+
+    {{if gt .TotalPages 1}}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item{{if not .HasPrev}} disabled{{end}}">
+                <a class="page-link" href="?page={{subtract .CurrentPage 1}}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {{range $i := (add .TotalPages 1)}}{{end}}
+            <li class="page-item disabled">
+                <span class="page-link">{{.CurrentPage}} / {{.TotalPages}}</span>
+            </li>
+            <li class="page-item{{if not .HasNext}} disabled{{end}}">
+                <a class="page-link" href="?page={{add .CurrentPage 1}}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {{end}}
+
+    {{else}}
+    <p class="text-muted">{{t .Lang "media.no_items"}}</p>
+    {{end}}
+
+</div>
+{{template "admin-footer" .}}

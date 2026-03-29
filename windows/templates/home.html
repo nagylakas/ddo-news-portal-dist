@@ -1,0 +1,216 @@
+{{define "home"}}
+{{template "header" .}}
+
+<!-- Hero Section - Full Width, No Gaps -->
+{{if .FeaturedNews}}
+<section class="hero-section">
+    <div class="hero-grid">
+        <!-- Main Featured Article (left, large) -->
+        <div class="hero-main">
+            <a href="/article/{{.FeaturedNews.Slug}}" class="hero-card-link">
+                <div class="hero-card hero-card-main">
+                    {{if .FeaturedNews.ImageURL}}
+                    <img src="{{.FeaturedNews.ImageURL}}" class="hero-bg-img" alt="{{.FeaturedNews.Title}}">
+                    {{else}}
+                    <div class="hero-bg-placeholder"></div>
+                    {{end}}
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <div class="hero-badges mb-2">
+                            <span class="hero-badge hero-badge-live">FRISS</span>
+                            <span class="hero-badge hero-badge-cat">{{.FeaturedNews.Category}}</span>
+                        </div>
+                        <h2 class="hero-title-main">{{.FeaturedNews.Title}}</h2>
+                        <div class="hero-meta">
+                            <span>Szerző: {{upper .FeaturedNews.Author}}</span>
+                            <span class="hero-dot">•</span>
+                            <span>{{formatDate .FeaturedNews.PublishedAt}}</span>
+                        </div>
+                        <div class="hero-read-more mt-3">
+                            <span class="hero-read-link">&#8594; ELOLVASOM</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Right side: 2 smaller articles stacked -->
+        <div class="hero-side">
+            {{$articles := .Articles}}
+            {{range $i, $art := $articles}}
+            {{if lt $i 2}}
+            <div class="hero-side-item">
+                <a href="/article/{{$art.Slug}}" class="hero-card-link">
+                    <div class="hero-card hero-card-side">
+                        {{if $art.ImageURL}}
+                        <img src="{{$art.ImageURL}}" class="hero-bg-img" alt="{{$art.Title}}">
+                        {{else}}
+                        <div class="hero-bg-placeholder"></div>
+                        {{end}}
+                        <div class="hero-overlay hero-overlay-side"></div>
+                        <div class="hero-content">
+                            <div class="hero-badges mb-2">
+                                <span class="hero-badge hero-badge-cat">{{$art.Category}}</span>
+                            </div>
+                            <h3 class="hero-title-side">{{$art.Title}}</h3>
+                            <div class="hero-meta hero-meta-small">
+                                <span>Szerző: {{upper $art.Author}}</span>
+                                <span class="hero-dot">•</span>
+                                <span>{{formatDate $art.PublishedAt}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {{end}}
+            {{end}}
+        </div>
+    </div>
+
+</section>
+{{end}}
+
+<!-- ===== THE LATEST ===== -->
+<div class="container-fluid px-4 px-lg-5 py-5">
+    {{if .Articles}}
+    {{$articles := .Articles}}
+
+    <!-- Section header -->
+    <div class="section-header mb-4">
+        <h3 class="section-title">A <span class="text-primary">Legfrissebb</span> hírek</h3>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left: large featured article (4th article overall, Articles[2]) -->
+        {{range $i, $art := $articles}}
+        {{if eq $i 2}}
+        <div class="col-lg-6 col-xl-7 col-xxl-6">
+            <a href="/article/{{$art.Slug}}" class="text-decoration-none text-dark">
+                <div class="latest-main">
+                    <div class="latest-main-img-wrap">
+                        {{if $art.ImageURL}}
+                        <img src="{{$art.ImageURL}}" class="latest-main-img" alt="{{$art.Title}}">
+                        {{else}}
+                        <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-white" style="font-size:4rem;"></i>
+                        </div>
+                        {{end}}
+                        <span class="latest-badge latest-badge-overlay">{{$art.Category}}</span>
+                    </div>
+                    <div class="latest-main-body">
+                        <h3 class="latest-main-title">{{$art.Title}}</h3>
+                        <p class="latest-main-summary">{{truncate $art.Summary 160}}</p>
+                        <div class="latest-meta">
+                            <span class="latest-meta-author">Szerző: {{upper $art.Author}}</span>
+                            <span class="latest-meta-dot">•</span>
+                            <span>{{formatDate $art.PublishedAt}}</span>
+                            {{/* comment count hidden until comments are implemented */}}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{end}}
+        {{end}}
+
+        <!-- Right: 2x2 small card grid (5th–8th articles, Articles[3–6]) -->
+        <div class="col-lg-6 col-xl-5 col-xxl-6">
+            <div class="row g-3 h-100">
+                {{range $i, $art := $articles}}
+                {{if and (gt $i 2) (lt $i 7)}}
+                <div class="col-6 latest-small-col">
+                    {{template "home-small-card" $art}}
+                </div>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="section-divider my-5">
+
+    <!-- ===== MOST POPULAR + TOP STORIES ===== -->
+    <div class="row g-5">
+
+        <!-- Most Popular (left) -->
+        <div class="col-lg-6">
+            <div class="section-header mb-4">
+                <h3 class="section-title">Legnépszerűbb <span class="text-primary">Cikkek</span></h3>
+            </div>
+            <div class="row g-3">
+                {{range .PopularArticles}}
+                <div class="col-6 latest-small-col">
+                    {{template "home-small-card" .}}
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Top Stories (right) -->
+        <div class="col-lg-6">
+            <div class="section-header mb-4">
+                <h3 class="section-title">Legtöbbet olvasott<span class="text-primary"> Cikkek</span></h3>
+            </div>
+            <div class="listing-list">
+                {{range .MostReadArticles}}
+                {{template "article-row" .}}
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {{if or .HasPrev .HasNext}}
+    <nav aria-label="News pagination" class="mt-5">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                <a class="page-link" href="/?page={{subtract .CurrentPage 1}}" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i> Előző
+                </a>
+            </li>
+            <li class="page-item active">
+                <span class="page-link">{{.CurrentPage}}. oldal</span>
+            </li>
+            <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                <a class="page-link" href="/?page={{add .CurrentPage 1}}" aria-label="Next">
+                    Következő <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {{end}}
+
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-newspaper text-muted" style="font-size: 4rem;"></i>
+        <h4 class="mt-3 text-muted">Még nincsenek cikkek</h4>
+        <p class="text-muted">Látogass vissza később a legfrissebb hírekért.</p>
+        <a href="/admin/create" class="btn btn-primary mt-2">
+            <i class="bi bi-plus-lg me-2"></i>Első cikk létrehozása
+        </a>
+    </div>
+    {{end}}
+
+    <!-- Category Quick Links -->
+    {{if .Categories}}
+    <hr class="section-divider my-5">
+    <div class="section-header mb-4">
+        <h4 class="section-title"><i class="bi bi-grid-3x3-gap me-2 text-primary"></i>Böngészd kategóriák szerint</h4>
+    </div>
+    <div class="row row-cols-2 row-cols-md-4 g-3">
+        {{range .Categories}}
+        <div class="col">
+            <a href="/category/{{lower .}}" class="card text-decoration-none category-card border-0 bg-light">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-folder2-open text-primary mb-2" style="font-size: 2rem;"></i>
+                    <h6 class="card-title mb-0 text-dark">{{.}}</h6>
+                </div>
+            </a>
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+</div>
+{{template "footer" .}}
+{{end}}

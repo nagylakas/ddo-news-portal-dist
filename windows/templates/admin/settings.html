@@ -1,0 +1,250 @@
+{{define "admin/settings"}}
+{{template "admin-header" .}}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-sliders me-2 text-primary"></i>{{t .Lang "settings.title"}}</h4>
+                <button type="button" class="btn btn-warning btn-sm" id="restartBtn" onclick="triggerRestart()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>{{t .Lang "settings.restart_btn"}}
+                </button>
+            </div>
+
+            {{if .FlashMessage}}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>{{.FlashMessage}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{end}}
+
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>{{.ErrorMessage}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{end}}
+
+            <div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill mt-1 flex-shrink-0"></i>
+                <div>
+                    {{t .Lang "settings.warning"}}
+                </div>
+            </div>
+
+            {{if .Entries}}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <form action="/admin/settings" method="POST" id="settings-form">
+
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:35%">{{t .Lang "settings.col_key"}}</th>
+                                    <th>{{t .Lang "settings.col_value"}}</th>
+                                    <th style="width:60px" class="text-center">{{t .Lang "settings.col_delete"}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Entries}}
+                                <tr>
+                                    <td>
+                                        <code class="d-flex align-items-center gap-1">
+                                            {{.Key}}
+                                            {{if .ReadOnly}}<span class="badge bg-secondary ms-1" style="font-size:.65rem;">{{t $.Lang "settings.readonly"}}</span>{{end}}
+                                        </code>
+                                    </td>
+                                    <td>
+                                        {{if .ReadOnly}}
+                                        <input type="text" class="form-control form-control-sm bg-light font-monospace"
+                                               value="{{.DisplayValue}}" disabled readonly>
+                                        {{else}}
+                                        <input type="text" class="form-control form-control-sm font-monospace"
+                                               name="{{.Key}}" value="{{.Value}}">
+                                        {{end}}
+                                    </td>
+                                    <td class="text-center">
+                                        {{if .NoDel}}
+                                        <i class="bi bi-lock text-muted" title="{{t $.Lang "settings.cannot_del"}}"></i>
+                                        {{else}}
+                                        <input type="checkbox" class="form-check-input"
+                                               name="delete_{{.Key}}" value="1"
+                                               title="{{t $.Lang "settings.mark_del"}}"
+                                               onchange="this.closest('tr').classList.toggle('table-danger', this.checked)">
+                                        {{end}}
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+
+                        <!-- New entries section -->
+                        <div class="mt-4">
+                            <h6 class="text-muted mb-3"><i class="bi bi-plus-circle me-1"></i>{{t .Lang "settings.add_key"}}</h6>
+                            <div id="new-entries">
+                                <!-- rows added by JS -->
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="addNewRow()">
+                                <i class="bi bi-plus me-1"></i>{{t .Lang "settings.add_row"}}
+                            </button>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <a href="/admin/settings" class="btn btn-outline-secondary">{{t .Lang "settings.cancel"}}</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>{{t .Lang "settings.save"}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {{else}}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>{{t .Lang "settings.no_env"}}
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+
+<div id="restartOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:2.5rem 3rem; text-align:center; max-width:380px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.3);">
+        <div class="spinner-border text-warning mb-3" role="status" style="width:3rem;height:3rem;">
+            <span class="visually-hidden">{{t .Lang "settings.loading"}}</span>
+        </div>
+        <h5 class="mb-2 fw-bold" id="restartOverlayTitle"></h5>
+        <p class="text-muted mb-3" style="font-size:.9rem;" id="restartOverlayText"></p>
+        <div id="restartStatus" class="text-muted" style="font-size:.8rem;"></div>
+    </div>
+</div>
+
+<script>
+window.adminI18n = {
+    overlayTitle:    "{{t .Lang "settings.overlay_title"}}",
+    overlayText:     "{{t .Lang "settings.overlay_text"}}",
+    shuttingDown:    "{{t .Lang "settings.shutting"}}",
+    restarting:      "{{t .Lang "settings.restarting"}}",
+    tooSlow:         "{{t .Lang "settings.too_slow"}}",
+    ready:           "{{t .Lang "settings.ready"}}",
+    waiting:         "{{t .Lang "settings.waiting"}}",
+    confirmRestart:  "{{t .Lang "settings.confirm_restart"}}",
+    success:         "{{t .Lang "settings.success"}}",
+    loading:         "{{t .Lang "settings.loading"}}",
+    keyPh:           "{{t .Lang "settings.key_ph"}}",
+    valuePh:         "{{t .Lang "settings.value_ph"}}",
+    apiKeyInvalid:   "{{t .Lang "settings.api_key_invalid"}}",
+    apiKeyValid:     "{{t .Lang "settings.api_key_valid"}}"
+};
+</script>
+
+<script>
+// API_KEY format validation
+(function() {
+    var re = /^[A-Z0-9]{32}$/;
+    function validateApiKey(input) {
+        var hint = document.getElementById('api-key-hint');
+        if (!hint) {
+            hint = document.createElement('div');
+            hint.id = 'api-key-hint';
+            hint.className = 'form-text mt-1';
+            input.parentNode.appendChild(hint);
+        }
+        var val = input.value.trim();
+        if (val === '') {
+            hint.textContent = '';
+            input.classList.remove('is-valid', 'is-invalid');
+        } else if (re.test(val)) {
+            hint.textContent = window.adminI18n.apiKeyValid;
+            hint.className = 'form-text mt-1 text-success';
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        } else {
+            hint.textContent = window.adminI18n.apiKeyInvalid;
+            hint.className = 'form-text mt-1 text-danger';
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var inp = document.querySelector('input[name="API_KEY"]');
+        if (!inp) return;
+        validateApiKey(inp);
+        inp.addEventListener('input', function() { validateApiKey(inp); });
+    });
+})();
+
+function addNewRow() {
+    const container = document.getElementById('new-entries');
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 align-items-center new-entry-row';
+    row.innerHTML = `
+        <div class="col-4">
+            <input type="text" class="form-control form-control-sm font-monospace"
+                   name="new_key" placeholder="${window.adminI18n.keyPh}" autocomplete="off">
+        </div>
+        <div class="col">
+            <input type="text" class="form-control form-control-sm font-monospace"
+                   name="new_value" placeholder="${window.adminI18n.valuePh}" autocomplete="off">
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.new-entry-row').remove()">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>`;
+    container.appendChild(row);
+    row.querySelector('input[name="new_key"]').focus();
+}
+
+function triggerRestart() {
+    if (!confirm(window.adminI18n.confirmRestart)) return;
+
+    var overlay = document.getElementById('restartOverlay');
+    var overlayTitle = document.getElementById('restartOverlayTitle');
+    var overlayText  = document.getElementById('restartOverlayText');
+    var status  = document.getElementById('restartStatus');
+    var btn     = document.getElementById('restartBtn');
+
+    overlayTitle.textContent = window.adminI18n.overlayTitle;
+    overlayText.textContent  = window.adminI18n.overlayText;
+    overlay.style.display = 'flex';
+    btn.disabled = true;
+
+    // Fire-and-forget POST — the server may close the connection before responding
+    fetch('/admin/restart', { method: 'POST' }).catch(function() {});
+
+    // Wait a moment, then start polling until the server is back
+    setTimeout(function() {
+        status.textContent = window.adminI18n.restarting;
+        pollUntilAlive(0);
+    }, 2000);
+}
+
+function pollUntilAlive(attempts) {
+    var status = document.getElementById('restartStatus');
+    var maxAttempts = 30; // 30 × 2s = 60s timeout
+
+    if (attempts >= maxAttempts) {
+        status.textContent = window.adminI18n.tooSlow;
+        return;
+    }
+
+    fetch('/admin', { method: 'HEAD', cache: 'no-store' })
+        .then(function(r) {
+            if (r.ok || r.status === 302 || r.status === 200) {
+                status.textContent = window.adminI18n.ready;
+                window.location.href = '/admin/settings?flash=' + encodeURIComponent(window.adminI18n.success);
+            } else {
+                retry(attempts);
+            }
+        })
+        .catch(function() { retry(attempts); });
+}
+
+function retry(attempts) {
+    var status = document.getElementById('restartStatus');
+    status.textContent = window.adminI18n.waiting + ' (' + (attempts + 1) + ')';
+    setTimeout(function() { pollUntilAlive(attempts + 1); }, 2000);
+}
+</script>
+
+{{template "admin-footer" .}}
+{{end}}

@@ -1,0 +1,24 @@
+{{define "home-small-card"}}
+<a href="/article/{{.Slug}}" class="text-decoration-none text-dark">
+    <div class="latest-small-card">
+        <div class="latest-small-img-wrap">
+            {{if .ImageURL}}
+            <img src="{{.ImageURL}}" class="latest-small-img" alt="{{.Title}}">
+            {{else}}
+            <div class="latest-small-img bg-light d-flex align-items-center justify-content-center">
+                <i class="bi bi-image text-muted" style="font-size:2rem;"></i>
+            </div>
+            {{end}}
+            <span class="latest-badge latest-badge-sm latest-badge-overlay">{{.Category}}</span>
+        </div>
+        <div class="latest-small-body">
+            <h6 class="latest-small-title">{{truncate .Title 65}}</h6>
+            <div class="latest-meta latest-meta-xs">
+                <span class="latest-meta-author">Szerző: {{upper .Author}}</span>
+                <span class="latest-meta-dot">•</span>
+                <span>{{formatDate .PublishedAt}}</span>
+            </div>
+        </div>
+    </div>
+</a>
+{{end}}

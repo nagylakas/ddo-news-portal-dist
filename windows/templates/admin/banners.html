@@ -1,0 +1,115 @@
+{{define "admin/banners"}}
+{{template "admin-header" .}}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-badge-ad me-2"></i>{{t .Lang "banner.manage_title"}}
+        </h2>
+        <a href="/admin/banners/create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>{{t .Lang "banner.new_btn"}}
+        </a>
+    </div>
+
+    {{if .FlashMessage}}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{.FlashMessage}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {{end}}
+
+    <!-- Slot summary cards -->
+    <div class="row g-3 mb-4">
+        {{range .Slots}}
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-layout-sidebar-inset me-2 text-primary fs-5"></i>
+                        <h6 class="mb-0 fw-bold">{{.Label}}</h6>
+                    </div>
+                    <p class="text-muted small mb-1">{{.Description}}</p>
+                    <span class="badge bg-secondary">{{.WidthPx}} × {{.HeightPx}} px</span>
+                    <code class="ms-2 small text-muted">{{.ID}}</code>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    {{if .Banners}}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>{{t .Lang "banner.col_name"}}</th>
+                            <th>{{t .Lang "banner.col_slot"}}</th>
+                            <th>{{t .Lang "banner.col_active"}}</th>
+                            <th>{{t .Lang "banner.col_period"}}</th>
+                            <th class="text-center">{{t .Lang "banner.col_priority"}}</th>
+                            <th class="text-end">{{t .Lang "banner.col_impr"}}</th>
+                            <th class="text-end">{{t .Lang "banner.col_clicks"}}</th>
+                            <th class="text-end">CTR</th>
+                            <th class="text-end">{{t .Lang "banner.col_actions"}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Banners}}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{.Name}}</div>
+                                <small class="text-muted">{{truncate .TargetURL 40}}</small>
+                            </td>
+                            <td><code class="small">{{.SlotID}}</code></td>
+                            <td>
+                                {{if .Active}}
+                                <span class="badge bg-success">{{t $.Lang "common.active"}}</span>
+                                {{else}}
+                                <span class="badge bg-secondary">{{t $.Lang "common.inactive"}}</span>
+                                {{end}}
+                            </td>
+                            <td class="small">
+                                <div>{{formatDateTime .ActiveFrom}}</div>
+                                <div class="text-muted">→ {{formatDateTime .ActiveUntil}}</div>
+                            </td>
+                            <td class="text-center">{{.Priority}}</td>
+                            <td class="text-end">{{.Impressions}}</td>
+                            <td class="text-end">{{.Clicks}}</td>
+                            <td class="text-end">
+                                {{printf "%.2f" .CTR}}%
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/admin/banners/edit/{{.ID.Hex}}" class="btn btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="/admin/banners/delete/{{.ID.Hex}}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger"
+                                                onclick="return confirm(this.dataset.confirm)"
+                                                data-confirm="{{t $.Lang "banner.confirm_delete"}}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-badge-ad text-muted" style="font-size:4rem;"></i>
+        <h4 class="mt-3 text-muted">{{t .Lang "banner.no_banners"}}</h4>
+        <p class="text-muted">{{t .Lang "banner.no_banners_sub"}}</p>
+        <a href="/admin/banners/create" class="btn btn-primary mt-2">
+            <i class="bi bi-plus-lg me-2"></i>{{t .Lang "banner.create_first"}}
+        </a>
+    </div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}

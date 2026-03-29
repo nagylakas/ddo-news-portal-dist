@@ -1,0 +1,248 @@
+{{define "admin/banner_edit"}}
+{{template "admin-header" .}}
+<div class="container-fluid py-4" style="max-width:720px;">
+    <div class="d-flex align-items-center mb-4">
+        <a href="/admin/banners" class="btn btn-outline-secondary btn-sm me-3">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="mb-0"><i class="bi bi-badge-ad me-2"></i>{{t .Lang "banner.edit_title"}}</h2>
+    </div>
+
+    {{if .ErrorMessage}}
+    <div class="alert alert-danger">{{.ErrorMessage}}</div>
+    {{end}}
+
+    <!-- Stats summary -->
+    {{if .Banner}}
+    <div class="row g-3 mb-4">
+        <div class="col-4">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="fs-4 fw-bold text-primary">{{.Banner.Impressions}}</div>
+                <small class="text-muted">{{t .Lang "banner.stat_impr"}}</small>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="fs-4 fw-bold text-success">{{.Banner.Clicks}}</div>
+                <small class="text-muted">{{t .Lang "banner.stat_clicks"}}</small>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="fs-4 fw-bold text-info">{{printf "%.2f" .Banner.CTR}}%</div>
+                <small class="text-muted">CTR</small>
+            </div>
+        </div>
+    </div>
+    {{end}}
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form method="POST" action="/admin/banners/edit/{{.Banner.ID.Hex}}">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{t .Lang "banner.field_slot"}} <span class="text-danger">*</span></label>
+                    <select name="slot_id" class="form-select" required>
+                        <option value="">{{t .Lang "banner.choose_slot"}}</option>
+                        {{range .Slots}}
+                        <option value="{{.ID}}" {{if eq .ID $.Banner.SlotID}}selected{{end}}>
+                            {{.Label}} ({{.WidthPx}}×{{.HeightPx}} px)
+                        </option>
+                        {{end}}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{t .Lang "banner.field_name"}} <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" required
+                           value="{{.Banner.Name}}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{t .Lang "banner.field_image"}} <span class="text-danger">*</span></label>
+                    {{if .S3Enabled}}
+                    <div class="input-group">
+                        <input type="text" name="image_url" id="banner_image_url" class="form-control" required readonly
+                               value="{{.Banner.ImageURL}}">
+                        <button type="button" class="btn btn-outline-secondary" onclick="openBannerPicker()">
+                            <i class="bi bi-images me-1"></i>{{t .Lang "banner.field_image_pick"}}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="uploadBannerImage()">
+                            <i class="bi bi-upload me-1"></i>{{t .Lang "banner.field_image_upload"}}
+                        </button>
+                    </div>
+                    <input type="file" id="banner_file_input" accept="image/*" class="d-none"
+                           onchange="doUploadBannerImage(this)">
+                    <div id="banner_upload_status" class="form-text"></div>
+                    {{if .Banner.ImageURL}}
+                    <div class="mt-2">
+                        <img id="banner_preview_img" src="{{secureURL .Banner.ImageURL}}" alt="{{t .Lang "banner.preview"}}" style="max-height:80px;border-radius:4px;">
+                    </div>
+                    {{else}}
+                    <div class="mt-2" id="banner_preview_wrap" style="display:none">
+                        <img id="banner_preview_img" src="" alt="{{t .Lang "banner.preview"}}" style="max-height:80px;border-radius:4px;">
+                    </div>
+                    {{end}}
+                    {{else}}
+                    <input type="url" name="image_url" class="form-control" required
+                           value="{{.Banner.ImageURL}}">
+                    {{if .Banner.ImageURL}}
+                    <div class="mt-2">
+                        <img src="{{secureURL .Banner.ImageURL}}" alt="{{t .Lang "banner.preview"}}" style="max-height:80px;border-radius:4px;">
+                    </div>
+                    {{end}}
+                    {{end}}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{t .Lang "banner.field_alt"}}</label>
+                    <input type="text" name="alt_text" class="form-control"
+                           value="{{.Banner.AltText}}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{t .Lang "banner.field_target"}} <span class="text-danger">*</span></label>
+                    <input type="url" name="target_url" class="form-control" required
+                           value="{{.Banner.TargetURL}}">
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_from"}} <span class="text-danger">*</span></label>
+                        <input type="datetime-local" name="active_from" class="form-control" required
+                               value="{{.Banner.ActiveFrom.Format "2006-01-02T15:04"}}">
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_until"}} <span class="text-danger">*</span></label>
+                        <input type="datetime-local" name="active_until" class="form-control" required
+                               value="{{.Banner.ActiveUntil.Format "2006-01-02T15:04"}}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{t .Lang "banner.field_priority"}}</label>
+                    <input type="number" name="priority" class="form-control"
+                           value="{{.Banner.Priority}}" min="0" max="100">
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="active" id="active"
+                               {{if .Banner.Active}}checked{{end}}>
+                        <label class="form-check-label fw-semibold" for="active">{{t .Lang "banner.field_active"}}</label>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>{{t .Lang "common.save"}}
+                    </button>
+                    <a href="/admin/banners" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{if .S3Enabled}}
+<!-- Banner image picker modal -->
+<div class="modal fade" id="bannerPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{t .Lang "banner.pick_title"}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="banner_picker_grid" class="row g-2">
+                    <div class="col-12 text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm me-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window._bannerI18n = {
+    pickEmpty:   '{{t .Lang "banner.pick_empty"}}',
+    uploadDone:  '{{t .Lang "banner.upload_done"}}',
+    uploadError: '{{t .Lang "banner.upload_error"}}',
+};
+
+function secureBannerURL(u) {
+    if (!u) return u;
+    if (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('/')) return u;
+    return 'https://' + u;
+}
+
+function openBannerPicker() {
+    var modal = new bootstrap.Modal(document.getElementById('bannerPickerModal'));
+    modal.show();
+    fetch('/admin/media/picker?category=banner')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var items = (data && data.all) ? data.all : [];
+            var grid = document.getElementById('banner_picker_grid');
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="col-12 text-center text-muted py-4">' + window._bannerI18n.pickEmpty + '</div>';
+                return;
+            }
+            grid.innerHTML = items.map(function(item) {
+                var url = secureBannerURL(item.url);
+                var lbl = item.title || item.filename || '';
+                var safeUrl = url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+                var safeLabel = lbl.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+                return '<div class="col-6 col-sm-4 col-md-3 col-lg-2">' +
+                    '<div class="card h-100 border-0 shadow-sm picker-item" style="cursor:pointer" data-url="' + safeUrl + '">' +
+                    '<img src="' + safeUrl + '" class="card-img-top" style="height:80px;object-fit:cover;pointer-events:none" loading="lazy">' +
+                    '<div class="card-body p-1"><small class="text-truncate d-block" style="pointer-events:none" title="' + safeLabel + '">' + safeLabel + '</small></div>' +
+                    '</div></div>';
+            }).join('');
+        })
+        .catch(function() {
+            document.getElementById('banner_picker_grid').innerHTML =
+                '<div class="col-12 text-center text-danger py-4">' + window._bannerI18n.uploadError + '</div>';
+        });
+}
+
+document.getElementById('banner_picker_grid').addEventListener('click', function(e) {
+    var card = e.target.closest('.picker-item');
+    if (card) selectBannerImage(card.dataset.url);
+});
+function selectBannerImage(url) {
+    document.getElementById('banner_image_url').value = url;
+    var preview = document.getElementById('banner_preview_img');
+    if (preview) {
+        preview.src = url;
+        var wrap = document.getElementById('banner_preview_wrap');
+        if (wrap) wrap.style.display = '';
+    }
+    bootstrap.Modal.getInstance(document.getElementById('bannerPickerModal')).hide();
+}
+
+function uploadBannerImage() {
+    document.getElementById('banner_file_input').click();
+}
+
+function doUploadBannerImage(input) {
+    if (!input.files || !input.files[0]) return;
+    var status = document.getElementById('banner_upload_status');
+    status.textContent = '...';
+    var fd = new FormData();
+    fd.append('image', input.files[0]);
+    fd.append('category', 'banner');
+    input.value = '';
+    fetch('/admin/media/upload?json=1', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.error) { status.textContent = window._bannerI18n.uploadError; return; }
+            selectBannerImage(data.url);
+            status.textContent = window._bannerI18n.uploadDone;
+        })
+        .catch(function() { status.textContent = window._bannerI18n.uploadError; });
+}
+</script>
+{{end}}
+{{template "admin-footer" .}}
+{{end}}
