@@ -12,9 +12,21 @@
                             <i class="bi bi-grid me-2"></i>Összes hirdetés
                         </a>
                         {{range .MarketCategories}}
-                        <a href="/marketplace/category/{{.Slug}}" class="list-group-item list-group-item-action px-0 {{if eq $.CategorySlug .Slug}}fw-semibold text-primary{{end}}">
-                            <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} me-2"></i>{{.Name}}
+                        {{if eq .ParentIDHex ""}}
+                        {{/* Főkategória — fejléc stílusban */}}
+                        <div class="list-group-item px-0 pt-3 pb-1 border-0 bg-transparent">
+                            <a href="/marketplace/category/{{.Slug}}"
+                               class="text-decoration-none fw-semibold small text-uppercase text-muted d-flex align-items-center gap-1 {{if eq $.CategorySlug .Slug}}text-primary{{end}}">
+                                <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}folder{{end}}"></i>{{.Name}}
+                            </a>
+                        </div>
+                        {{else}}
+                        {{/* Alkategória — behúzva */}}
+                        <a href="/marketplace/category/{{.Slug}}"
+                           class="list-group-item list-group-item-action border-0 py-1 ps-4 pe-0 {{if eq $.CategorySlug .Slug}}fw-semibold text-primary{{end}}">
+                            <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} me-1 small"></i><span class="small">{{.Name}}</span>
                         </a>
+                        {{end}}
                         {{end}}
                     </div>
                 </div>
