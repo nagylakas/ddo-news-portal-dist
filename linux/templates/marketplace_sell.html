@@ -32,7 +32,11 @@
                                 <select class="form-select" id="category_id" name="category_id" required>
                                     <option value="">Válassz kategóriát</option>
                                     {{range .MarketCategories}}
-                                    <option value="{{.ID.Hex}}" {{if eq $.Form.CategoryID .ID.Hex}}selected{{end}}>{{.Name}}</option>
+                                    <option value="{{.ID.Hex}}"
+                                            data-parent="{{.ParentName}}"
+                                            {{if eq $.Form.CategoryID .ID.Hex}}selected{{end}}>
+                                        {{if .ParentName}}{{.Name}}{{else}}◆ {{.Name}}{{end}}
+                                    </option>
                                     {{end}}
                                 </select>
                             </div>
@@ -266,12 +270,35 @@
 </section>
 <script>
 (function() {
-    // Spec group show/hide on category select
+    // Build <optgroup> structure from data-parent attributes
     var select = document.getElementById('category_id');
-    var groups = Array.prototype.slice.call(document.querySelectorAll('.marketplace-spec-group'));
+    if (select) {
+        var options = Array.prototype.slice.call(select.querySelectorAll('option[data-parent]'));
+        var groups = {};
+        var groupOrder = [];
+        options.forEach(function(opt) {
+            var parent = opt.getAttribute('data-parent') || '';
+            if (!groups[parent]) { groups[parent] = []; groupOrder.push(parent); }
+            groups[parent].push(opt);
+            opt.parentNode.removeChild(opt);
+        });
+        groupOrder.forEach(function(parent) {
+            if (parent) {
+                var og = document.createElement('optgroup');
+                og.label = parent;
+                groups[parent].forEach(function(opt) { og.appendChild(opt); });
+                select.appendChild(og);
+            } else {
+                groups[parent].forEach(function(opt) { select.appendChild(opt); });
+            }
+        });
+    }
+
+    // Spec group show/hide on category select
+    var groups2 = Array.prototype.slice.call(document.querySelectorAll('.marketplace-spec-group'));
     function syncSpecs() {
         var selected = select ? select.value : '';
-        groups.forEach(function(g) { g.hidden = g.getAttribute('data-category-id') !== selected; });
+        groups2.forEach(function(g) { g.hidden = g.getAttribute('data-category-id') !== selected; });
     }
     if (select) { select.addEventListener('change', syncSpecs); syncSpecs(); }
 
