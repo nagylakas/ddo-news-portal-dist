@@ -82,20 +82,20 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold" for="spec_{{.Key}}">{{.Label}}{{if .Required}} <span class="text-danger">*</span>{{end}}</label>
                                     {{if eq .Type "select"}}
-                                    <select class="form-select" id="spec_{{.Key}}" name="spec_{{.Key}}">
+                                    <select class="form-select spec-field" id="spec_{{.Key}}" name="spec_{{.Key}}" disabled>
                                         <option value="">Válassz</option>
                                         {{range .Options}}
                                         <option value="{{.}}" {{if eq $value .}}selected{{end}}>{{.}}</option>
                                         {{end}}
                                     </select>
                                     {{else if eq .Type "boolean"}}
-                                    <select class="form-select" id="spec_{{.Key}}" name="spec_{{.Key}}">
+                                    <select class="form-select spec-field" id="spec_{{.Key}}" name="spec_{{.Key}}" disabled>
                                         <option value="">Válassz</option>
                                         <option value="Igen" {{if eq $value "Igen"}}selected{{end}}>Igen</option>
                                         <option value="Nem" {{if eq $value "Nem"}}selected{{end}}>Nem</option>
                                     </select>
                                     {{else}}
-                                    <input class="form-control" id="spec_{{.Key}}" name="spec_{{.Key}}" value="{{$value}}" {{if eq .Type "number"}}type="number"{{else}}type="text"{{end}}>
+                                    <input class="form-control spec-field" id="spec_{{.Key}}" name="spec_{{.Key}}" value="{{$value}}" {{if eq .Type "number"}}type="number"{{else}}type="text"{{end}} disabled>
                                     {{end}}
                                 </div>
                                 {{end}}
@@ -294,11 +294,17 @@
         });
     }
 
-    // Spec group show/hide on category select
-    var groups2 = Array.prototype.slice.call(document.querySelectorAll('.marketplace-spec-group'));
+    // Spec group show/hide on category select; disabled controls excluded from POST
+    var specGroups = Array.prototype.slice.call(document.querySelectorAll('.marketplace-spec-group'));
     function syncSpecs() {
         var selected = select ? select.value : '';
-        groups2.forEach(function(g) { g.hidden = g.getAttribute('data-category-id') !== selected; });
+        specGroups.forEach(function(g) {
+            var isActive = g.getAttribute('data-category-id') === selected;
+            g.hidden = !isActive;
+            g.querySelectorAll('.spec-field').forEach(function(f) {
+                f.disabled = !isActive;
+            });
+        });
     }
     if (select) { select.addEventListener('change', syncSpecs); syncSpecs(); }
 
