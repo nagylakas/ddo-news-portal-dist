@@ -1,0 +1,42 @@
+{{define "admin/marketplace"}}
+{{template "admin-header" .}}
+<div class="container-fluid">
+    {{template "admin-flash" .}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-shop me-2 text-primary"></i>Marketplace</h2>
+            <p class="text-muted mb-0">Az apróhirdetési modul aktív. A kategória- és hirdetéskezelő felület erre az izolált modulra épül.</p>
+        </div>
+        <a href="/marketplace" class="btn btn-outline-primary">
+            <i class="bi bi-eye me-1"></i>Publikus oldal
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Marketplace collection nevek</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>Terület</th>
+                        <th>MongoDB collection</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{range $name, $collection := .Collections}}
+                    <tr>
+                        <td>{{$name}}</td>
+                        <td><code>{{$collection}}</code></td>
+                    </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}
