@@ -50,7 +50,10 @@
                         </div>
                     </td>
                     <td>{{.CategoryName}}</td>
-                    <td class="fw-semibold">{{.ListPriceFormatted}}</td>
+                    <td class="fw-semibold">
+                        <div>{{.ListPriceFormatted}}</div>
+                        {{if .Negotiable}}<span class="badge text-bg-success mt-1">Alkudható</span>{{end}}
+                    </td>
                     <td class="text-center"><span class="badge text-bg-secondary">{{.StatusLabel}}</span></td>
                     <td class="text-end">
                         <div class="d-flex justify-content-end gap-2 flex-wrap">

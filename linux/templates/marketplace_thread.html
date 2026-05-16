@@ -36,6 +36,29 @@
                                 {{if .IsSystemMsg}}
                                 <div class="alert alert-info py-2 px-3 mb-0 small">
                                     <i class="bi bi-info-circle me-1"></i>{{.Content}}
+                                    {{if .OfferStatus}}
+                                    <div class="mt-2">
+                                        <span class="badge text-bg-light border">Ajánlat: {{.OfferPriceFormatted}}</span>
+                                        <span class="badge text-bg-secondary">{{.OfferStatusLabel}}</span>
+                                    </div>
+                                    {{end}}
+                                    {{if .CanHandleOffer $.CurrentUser.ID}}
+                                    <div class="d-flex flex-wrap gap-2 mt-3">
+                                        <form method="POST" action="/marketplace/offers/{{.ID.Hex}}">
+                                            <input type="hidden" name="action" value="accept">
+                                            <button type="submit" class="btn btn-sm btn-success">Elfogadom</button>
+                                        </form>
+                                        <form method="POST" action="/marketplace/offers/{{.ID.Hex}}">
+                                            <input type="hidden" name="action" value="reject">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Elutasítom</button>
+                                        </form>
+                                        <form method="POST" action="/marketplace/offers/{{.ID.Hex}}" class="d-flex gap-2">
+                                            <input type="hidden" name="action" value="counter">
+                                            <input class="form-control form-control-sm" name="counter_price" inputmode="numeric" placeholder="Köztes ár">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">Javaslat</button>
+                                        </form>
+                                    </div>
+                                    {{end}}
                                 </div>
                                 {{else}}
                                 <div class="mb-1">
@@ -95,7 +118,25 @@
         var html = messages.map(function(msg) {
             var sent = msg.sender_id === currentUser;
             if (msg.is_system_msg) {
-                return '<div class="d-flex px-4 py-3 border-bottom"><div style="max-width:85%;"><div class="alert alert-info py-2 px-3 mb-0 small"><i class="bi bi-info-circle me-1"></i>' + esc(msg.content) + '</div></div></div>';
+                var offer = '';
+                if (msg.offer_status) {
+                    offer += '<div class="mt-2"><span class="badge text-bg-light border">Ajánlat: ' + esc(msg.offer_price_formatted) + '</span> ' +
+                        '<span class="badge text-bg-secondary">' + esc(msg.offer_status_label) + '</span></div>';
+                }
+                if (msg.can_handle_offer) {
+                    offer += '<div class="d-flex flex-wrap gap-2 mt-3">' +
+                        '<form method="POST" action="/marketplace/offers/' + esc(msg.id) + '">' +
+                        '<input type="hidden" name="action" value="accept">' +
+                        '<button type="submit" class="btn btn-sm btn-success">Elfogadom</button></form>' +
+                        '<form method="POST" action="/marketplace/offers/' + esc(msg.id) + '">' +
+                        '<input type="hidden" name="action" value="reject">' +
+                        '<button type="submit" class="btn btn-sm btn-outline-danger">Elutasítom</button></form>' +
+                        '<form method="POST" action="/marketplace/offers/' + esc(msg.id) + '" class="d-flex gap-2">' +
+                        '<input type="hidden" name="action" value="counter">' +
+                        '<input class="form-control form-control-sm" name="counter_price" inputmode="numeric" placeholder="Köztes ár">' +
+                        '<button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">Javaslat</button></form></div>';
+                }
+                return '<div class="d-flex px-4 py-3 border-bottom"><div style="max-width:85%;"><div class="alert alert-info py-2 px-3 mb-0 small"><i class="bi bi-info-circle me-1"></i>' + esc(msg.content) + offer + '</div></div></div>';
             }
             return '<div class="d-flex ' + (sent ? 'justify-content-end' : '') + ' px-4 py-3 border-bottom">' +
                 '<div class="' + (sent ? 'text-end' : '') + '" style="max-width:85%;">' +

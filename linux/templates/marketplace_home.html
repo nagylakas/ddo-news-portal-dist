@@ -94,7 +94,10 @@
                                 {{if .Location}}<i class="bi bi-geo-alt me-1"></i>{{.Location}}{{else}}<i class="bi bi-person me-1"></i>{{.SellerName}}{{end}}
                             </div>
                             <div class="d-flex justify-content-between align-items-center border-top pt-3">
-                                <strong class="fs-5 text-primary">{{.ListPriceFormatted}}</strong>
+                                <div>
+                                    <strong class="fs-5 text-primary d-block">{{.ListPriceFormatted}}</strong>
+                                    {{if .Negotiable}}<span class="badge text-bg-success mt-1">Alkudható</span>{{end}}
+                                </div>
                                 {{if $isFav}}
                                 <i class="bi bi-heart-fill text-danger"></i>
                                 {{else}}
@@ -152,7 +155,10 @@
             {{if .Location}}<i class="bi bi-geo-alt me-1"></i>{{.Location}}{{else}}<i class="bi bi-person me-1"></i>{{.SellerName}}{{end}}
         </div>
         <div class="d-flex justify-content-between align-items-center border-top pt-3">
-            <strong class="fs-5 text-primary">{{.ListPriceFormatted}}</strong>
+            <div>
+                <strong class="fs-5 text-primary d-block">{{.ListPriceFormatted}}</strong>
+                {{if .Negotiable}}<span class="badge text-bg-success mt-1">Alkudható</span>{{end}}
+            </div>
             <i class="bi bi-heart text-muted"></i>
         </div>
     </div>

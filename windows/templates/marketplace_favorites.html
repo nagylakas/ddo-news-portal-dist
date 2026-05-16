@@ -38,7 +38,10 @@
                         {{if $l.Location}}<i class="bi bi-geo-alt me-1"></i>{{$l.Location}}{{else}}<i class="bi bi-person me-1"></i>{{$l.SellerName}}{{end}}
                     </div>
                     <div class="d-flex justify-content-between align-items-center border-top pt-3">
-                        <strong class="fs-5 text-primary">{{$l.ListPriceFormatted}}</strong>
+                        <div>
+                            <strong class="fs-5 text-primary d-block">{{$l.ListPriceFormatted}}</strong>
+                            {{if $l.Negotiable}}<span class="badge text-bg-success mt-1">Alkudható</span>{{end}}
+                        </div>
                         <span class="small text-muted"><i class="bi bi-heart-fill text-danger me-1"></i>Mentve: {{formatDate $fav.CreatedAt}}</span>
                     </div>
                 </div>

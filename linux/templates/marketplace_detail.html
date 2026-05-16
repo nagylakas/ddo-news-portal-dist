@@ -90,7 +90,12 @@
                         <span class="badge text-bg-secondary">{{.Listing.StatusLabel}}</span>
                     </div>
                     <h1 class="h2 mb-3">{{.Listing.Title}}</h1>
-                    <div class="display-6 fw-bold text-primary mb-4">{{.Listing.PriceFormatted}}</div>
+                    <div class="display-6 fw-bold text-primary mb-1">{{.Listing.PriceFormatted}}</div>
+                    {{if .Listing.Negotiable}}
+                    <div class="mb-4"><span class="badge text-bg-success">Alkudható ár</span></div>
+                    {{else}}
+                    <div class="mb-4"></div>
+                    {{end}}
                     {{if .CurrentUser}}
                     <form method="POST" action="/marketplace/favorite/{{.Listing.Slug}}" class="mb-2">
                         <button class="btn {{if .IsFavorited}}btn-primary{{else}}btn-outline-primary{{end}} w-100" type="submit">
@@ -106,7 +111,14 @@
                     {{if and (eq .Listing.Status "active") .CurrentUser}}
                     {{if ne .CurrentUser.ID .Listing.SellerIDHex}}
                     <form method="POST" action="/marketplace/reserve/{{.Listing.Slug}}" class="mb-2"
-                          onsubmit="return confirm('Biztosan jelzed vásárlási szándékodat? A hirdetés Foglalt állapotba kerül.')">
+                          onsubmit="return confirm('Biztosan jelzed vásárlási szándékodat? Alacsonyabb ajánlatnál a hirdetés csak az eladó elfogadása után kerül Foglalt állapotba.')">
+                        {{if .Listing.Negotiable}}
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold" for="offer-price">Ajánlott vételár (Ft)</label>
+                            <input class="form-control" id="offer-price" name="offer_price" inputmode="numeric" value="{{.Listing.PriceHUF}}" min="0">
+                            <div class="form-text">Ha a meghirdetett árnál alacsonyabb összeget adsz meg, az eladó dönthet az ajánlatról.</div>
+                        </div>
+                        {{end}}
                         <button class="btn btn-primary w-100" type="submit">
                             <i class="bi bi-cart-check me-1"></i>Vásárlási szándék jelzése
                         </button>

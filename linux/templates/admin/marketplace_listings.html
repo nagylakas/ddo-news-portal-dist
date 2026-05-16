@@ -64,7 +64,10 @@
                         </div>
                     </td>
                     <td>{{.CategoryName}}</td>
-                    <td class="text-nowrap">{{.ListPriceFormatted}}</td>
+                    <td class="text-nowrap">
+                        <div>{{.ListPriceFormatted}}</div>
+                        {{if .Negotiable}}<span class="badge text-bg-success mt-1">Alkudható</span>{{end}}
+                    </td>
                     <td><span class="badge bg-secondary">{{.StatusLabel}}</span></td>
                     <td class="text-end">
                         <div class="d-flex flex-wrap justify-content-end gap-2">
