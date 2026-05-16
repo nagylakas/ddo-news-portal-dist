@@ -53,6 +53,9 @@
                         {{end}}
                     </td>
                     <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary me-1" href="/admin/marketplace/messages/{{.ListingID.Hex}}">
+                            <i class="bi bi-envelope-open me-1"></i>Üzenetek
+                        </a>
                         {{if .Details}}
                         <button class="btn btn-sm btn-outline-secondary me-1"
                                 data-bs-toggle="popover" data-bs-trigger="click"

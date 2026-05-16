@@ -67,6 +67,13 @@
                                         </form>
                                     </div>
                                     {{end}}
+                                    {{if .CanAcceptCounterOffer $.CurrentUser.ID}}
+                                    <form method="POST" action="/marketplace/counter-offers/{{.ID.Hex}}/accept" class="mt-3 border-top pt-3">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            Elfogadom ezt az árat: {{.OfferPriceFormatted}}
+                                        </button>
+                                    </form>
+                                    {{end}}
                                 </div>
                                 {{else}}
                                 <div class="mb-1">
@@ -149,6 +156,10 @@
                         '<span class="input-group-text">Ft</span>' +
                         '<button type="submit" class="btn btn-outline-primary">Ellenajánlat küldése</button></div>' +
                         '<div class="form-text">Az ellenajánlatnak a vevő ajánlatánál magasabbnak, de az eredeti árnál alacsonyabbnak kell lennie.</div></form></div>';
+                }
+                if (msg.can_accept_counter_offer) {
+                    offer += '<form method="POST" action="/marketplace/counter-offers/' + esc(msg.id) + '/accept" class="mt-3 border-top pt-3">' +
+                        '<button type="submit" class="btn btn-sm btn-success">Elfogadom ezt az árat: ' + esc(msg.offer_price_formatted) + '</button></form>';
                 }
                 return '<div class="d-flex px-4 py-3 border-bottom"><div style="max-width:85%;"><div class="alert alert-info py-2 px-3 mb-0 small"><i class="bi bi-info-circle me-1"></i>' + esc(msg.content) + offer + '</div></div></div>';
             }
