@@ -1,0 +1,65 @@
+{{define "marketplace/favorites"}}
+{{template "header" .}}
+<section class="container py-5" style="margin-top:90px;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h2 mb-1">Marketplace kedvencek</h1>
+            <p class="text-muted mb-0">Mentett hirdetések és mentett keresések.</p>
+        </div>
+        <a href="/marketplace" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Marketplace
+        </a>
+    </div>
+
+    {{if .Favorites}}
+    <div class="list-group shadow-sm">
+        {{range .Favorites}}
+        {{if eq .Type "listing"}}
+        <a href="/marketplace/listing/{{.ListingSlug}}" class="list-group-item list-group-item-action">
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="badge text-bg-primary mb-2">Hirdetés</span>
+                    <div class="fw-semibold">{{.ListingTitle}}</div>
+                    <div class="small text-muted">Mentve: {{formatDateTime .CreatedAt}}</div>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+        </a>
+        {{else if eq .Type "search"}}
+        <a href="/marketplace?q={{.Query}}" class="list-group-item list-group-item-action">
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="badge text-bg-secondary mb-2">Keresés</span>
+                    <div class="fw-semibold">{{.Query}}</div>
+                    <div class="small text-muted">Mentve: {{formatDateTime .CreatedAt}}</div>
+                </div>
+                <i class="bi bi-search text-muted"></i>
+            </div>
+        </a>
+        {{end}}
+        {{end}}
+    </div>
+
+    {{if or .HasPrev .HasNext}}
+    <nav class="mt-4" aria-label="Marketplace kedvencek lapozás">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                <a class="page-link" href="/marketplace/favorites?page={{subtract .CurrentPage 1}}">Előző</a>
+            </li>
+            <li class="page-item active"><span class="page-link">{{.CurrentPage}}. oldal</span></li>
+            <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                <a class="page-link" href="/marketplace/favorites?page={{add .CurrentPage 1}}">Következő</a>
+            </li>
+        </ul>
+    </nav>
+    {{end}}
+    {{else}}
+    <div class="text-center py-5 border rounded-3 bg-light">
+        <i class="bi bi-heart text-muted" style="font-size:4rem;"></i>
+        <h2 class="h5 mt-3 text-muted">Még nincs mentett marketplace elemed</h2>
+        <p class="text-muted">Hirdetéseket a részletező oldalon, kereséseket a találati oldalon tudsz menteni.</p>
+    </div>
+    {{end}}
+</section>
+{{template "footer" .}}
+{{end}}

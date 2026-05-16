@@ -1,0 +1,214 @@
+{{define "marketplace/detail"}}
+{{template "header" .}}
+<section class="container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+    <nav class="small mb-4" aria-label="breadcrumb">
+        <a href="/marketplace" class="text-decoration-none">Marketplace</a>
+        {{if .Listing.CategorySlug}}
+        <span class="mx-2 text-muted">/</span>
+        <a href="/marketplace/category/{{.Listing.CategorySlug}}" class="text-decoration-none">{{.Listing.CategoryName}}</a>
+        {{end}}
+        <span class="mx-2 text-muted">/</span>
+        <span class="text-muted">{{.Listing.Title}}</span>
+    </nav>
+
+    <div class="row g-4">
+        <main class="col-lg-8">
+            {{if .FlashMessage}}
+            <div class="alert alert-success">{{.FlashMessage}}</div>
+            {{end}}
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger">{{.ErrorMessage}}</div>
+            {{end}}
+            <div class="row g-3 mb-4">
+                <div class="col-md-9">
+                    {{if .Listing.CoverImage}}
+                    <img src="{{.Listing.CoverImage}}" alt="{{.Listing.Title}}" class="img-fluid rounded-3 border w-100" style="aspect-ratio:4/3;object-fit:cover;">
+                    {{else}}
+                    <div class="rounded-3 border bg-secondary-subtle d-flex align-items-center justify-content-center" style="aspect-ratio:4/3;">
+                        <i class="bi bi-image text-secondary" style="font-size:5rem;"></i>
+                    </div>
+                    {{end}}
+                </div>
+                <div class="col-md-3">
+                    <div class="d-grid gap-3">
+                        {{range $i, $img := .Listing.ImageURLs}}
+                        {{if and (gt $i 0) (lt $i 4)}}
+                        <img src="{{$img}}" alt="" class="img-fluid rounded-2 border" style="aspect-ratio:4/3;object-fit:cover;">
+                        {{end}}
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h4">Leírás</h2>
+                    <p class="mb-0" style="white-space:pre-wrap;">{{.Listing.Description}}</p>
+                </div>
+            </div>
+
+            {{if .Listing.Specs}}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Specifikációk</h2>
+                    <div class="row g-3">
+                        {{range .Listing.Specs}}
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="small text-muted">{{.Label}}</div>
+                            <div class="fw-semibold">{{.Value}}</div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </main>
+
+        <aside class="col-lg-4">
+            <div class="card shadow-sm sticky-lg-top" style="top:100px;">
+                <div class="card-body">
+                    <div class="d-flex gap-2 mb-3">
+                        <span class="badge text-bg-success">{{.Listing.Condition}}</span>
+                        <span class="badge text-bg-secondary">{{.Listing.StatusLabel}}</span>
+                    </div>
+                    <h1 class="h2 mb-3">{{.Listing.Title}}</h1>
+                    <div class="display-6 fw-bold text-primary mb-4">{{.Listing.PriceFormatted}}</div>
+                    {{if .CurrentUser}}
+                    <form method="POST" action="/marketplace/favorite/{{.Listing.Slug}}" class="mb-2">
+                        <button class="btn {{if .IsFavorited}}btn-primary{{else}}btn-outline-primary{{end}} w-100" type="submit">
+                            <i class="bi bi-heart me-1"></i>{{if .IsFavorited}}Kedvencekben{{else}}Kedvencekhez adás{{end}}
+                        </button>
+                    </form>
+                    {{else if .OIDCEnabled}}
+                    <a href="/auth/login?force=1&return=/marketplace/listing/{{.Listing.Slug}}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-heart me-1"></i>Bejelentkezés a mentéshez
+                    </a>
+                    {{end}}
+                    <button class="btn btn-primary w-100 mb-2" disabled>
+                        <i class="bi bi-cart me-1"></i>Vásárlási szándék
+                    </button>
+                    {{if .CurrentUser}}
+                    {{if ne .CurrentUser.ID .Listing.SellerIDHex}}
+                    <form method="POST" action="/marketplace/listing/{{.Listing.Slug}}/contact" class="mb-4">
+                        <label class="form-label fw-semibold" for="message-content">Kapcsolat az eladóval</label>
+                        <textarea class="form-control mb-2" id="message-content" name="content" rows="4" maxlength="2000" required placeholder="Írd meg kérdésedet az eladónak..."></textarea>
+                        <button class="btn btn-outline-secondary w-100" type="submit">
+                            <i class="bi bi-chat-left-text me-1"></i>Üzenet küldése
+                        </button>
+                    </form>
+                    {{else}}
+                    <a href="/marketplace/my" class="btn btn-outline-secondary w-100 mb-4">
+                        <i class="bi bi-shop-window me-1"></i>Saját hirdetés kezelése
+                    </a>
+                    {{end}}
+                    {{else if .OIDCEnabled}}
+                    <a href="/auth/login?force=1&return=/marketplace/listing/{{.Listing.Slug}}" class="btn btn-outline-secondary w-100 mb-4">
+                        <i class="bi bi-chat-left-text me-1"></i>Bejelentkezés üzenetküldéshez
+                    </a>
+                    {{else}}
+                    <button class="btn btn-outline-secondary w-100 mb-4" disabled>
+                        <i class="bi bi-chat-left-text me-1"></i>Kapcsolat az eladóval
+                    </button>
+                    {{end}}
+                    <hr>
+                    <div class="mb-3">
+                        <div class="small text-muted">Eladó</div>
+                        <div class="fw-semibold">{{if .Listing.SellerName}}{{.Listing.SellerName}}{{else}}Ismeretlen eladó{{end}}</div>
+                        <div class="small text-muted">
+                            {{.ReviewStats.AverageLabel}}{{if gt .ReviewStats.Count 0}} ({{.ReviewStats.Count}} értékelés){{end}}
+                        </div>
+                    </div>
+                    {{if .Listing.Location}}
+                    <div class="mb-3">
+                        <div class="small text-muted">Lokáció</div>
+                        <div><i class="bi bi-geo-alt me-1"></i>{{.Listing.Location}}</div>
+                    </div>
+                    {{end}}
+                    {{if .Listing.Delivery}}
+                    <div class="mb-3">
+                        <div class="small text-muted">Átvétel / szállítás</div>
+                        <div>{{join .Listing.Delivery ", "}}</div>
+                    </div>
+                    {{end}}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-shield-check me-1"></i>
+                        A vevői védelem és üzenetküldés a következő ütemben kapcsolódik ehhez a hirdetéshez.
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <section class="mt-5">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <h2 class="h4 mb-3">Eladói értékelések</h2>
+                {{if .Reviews}}
+                <div class="list-group shadow-sm">
+                    {{range .Reviews}}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between gap-3">
+                            <div>
+                                <div class="fw-semibold">{{.ReviewerName}}</div>
+                                <div class="small text-muted">{{.ListingTitle}} &middot; {{formatDateTime .CreatedAt}}</div>
+                            </div>
+                            <div class="text-primary fw-semibold">{{.Stars}}</div>
+                        </div>
+                        <p class="mb-0 mt-2">{{.Comment}}</p>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <div class="border rounded-3 bg-light p-4 text-muted">
+                    Az eladónak még nincs marketplace értékelése.
+                </div>
+                {{end}}
+            </div>
+            <div class="col-lg-5">
+                {{if .CanReview}}
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Eladó értékelése</h2>
+                        <form method="POST" action="/marketplace/listing/{{.Listing.Slug}}/review">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="rating">Értékelés</label>
+                                <select class="form-select" id="rating" name="rating" required>
+                                    <option value="5">5 - Kiváló</option>
+                                    <option value="4">4 - Jó</option>
+                                    <option value="3">3 - Rendben</option>
+                                    <option value="2">2 - Problémás</option>
+                                    <option value="1">1 - Rossz</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="review-comment">Szöveges értékelés</label>
+                                <textarea class="form-control" id="review-comment" name="comment" rows="4" maxlength="1000" required placeholder="Írd le röviden a tapasztalatodat..."></textarea>
+                            </div>
+                            <button class="btn btn-primary w-100" type="submit">
+                                <i class="bi bi-star me-1"></i>Értékelés mentése
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {{else}}
+                <div class="border rounded-3 bg-light p-4 text-muted">
+                    Értékelést akkor adhatsz, ha bejelentkezve már üzenetben kapcsolatba léptél az eladóval ezen a hirdetésen, és még nem értékelted.
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </section>
+
+    {{if .RelatedListings}}
+    <section class="mt-5">
+        <h2 class="h4 mb-4">Hasonló hirdetések</h2>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+            {{range .RelatedListings}}
+            <div class="col">{{template "marketplace-card" .}}</div>
+            {{end}}
+        </div>
+    </section>
+    {{end}}
+</section>
+{{template "footer" .}}
+{{end}}

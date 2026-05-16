@@ -73,5 +73,22 @@
             <label class="form-check-label fw-semibold" for="active">Aktív kategória</label>
         </div>
     </div>
+    <div class="col-12">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="allow_listings" name="allow_listings" {{if .Category}}{{if .Category.AllowListings}}checked{{end}}{{end}} data-new-category="{{if .Category}}0{{else}}1{{end}}">
+            <label class="form-check-label fw-semibold" for="allow_listings">Hirdetés feladható közvetlenül ebbe a kategóriába</label>
+            <div class="form-text">Főkategóriáknál, például PC, PlayStation, XBOX vagy Nintendo esetén kapcsold ki. Alkategóriáknál, például Videókártya vagy CPU esetén maradjon bekapcsolva.</div>
+        </div>
+    </div>
 </div>
+<script>
+    (function() {
+        var parentSelect = document.getElementById('parent_id');
+        var allowListings = document.getElementById('allow_listings');
+        if (!parentSelect || !allowListings || allowListings.getAttribute('data-new-category') !== '1') return;
+        parentSelect.addEventListener('change', function() {
+            allowListings.checked = parentSelect.value !== '';
+        });
+    })();
+</script>
 {{end}}

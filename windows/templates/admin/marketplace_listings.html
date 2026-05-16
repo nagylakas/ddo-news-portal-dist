@@ -1,0 +1,118 @@
+{{define "admin/marketplace_listings"}}
+{{template "admin/header" .}}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Marketplace hirdetések</h1>
+        <p class="text-muted mb-0">Feladott apróhirdetések moderálása és státuszkezelése.</p>
+    </div>
+    <a href="/admin/marketplace" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Marketplace
+    </a>
+</div>
+
+{{template "admin/flash" .}}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-sm {{if eq .StatusFilter ""}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings">Mind</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "active"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=active">Aktív</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "reserved"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=reserved">Foglalva</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "sold"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=sold">Eladva</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "hidden"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=hidden">Rejtett</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "draft"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=draft">Vázlat</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "expired"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=expired">Lejárt</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Hirdetés</th>
+                    <th>Kategória</th>
+                    <th>Ár</th>
+                    <th>Státusz</th>
+                    <th class="text-end">Műveletek</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Listings}}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            {{if .CoverImage}}
+                            <img src="{{.CoverImage}}" alt="" class="rounded object-fit-cover" style="width: 64px; height: 48px;">
+                            {{else}}
+                            <div class="rounded bg-light border d-flex align-items-center justify-content-center text-muted" style="width: 64px; height: 48px;">
+                                <i class="bi bi-image"></i>
+                            </div>
+                            {{end}}
+                            <div>
+                                <div class="fw-semibold">
+                                    {{if eq .Status "active"}}
+                                    <a href="/marketplace/listing/{{.Slug}}" target="_blank" rel="noopener">{{.Title}}</a>
+                                    {{else}}
+                                    {{.Title}}
+                                    {{end}}
+                                </div>
+                                <div class="small text-muted">{{.SellerName}} · frissítve: {{formatDateTime .UpdatedAt}}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{.CategoryName}}</td>
+                    <td class="text-nowrap">{{.FormattedPrice}}</td>
+                    <td><span class="badge bg-secondary">{{.StatusLabel}}</span></td>
+                    <td class="text-end">
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
+                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "active" "Label" "Aktív" "Class" "btn-outline-success"}}
+                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "reserved" "Label" "Foglalva" "Class" "btn-outline-warning"}}
+                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "sold" "Label" "Eladva" "Class" "btn-outline-secondary"}}
+                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "hidden" "Label" "Rejtés" "Class" "btn-outline-danger"}}
+                        </div>
+                    </td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-5">Nincs megjeleníthető hirdetés.</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{if or .HasPrev .HasNext}}
+<nav class="mt-4" aria-label="Marketplace hirdetés lapozás">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+            {{if .StatusFilter}}
+            <a class="page-link" href="/admin/marketplace/listings?status={{.StatusFilter}}&page={{subtract .CurrentPage 1}}">Előző</a>
+            {{else}}
+            <a class="page-link" href="/admin/marketplace/listings?page={{subtract .CurrentPage 1}}">Előző</a>
+            {{end}}
+        </li>
+        <li class="page-item disabled"><span class="page-link">{{.CurrentPage}}. oldal</span></li>
+        <li class="page-item {{if not .HasNext}}disabled{{end}}">
+            {{if .StatusFilter}}
+            <a class="page-link" href="/admin/marketplace/listings?status={{.StatusFilter}}&page={{add .CurrentPage 1}}">Következő</a>
+            {{else}}
+            <a class="page-link" href="/admin/marketplace/listings?page={{add .CurrentPage 1}}">Következő</a>
+            {{end}}
+        </li>
+    </ul>
+</nav>
+{{end}}
+
+{{template "admin/footer" .}}
+{{end}}
+
+{{define "admin-marketplace-status-form"}}
+<form method="POST" action="/admin/marketplace/listings/{{.ID}}/status" class="d-inline">
+    <input type="hidden" name="status" value="{{.Status}}">
+    <button type="submit" class="btn btn-sm {{.Class}}">{{.Label}}</button>
+</form>
+{{end}}

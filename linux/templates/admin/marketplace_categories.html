@@ -22,6 +22,7 @@
                     <th>Slug</th>
                     <th>Szülő</th>
                     <th>Mezők</th>
+                    <th class="text-center">Feladás</th>
                     <th class="text-center">Sorrend</th>
                     <th class="text-center">Állapot</th>
                     <th class="text-end">Műveletek</th>
@@ -38,6 +39,13 @@
                     <td><code>{{.Slug}}</code></td>
                     <td>{{if .ParentName}}{{.ParentName}}{{else}}<span class="text-muted">-</span>{{end}}</td>
                     <td><span class="badge text-bg-secondary">{{len .Fields}}</span></td>
+                    <td class="text-center">
+                        {{if .AllowListings}}
+                        <span class="badge text-bg-primary">Engedélyezett</span>
+                        {{else}}
+                        <span class="badge text-bg-light border text-muted">Csak gyűjtő</span>
+                        {{end}}
+                    </td>
                     <td class="text-center">{{.DisplayOrder}}</td>
                     <td class="text-center">
                         {{if .Active}}

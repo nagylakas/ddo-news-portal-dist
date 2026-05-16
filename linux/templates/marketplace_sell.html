@@ -1,0 +1,198 @@
+{{define "marketplace/sell"}}
+{{template "header" .}}
+<section class="container py-5" style="margin-top:90px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Hirdetés feladása</h1>
+                    <p class="text-muted mb-0">Add meg a termék alapadatait, specifikációit, képeit és árát.</p>
+                </div>
+                <a href="/marketplace" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Vissza
+                </a>
+            </div>
+
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger">{{.ErrorMessage}}</div>
+            {{end}}
+
+            {{if .MarketCategories}}
+            <form method="POST" action="/marketplace/sell" enctype="multipart/form-data">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Alapadatok</h2>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="title">Hirdetés címe <span class="text-danger">*</span></label>
+                                <input class="form-control form-control-lg" id="title" name="title" maxlength="140" required value="{{.Form.Title}}" placeholder="Pl. ASUS ROG Strix RTX 3080 10GB OC">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="category_id">Kategória <span class="text-danger">*</span></label>
+                                <select class="form-select" id="category_id" name="category_id" required>
+                                    <option value="">Válassz kategóriát</option>
+                                    {{range .MarketCategories}}
+                                    <option value="{{.ID.Hex}}" {{if eq $.Form.CategoryID .ID.Hex}}selected{{end}}>{{.Name}}</option>
+                                    {{end}}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="condition">Állapot</label>
+                                <select class="form-select" id="condition" name="condition">
+                                    {{$condition := .Form.Condition}}
+                                    <option value="Új" {{if eq $condition "Új"}}selected{{end}}>Új</option>
+                                    <option value="Újszerű" {{if eq $condition "Újszerű"}}selected{{end}}>Újszerű</option>
+                                    <option value="Használt" {{if eq $condition "Használt"}}selected{{end}}>Használt</option>
+                                    <option value="Hibás" {{if eq $condition "Hibás"}}selected{{end}}>Hibás</option>
+                                    <option value="Alkatrésznek" {{if eq $condition "Alkatrésznek"}}selected{{end}}>Alkatrésznek</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="listing_type">Típus</label>
+                                <select class="form-select" id="listing_type" name="listing_type">
+                                    {{$listingType := .Form.ListingType}}
+                                    <option value="sell" {{if eq $listingType "sell"}}selected{{end}}>Eladás</option>
+                                    <option value="buy" {{if eq $listingType "buy"}}selected{{end}}>Keresek</option>
+                                    <option value="trade" {{if eq $listingType "trade"}}selected{{end}}>Csere</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Részletek</h2>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="description">Leírás <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="description" name="description" rows="8" required placeholder="Írd le a termék állapotát, tartozékait, garanciáját...">{{.Form.Description}}</textarea>
+                        </div>
+
+                        {{range .MarketCategories}}
+                        <div class="marketplace-spec-group border rounded-3 p-3 mb-3" data-category-id="{{.ID.Hex}}" hidden>
+                            <h3 class="h6 mb-3">{{.Name}} specifikációk</h3>
+                            {{if .Fields}}
+                            <div class="row g-3">
+                                {{range .Fields}}
+                                {{$value := index $.Form.Specs .Key}}
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" for="spec_{{.Key}}">{{.Label}}{{if .Required}} <span class="text-danger">*</span>{{end}}</label>
+                                    {{if eq .Type "select"}}
+                                    <select class="form-select" id="spec_{{.Key}}" name="spec_{{.Key}}">
+                                        <option value="">Válassz</option>
+                                        {{range .Options}}
+                                        <option value="{{.}}" {{if eq $value .}}selected{{end}}>{{.}}</option>
+                                        {{end}}
+                                    </select>
+                                    {{else if eq .Type "boolean"}}
+                                    <select class="form-select" id="spec_{{.Key}}" name="spec_{{.Key}}">
+                                        <option value="">Válassz</option>
+                                        <option value="Igen" {{if eq $value "Igen"}}selected{{end}}>Igen</option>
+                                        <option value="Nem" {{if eq $value "Nem"}}selected{{end}}>Nem</option>
+                                    </select>
+                                    {{else}}
+                                    <input class="form-control" id="spec_{{.Key}}" name="spec_{{.Key}}" value="{{$value}}" {{if eq .Type "number"}}type="number"{{else}}type="text"{{end}}>
+                                    {{end}}
+                                </div>
+                                {{end}}
+                            </div>
+                            {{else}}
+                            <p class="text-muted mb-0">Ehhez a kategóriához még nincs specifikációs mező beállítva.</p>
+                            {{end}}
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Média és ár</h2>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="price">Eladási ár HUF</label>
+                                <input class="form-control" id="price" name="price" inputmode="numeric" value="{{.Form.Price}}" placeholder="165000">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="location">Lokáció</label>
+                                <input class="form-control" id="location" name="location" value="{{.Form.Location}}" placeholder="Budapest, XI. kerület">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="images">Képek feltöltése</label>
+                                <input class="form-control" id="images" name="images" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple {{if not .S3Enabled}}disabled{{end}}>
+                                <div class="form-text">
+                                    {{if .S3Enabled}}
+                                    Maximum 5 kép, képenként legfeljebb 5 MB. A feltöltött képek a médiatár <code>marketplace</code> kategóriájába kerülnek.
+                                    {{else}}
+                                    A közvetlen képfeltöltéshez S3 konfiguráció szükséges. Addig használj kép URL-eket.
+                                    {{end}}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="image_urls">Kép URL-ek</label>
+                                <textarea class="form-control" id="image_urls" name="image_urls" rows="4" placeholder="Egy URL soronként, maximum 5 kép">{{.Form.ImageURLs}}</textarea>
+                                <div class="form-text">Külső vagy már médiatárban lévő kép URL-ek. A feltöltött képek a lista elejére kerülnek.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Átvétel / szállítás</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <label class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="delivery" value="Személyes">
+                                        <span class="form-check-label">Személyes</span>
+                                    </label>
+                                    <label class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="delivery" value="Foxpost">
+                                        <span class="form-check-label">Foxpost</span>
+                                    </label>
+                                    <label class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="delivery" value="MPL">
+                                        <span class="form-check-label">MPL</span>
+                                    </label>
+                                    <label class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="delivery" value="Futár">
+                                        <span class="form-check-label">Futár</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="negotiable" name="negotiable" {{if .Form.Negotiable}}checked{{end}}>
+                                    <label class="form-check-label fw-semibold" for="negotiable">Alkudható ár</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="/marketplace" class="btn btn-outline-secondary">Mégse</a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-lg me-1"></i>Hirdetés közzététele
+                    </button>
+                </div>
+            </form>
+            {{else}}
+            <div class="alert alert-warning">
+                Még nincs olyan aktív marketplace kategória, amelybe közvetlenül feladható hirdetés. Az admin felületen engedélyezd a “Hirdetés feladható közvetlenül ebbe a kategóriába” kapcsolót legalább egy alkategórián.
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+<script>
+    (function() {
+        var select = document.getElementById('category_id');
+        var groups = Array.prototype.slice.call(document.querySelectorAll('.marketplace-spec-group'));
+        function sync() {
+            var selected = select ? select.value : '';
+            groups.forEach(function(group) {
+                group.hidden = group.getAttribute('data-category-id') !== selected;
+            });
+        }
+        if (select) {
+            select.addEventListener('change', sync);
+            sync();
+        }
+    })();
+</script>
+{{template "footer" .}}
+{{end}}

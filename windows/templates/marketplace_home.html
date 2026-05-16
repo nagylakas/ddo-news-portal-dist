@@ -1,22 +1,121 @@
 {{define "marketplace/home"}}
 {{template "header" .}}
-<section class="container py-5" style="margin-top:90px;">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="p-4 p-lg-5 bg-light rounded-3 border">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <i class="bi bi-shop fs-1 text-primary"></i>
-                    <div>
-                        <h1 class="h2 mb-1">Marketplace</h1>
-                        <p class="text-muted mb-0">Az apróhirdetési modul be van kapcsolva. A kategória- és hirdetéskezelés a következő ütemben épül erre a modulra.</p>
+<section class="marketplace-page container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+    <div class="row g-4">
+        <aside class="col-lg-3 col-xl-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-1">Marketplace</h2>
+                    <p class="text-muted small mb-4">Hardveres apróhirdetések</p>
+                    <div class="list-group list-group-flush">
+                        <a href="/marketplace" class="list-group-item list-group-item-action px-0 {{if not .CategorySlug}}fw-semibold text-primary{{end}}">
+                            <i class="bi bi-grid me-2"></i>Összes hirdetés
+                        </a>
+                        {{range .MarketCategories}}
+                        <a href="/marketplace/category/{{.Slug}}" class="list-group-item list-group-item-action px-0 {{if eq $.CategorySlug .Slug}}fw-semibold text-primary{{end}}">
+                            <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} me-2"></i>{{.Name}}
+                        </a>
+                        {{end}}
                     </div>
                 </div>
-                <a href="/admin/marketplace" class="btn btn-primary">
-                    <i class="bi bi-sliders me-1"></i>Marketplace admin
-                </a>
             </div>
-        </div>
+        </aside>
+
+        <main class="col-lg-9 col-xl-10">
+            <div class="p-4 p-lg-5 bg-light rounded-3 border mb-4">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-7">
+                        <h1 class="display-6 fw-bold mb-2">{{if .MarketCategory}}{{.MarketCategory.Name}}{{else}}Marketplace{{end}}</h1>
+                        <p class="lead text-muted mb-0">{{if .MarketCategory}}{{.MarketCategory.Description}}{{else}}Vásárolj, adj el és keress hardvereket a portál közösségében.{{end}}</p>
+                    </div>
+                    <div class="col-lg-5">
+                        <form action="/marketplace" method="GET" role="search">
+                            <div class="input-group input-group-lg">
+                                <input class="form-control" type="search" name="q" value="{{.Query}}" placeholder="Keresés pl. RTX 4080, Ryzen 7...">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-search me-1"></i>Keresés
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">{{if .Query}}Keresési eredmények{{else}}Legújabb hirdetések{{end}}</h2>
+                <div class="d-flex gap-2">
+                    {{if .Query}}<a href="/marketplace" class="btn btn-sm btn-outline-secondary">Keresés törlése</a>{{end}}
+                    {{if and .Query .CurrentUser}}
+                    <form method="POST" action="/marketplace/save-search" class="d-inline">
+                        <input type="hidden" name="q" value="{{.Query}}">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-bookmark me-1"></i>Keresés mentése
+                        </button>
+                    </form>
+                    {{end}}
+                    <a href="/marketplace/sell" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>Hirdetés feladása
+                    </a>
+                </div>
+            </div>
+
+            {{if .Listings}}
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4">
+                {{range .Listings}}
+                <div class="col">
+                    {{template "marketplace-card" .}}
+                </div>
+                {{end}}
+            </div>
+
+            {{if or .HasPrev .HasNext}}
+            <nav class="mt-5" aria-label="Marketplace pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                        <a class="page-link" href="?page={{subtract .CurrentPage 1}}{{if .Query}}&q={{.Query}}{{end}}">Előző</a>
+                    </li>
+                    <li class="page-item active"><span class="page-link">{{.CurrentPage}}. oldal</span></li>
+                    <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                        <a class="page-link" href="?page={{add .CurrentPage 1}}{{if .Query}}&q={{.Query}}{{end}}">Következő</a>
+                    </li>
+                </ul>
+            </nav>
+            {{end}}
+            {{else}}
+            <div class="text-center py-5 border rounded-3 bg-light">
+                <i class="bi bi-shop text-muted" style="font-size:4rem;"></i>
+                <h3 class="h5 mt-3 text-muted">{{if .Query}}Nincs találat{{else}}Még nincsenek aktív hirdetések{{end}}</h3>
+                <p class="text-muted mb-0">{{if .Query}}Próbálj más keresőkifejezést vagy kategóriát.{{else}}A hirdetésfeladás a következő ütemben kapcsolódik ehhez a felülethez.{{end}}</p>
+            </div>
+            {{end}}
+        </main>
     </div>
 </section>
 {{template "footer" .}}
+{{end}}
+
+{{define "marketplace-card"}}
+<a href="/marketplace/listing/{{.Slug}}" class="card h-100 text-decoration-none text-dark shadow-sm marketplace-card">
+    {{if .CoverImage}}
+    <img src="{{.CoverImage}}" class="card-img-top" alt="{{.Title}}" style="aspect-ratio:4/3;object-fit:cover;">
+    {{else}}
+    <div class="card-img-top bg-secondary-subtle d-flex align-items-center justify-content-center" style="aspect-ratio:4/3;">
+        <i class="bi bi-image text-secondary" style="font-size:3rem;"></i>
+    </div>
+    {{end}}
+    <div class="card-body">
+        <div class="d-flex gap-2 mb-2">
+            <span class="badge text-bg-secondary">{{.Condition}}</span>
+            {{if .CategoryName}}<span class="badge text-bg-light border">{{.CategoryName}}</span>{{end}}
+        </div>
+        <h3 class="h6 card-title mb-2">{{truncate .Title 70}}</h3>
+        <div class="small text-muted mb-3">
+            {{if .Location}}<i class="bi bi-geo-alt me-1"></i>{{.Location}}{{else}}<i class="bi bi-person me-1"></i>{{.SellerName}}{{end}}
+        </div>
+        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+            <strong class="fs-5 text-primary">{{.PriceFormatted}}</strong>
+            <i class="bi bi-heart text-muted"></i>
+        </div>
+    </div>
+</a>
 {{end}}

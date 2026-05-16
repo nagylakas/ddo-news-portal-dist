@@ -1,0 +1,57 @@
+{{define "marketplace/messages"}}
+{{template "header" .}}
+<section class="container py-5" style="margin-top:90px;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h2 mb-1">Marketplace üzenetek</h1>
+            <p class="text-muted mb-0">Hirdetésekhez kapcsolódó bejövő és kimenő üzenetek.</p>
+        </div>
+        <a href="/marketplace/my" class="btn btn-outline-secondary">
+            <i class="bi bi-shop-window me-1"></i>Saját hirdetéseim
+        </a>
+    </div>
+
+    {{if .Messages}}
+    <div class="list-group shadow-sm">
+        {{range .Messages}}
+        <a href="/marketplace/listing/{{.ListingSlug}}" class="list-group-item list-group-item-action">
+            <div class="d-flex justify-content-between gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge text-bg-secondary">{{.Direction $.CurrentUser.ID}}</span>
+                        <strong>{{.ListingTitle}}</strong>
+                    </div>
+                    <div class="small text-muted mb-2">
+                        Partner: {{.OtherParty $.CurrentUser.ID}} &middot; {{formatDateTime .CreatedAt}}
+                    </div>
+                    <p class="mb-0">{{truncate .Content 220}}</p>
+                </div>
+                <i class="bi bi-chevron-right text-muted align-self-center"></i>
+            </div>
+        </a>
+        {{end}}
+    </div>
+
+    {{if or .HasPrev .HasNext}}
+    <nav class="mt-4" aria-label="Marketplace üzenetek lapozás">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                <a class="page-link" href="/marketplace/messages?page={{subtract .CurrentPage 1}}">Előző</a>
+            </li>
+            <li class="page-item active"><span class="page-link">{{.CurrentPage}}. oldal</span></li>
+            <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                <a class="page-link" href="/marketplace/messages?page={{add .CurrentPage 1}}">Következő</a>
+            </li>
+        </ul>
+    </nav>
+    {{end}}
+    {{else}}
+    <div class="text-center py-5 border rounded-3 bg-light">
+        <i class="bi bi-envelope text-muted" style="font-size:4rem;"></i>
+        <h2 class="h5 mt-3 text-muted">Még nincsenek marketplace üzeneteid</h2>
+        <p class="text-muted">Ha kapcsolatba lépsz egy eladóval, vagy valaki ír a hirdetésedre, itt fog megjelenni.</p>
+    </div>
+    {{end}}
+</section>
+{{template "footer" .}}
+{{end}}

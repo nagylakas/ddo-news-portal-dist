@@ -1,0 +1,107 @@
+{{define "marketplace/my"}}
+{{template "header" .}}
+<section class="container py-5" style="margin-top:90px;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h2 mb-1">Saját hirdetéseim</h1>
+            <p class="text-muted mb-0">Aktív, foglalt, eladott és rejtett marketplace hirdetéseid.</p>
+        </div>
+        <a href="/marketplace/sell" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Új hirdetés
+        </a>
+    </div>
+
+    {{if .FlashMessage}}
+    <div class="alert alert-success">{{.FlashMessage}}</div>
+    {{end}}
+    {{if .ErrorMessage}}
+    <div class="alert alert-danger">{{.ErrorMessage}}</div>
+    {{end}}
+
+    {{if .Listings}}
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Hirdetés</th>
+                    <th>Kategória</th>
+                    <th>Ár</th>
+                    <th class="text-center">Státusz</th>
+                    <th class="text-end">Műveletek</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Listings}}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            {{if .CoverImage}}
+                            <img src="{{.CoverImage}}" alt="" class="rounded border" style="width:72px;height:54px;object-fit:cover;">
+                            {{else}}
+                            <div class="rounded border bg-secondary-subtle d-flex align-items-center justify-content-center" style="width:72px;height:54px;">
+                                <i class="bi bi-image text-secondary"></i>
+                            </div>
+                            {{end}}
+                            <div>
+                                <div class="fw-semibold">{{.Title}}</div>
+                                <div class="small text-muted">{{formatDateTime .UpdatedAt}} &middot; {{.ViewCount}} megtekintés</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{.CategoryName}}</td>
+                    <td class="fw-semibold">{{.PriceFormatted}}</td>
+                    <td class="text-center"><span class="badge text-bg-secondary">{{.StatusLabel}}</span></td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-2 flex-wrap">
+                            {{if eq .Status "active"}}
+                            <a href="/marketplace/listing/{{.Slug}}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {{end}}
+                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "active" "Label" "Aktív"}}
+                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "reserved" "Label" "Foglalt"}}
+                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "sold" "Label" "Eladva"}}
+                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "hidden" "Label" "Rejtés"}}
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{if or .HasPrev .HasNext}}
+    <nav class="mt-4" aria-label="Saját hirdetések lapozás">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                <a class="page-link" href="/marketplace/my?page={{subtract .CurrentPage 1}}">Előző</a>
+            </li>
+            <li class="page-item active"><span class="page-link">{{.CurrentPage}}. oldal</span></li>
+            <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                <a class="page-link" href="/marketplace/my?page={{add .CurrentPage 1}}">Következő</a>
+            </li>
+        </ul>
+    </nav>
+    {{end}}
+    {{else}}
+    <div class="text-center py-5 border rounded-3 bg-light">
+        <i class="bi bi-shop-window text-muted" style="font-size:4rem;"></i>
+        <h2 class="h5 mt-3 text-muted">Még nincs saját hirdetésed</h2>
+        <p class="text-muted">Hozd létre az első marketplace hirdetésedet.</p>
+        <a href="/marketplace/sell" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Hirdetés feladása
+        </a>
+    </div>
+    {{end}}
+</section>
+{{template "footer" .}}
+{{end}}
+
+{{define "marketplace-status-form"}}
+<form method="POST" action="/marketplace/my/{{.ID}}/status" class="d-inline">
+    <input type="hidden" name="status" value="{{.Status}}">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">{{.Label}}</button>
+</form>
+{{end}}
