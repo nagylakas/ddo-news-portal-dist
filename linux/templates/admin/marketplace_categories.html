@@ -4,11 +4,11 @@
     {{template "admin-flash" .}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1"><i class="bi bi-folder2-open me-2 text-primary"></i>Marketplace kategóriák</h2>
-            <p class="text-muted mb-0">Az apróhirdetések kategóriái és kategória-specifikus specifikációs mezői.</p>
+            <h2 class="mb-1"><i class="bi bi-folder2-open me-2 text-primary"></i>{{t .Lang "mkt.cat_title"}}</h2>
+            <p class="text-muted mb-0">{{t .Lang "mkt.cat_sub"}}</p>
         </div>
         <a href="/admin/marketplace/categories/create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>Új kategória
+            <i class="bi bi-plus-lg me-1"></i>{{t .Lang "mkt.cat_new"}}
         </a>
     </div>
 
@@ -18,49 +18,56 @@
             <table class="table align-middle mb-0">
                 <thead class="table-light">
                 <tr>
-                    <th>Név</th>
-                    <th>Slug</th>
-                    <th>Szülő</th>
-                    <th>Mezők</th>
-                    <th class="text-center">Feladás</th>
-                    <th class="text-center">Sorrend</th>
-                    <th class="text-center">Állapot</th>
-                    <th class="text-end">Műveletek</th>
+                    <th>{{t .Lang "mkt.cat_col_name"}}</th>
+                    <th>{{t .Lang "mkt.cat_col_slug"}}</th>
+                    <th>{{t .Lang "mkt.cat_col_fields"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.cat_col_listing"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.cat_col_order"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.cat_col_status"}}</th>
+                    <th class="text-end">{{t .Lang "mkt.cat_col_actions"}}</th>
                 </tr>
                 </thead>
                 <tbody>
                 {{range .Categories}}
-                <tr>
+                {{$isChild := ne .ParentIDHex ""}}
+                <tr class="{{if $isChild}}table-light{{end}}">
                     <td>
-                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} me-2 text-primary"></i>
+                        {{if $isChild}}
+                        <span class="text-muted me-1" style="padding-left:1.25rem;">└</span>
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} me-1 text-secondary"></i>
+                        <span class="small">{{.Name}}</span>
+                        {{if .Description}}<div class="small text-muted ms-4">{{.Description}}</div>{{end}}
+                        {{else}}
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}folder{{end}} me-2 text-primary"></i>
                         <strong>{{.Name}}</strong>
-                        {{if .Description}}<div class="small text-muted">{{.Description}}</div>{{end}}
+                        {{if .Description}}<div class="small text-muted ms-4">{{.Description}}</div>{{end}}
+                        {{end}}
                     </td>
-                    <td><code>{{.Slug}}</code></td>
-                    <td>{{if .ParentName}}{{.ParentName}}{{else}}<span class="text-muted">-</span>{{end}}</td>
+                    <td><code class="small">{{.Slug}}</code></td>
                     <td><span class="badge text-bg-secondary">{{len .Fields}}</span></td>
                     <td class="text-center">
                         {{if .AllowListings}}
-                        <span class="badge text-bg-primary">Engedélyezett</span>
+                        <span class="badge text-bg-primary">{{t $.Lang "mkt.cat_listing_allowed"}}</span>
                         {{else}}
-                        <span class="badge text-bg-light border text-muted">Csak gyűjtő</span>
+                        <span class="badge text-bg-light border text-muted">{{t $.Lang "mkt.cat_listing_collector"}}</span>
                         {{end}}
                     </td>
                     <td class="text-center">{{.DisplayOrder}}</td>
                     <td class="text-center">
                         {{if .Active}}
-                        <span class="badge text-bg-success">Aktív</span>
+                        <span class="badge text-bg-success">{{t $.Lang "common.active"}}</span>
                         {{else}}
-                        <span class="badge text-bg-secondary">Inaktív</span>
+                        <span class="badge text-bg-secondary">{{t $.Lang "common.inactive"}}</span>
                         {{end}}
                     </td>
                     <td class="text-end">
                         <div class="btn-group btn-group-sm">
-                            <a href="/admin/marketplace/categories/edit/{{.ID.Hex}}" class="btn btn-outline-secondary" title="Szerkesztés">
+                            <a href="/admin/marketplace/categories/edit/{{.ID.Hex}}" class="btn btn-outline-secondary" title="{{t $.Lang "common.edit"}}">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form action="/admin/marketplace/categories/delete/{{.ID.Hex}}" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-outline-danger" data-confirm="Biztosan törlöd ezt a marketplace kategóriát?" title="Törlés">
+                            <form action="/admin/marketplace/categories/delete/{{.ID.Hex}}" method="POST" class="d-inline"
+                                  onsubmit="return confirm('{{t $.Lang "mkt.cat_confirm_delete"}}')">
+                                <button type="submit" class="btn btn-outline-danger" title="{{t $.Lang "common.delete"}}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -75,10 +82,10 @@
     {{else}}
     <div class="text-center py-5">
         <i class="bi bi-folder2-open display-4 text-muted"></i>
-        <h5 class="mt-3 text-muted">Még nincsenek marketplace kategóriák</h5>
-        <p class="text-muted">Hozd létre az első kategóriát, például Videókártyák, Processzorok vagy Memória.</p>
+        <h5 class="mt-3 text-muted">{{t .Lang "mkt.cat_empty_title"}}</h5>
+        <p class="text-muted">{{t .Lang "mkt.cat_empty_sub"}}</p>
         <a href="/admin/marketplace/categories/create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>Első kategória létrehozása
+            <i class="bi bi-plus-lg me-1"></i>{{t .Lang "mkt.cat_create_first"}}
         </a>
     </div>
     {{end}}

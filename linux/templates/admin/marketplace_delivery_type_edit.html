@@ -5,10 +5,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">
             <i class="bi bi-truck me-2 text-primary"></i>
-            {{if .DeliveryType}}Szállítási mód szerkesztése{{else}}Új szállítási mód{{end}}
+            {{if .DeliveryType}}{{t .Lang "mkt.del_edit_title"}}{{else}}{{t .Lang "mkt.del_create_title"}}{{end}}
         </h2>
         <a href="/admin/marketplace/delivery-types" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>Vissza
+            <i class="bi bi-arrow-left me-1"></i>{{t .Lang "mkt.del_back"}}
         </a>
     </div>
 
@@ -22,52 +22,53 @@
                 <div class="card-body">
                     <form method="POST">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" for="name">Név <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold" for="name">{{t .Lang "mkt.del_field_name"}} <span class="text-danger">*</span></label>
                             <input class="form-control" id="name" name="name" required maxlength="100"
                                    value="{{if .DeliveryType}}{{.DeliveryType.Name}}{{end}}"
-                                   placeholder="Pl. GLS futár, Személyes átvétel, MPL csomag">
+                                   placeholder="{{t .Lang "mkt.del_name_ph"}}">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" for="icon">Ikon (Bootstrap Icons osztálynév)</label>
+                            <label class="form-label fw-semibold" for="icon">{{t .Lang "mkt.del_field_icon"}}</label>
                             <div class="input-group">
                                 <span class="input-group-text" id="icon-preview">
                                     <i class="bi bi-{{if .DeliveryType}}{{.DeliveryType.Icon}}{{else}}box{{end}}" id="icon-preview-i"></i>
                                 </span>
                                 <input class="form-control" id="icon" name="icon" maxlength="80"
                                        value="{{if .DeliveryType}}{{.DeliveryType.Icon}}{{end}}"
-                                       placeholder="pl. truck, box, person-walking, bicycle">
+                                       placeholder="{{t .Lang "mkt.del_icon_ph"}}">
                             </div>
                             <div class="form-text">
-                                Kereshetsz ikonokat a <a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener">Bootstrap Icons</a> oldalon. Csak az osztálynevet add meg (pl. <code>truck</code>).
+                                {{t .Lang "mkt.del_icon_hint"}}
+                                (<a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener">Bootstrap Icons</a>)
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" for="description">Leírás</label>
+                            <label class="form-label fw-semibold" for="description">{{t .Lang "mkt.del_field_desc"}}</label>
                             <input class="form-control" id="description" name="description" maxlength="200"
                                    value="{{if .DeliveryType}}{{.DeliveryType.Description}}{{end}}"
-                                   placeholder="Rövid leírás a hirdetőknek">
+                                   placeholder="{{t .Lang "mkt.del_desc_ph"}}">
                         </div>
                         <div class="row g-3 mb-3">
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold" for="display_order">Megjelenési sorrend</label>
+                                <label class="form-label fw-semibold" for="display_order">{{t .Lang "mkt.del_field_order"}}</label>
                                 <input class="form-control" id="display_order" name="display_order" type="number" min="0"
                                        value="{{if .DeliveryType}}{{.DeliveryType.DisplayOrder}}{{else}}0{{end}}">
-                                <div class="form-text">Kisebb szám = előrébb jelenik meg.</div>
+                                <div class="form-text">{{t .Lang "mkt.del_order_hint"}}</div>
                             </div>
                             <div class="col-md-8">
                                 <label class="form-label fw-semibold d-block">&nbsp;</label>
                                 <div class="form-check form-switch mt-2">
                                     <input class="form-check-input" type="checkbox" id="active" name="active"
                                            {{if .DeliveryType}}{{if .DeliveryType.Active}}checked{{end}}{{else}}checked{{end}}>
-                                    <label class="form-check-label" for="active">Aktív (látható a hirdetők számára)</label>
+                                    <label class="form-check-label" for="active">{{t .Lang "mkt.del_field_active"}}</label>
                                 </div>
                             </div>
                         </div>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg me-1"></i>Mentés
+                                <i class="bi bi-check-lg me-1"></i>{{t .Lang "mkt.del_save_btn"}}
                             </button>
-                            <a href="/admin/marketplace/delivery-types" class="btn btn-outline-secondary">Mégse</a>
+                            <a href="/admin/marketplace/delivery-types" class="btn btn-outline-secondary">{{t .Lang "mkt.del_cancel"}}</a>
                         </div>
                     </form>
                 </div>

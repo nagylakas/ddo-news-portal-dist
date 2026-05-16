@@ -4,15 +4,15 @@
     {{template "admin-flash" .}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1"><i class="bi bi-truck me-2 text-primary"></i>Szállítási módok</h2>
-            <p class="text-muted mb-0">Az elérhető szállítási és átvételi módok kezelése.</p>
+            <h2 class="mb-1"><i class="bi bi-truck me-2 text-primary"></i>{{t .Lang "mkt.del_title"}}</h2>
+            <p class="text-muted mb-0">{{t .Lang "mkt.del_sub"}}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="/admin/marketplace/delivery-types/create" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>Új szállítási mód
+                <i class="bi bi-plus-lg me-1"></i>{{t .Lang "mkt.del_new"}}
             </a>
             <a href="/admin/marketplace" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Marketplace
+                <i class="bi bi-arrow-left me-1"></i>{{t .Lang "mkt.dashboard_title"}}
             </a>
         </div>
     </div>
@@ -23,11 +23,11 @@
             <table class="table align-middle mb-0">
                 <thead class="table-light">
                 <tr>
-                    <th>Megjelenítés</th>
-                    <th>Leírás</th>
-                    <th class="text-center">Sorrend</th>
-                    <th class="text-center">Aktív</th>
-                    <th class="text-end">Műveletek</th>
+                    <th>{{t .Lang "mkt.del_col_display"}}</th>
+                    <th>{{t .Lang "mkt.del_col_desc"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.del_col_order"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.del_col_active"}}</th>
+                    <th class="text-end">{{t .Lang "mkt.del_col_actions"}}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -42,19 +42,19 @@
                     <td class="text-center">{{.DisplayOrder}}</td>
                     <td class="text-center">
                         {{if .Active}}
-                        <span class="badge text-bg-success">Aktív</span>
+                        <span class="badge text-bg-success">{{t $.Lang "common.active"}}</span>
                         {{else}}
-                        <span class="badge text-bg-secondary">Inaktív</span>
+                        <span class="badge text-bg-secondary">{{t $.Lang "common.inactive"}}</span>
                         {{end}}
                     </td>
                     <td class="text-end">
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="/admin/marketplace/delivery-types/edit/{{.ID.Hex}}" class="btn btn-sm btn-outline-secondary">
+                            <a href="/admin/marketplace/delivery-types/edit/{{.ID.Hex}}" class="btn btn-sm btn-outline-secondary" title="{{t $.Lang "common.edit"}}">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <form method="POST" action="/admin/marketplace/delivery-types/delete/{{.ID.Hex}}" class="d-inline"
-                                  onsubmit="return confirm('Biztosan törlöd a(z) {{.Name}} szállítási módot?')">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                  onsubmit="return confirm('{{t $.Lang "mkt.del_confirm_delete"}}')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="{{t $.Lang "common.delete"}}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -69,10 +69,10 @@
     {{else}}
     <div class="text-center py-5 border rounded-3 bg-light">
         <i class="bi bi-truck text-muted" style="font-size:4rem;"></i>
-        <h3 class="h5 mt-3 text-muted">Még nincs szállítási mód</h3>
-        <p class="text-muted">Hozd létre az első szállítási módot, hogy a hirdetők kiválaszthassák az átvételi lehetőségeket.</p>
+        <h3 class="h5 mt-3 text-muted">{{t .Lang "mkt.del_empty_title"}}</h3>
+        <p class="text-muted">{{t .Lang "mkt.del_empty_sub"}}</p>
         <a href="/admin/marketplace/delivery-types/create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>Szállítási mód létrehozása
+            <i class="bi bi-plus-lg me-1"></i>{{t .Lang "mkt.del_create_first"}}
         </a>
     </div>
     {{end}}

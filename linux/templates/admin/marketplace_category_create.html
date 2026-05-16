@@ -6,9 +6,9 @@
         <div class="col-lg-9">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <a href="/admin/marketplace/categories" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Vissza
+                    <i class="bi bi-arrow-left me-1"></i>{{t .Lang "mkt.cat_back"}}
                 </a>
-                <h2 class="mb-0">Marketplace kategória létrehozása</h2>
+                <h2 class="mb-0">{{t .Lang "mkt.cat_create_title"}}</h2>
             </div>
 
             <div class="card shadow-sm">
@@ -16,9 +16,9 @@
                     <form method="POST" action="/admin/marketplace/categories/create">
                         {{template "marketplace-category-form" .}}
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="/admin/marketplace/categories" class="btn btn-outline-secondary">Mégse</a>
+                            <a href="/admin/marketplace/categories" class="btn btn-outline-secondary">{{t .Lang "mkt.cat_cancel"}}</a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-plus-lg me-1"></i>Létrehozás
+                                <i class="bi bi-plus-lg me-1"></i>{{t .Lang "mkt.cat_create_btn"}}
                             </button>
                         </div>
                     </form>
@@ -36,48 +36,48 @@
 {{end}}
 <div class="row g-3">
     <div class="col-md-8">
-        <label class="form-label fw-semibold" for="name">Név <span class="text-danger">*</span></label>
+        <label class="form-label fw-semibold" for="name">{{t .Lang "mkt.cat_field_name"}} <span class="text-danger">*</span></label>
         <input type="text" class="form-control" id="name" name="name" required value="{{if .Category}}{{.Category.Name}}{{end}}" placeholder="Pl. Videókártyák">
-        <div class="form-text">A slug automatikusan a névből készül.</div>
+        <div class="form-text">{{t .Lang "mkt.cat_name_hint"}}</div>
     </div>
     <div class="col-md-4">
-        <label class="form-label fw-semibold" for="icon">Bootstrap ikon</label>
+        <label class="form-label fw-semibold" for="icon">{{t .Lang "mkt.cat_field_icon"}}</label>
         <input type="text" class="form-control" id="icon" name="icon" value="{{if .Category}}{{.Category.Icon}}{{end}}" placeholder="gpu-card">
     </div>
     <div class="col-md-8">
-        <label class="form-label fw-semibold" for="parent_id">Szülő kategória</label>
+        <label class="form-label fw-semibold" for="parent_id">{{t .Lang "mkt.cat_field_parent"}}</label>
         {{$currentParent := ""}}{{if .Category}}{{$currentParent = .Category.ParentIDHex}}{{end}}
         <select class="form-select" id="parent_id" name="parent_id">
-            <option value="">- Fő kategória -</option>
+            <option value="">{{t .Lang "mkt.cat_parent_none"}}</option>
             {{range .Categories}}
             <option value="{{.ID.Hex}}" {{if eq .ID.Hex $currentParent}}selected{{end}}>{{.Name}}</option>
             {{end}}
         </select>
     </div>
     <div class="col-md-4">
-        <label class="form-label fw-semibold" for="display_order">Sorrend</label>
+        <label class="form-label fw-semibold" for="display_order">{{t .Lang "mkt.cat_field_order"}}</label>
         <input type="number" class="form-control" id="display_order" name="display_order" value="{{if .Category}}{{.Category.DisplayOrder}}{{else}}0{{end}}">
     </div>
     <div class="col-12">
-        <label class="form-label fw-semibold" for="description">Leírás</label>
+        <label class="form-label fw-semibold" for="description">{{t .Lang "mkt.cat_field_desc"}}</label>
         <textarea class="form-control" id="description" name="description" rows="2" placeholder="Rövid admin/publikus leírás">{{if .Category}}{{.Category.Description}}{{end}}</textarea>
     </div>
     <div class="col-12">
-        <label class="form-label fw-semibold" for="fields_raw">Specifikációs mezők</label>
+        <label class="form-label fw-semibold" for="fields_raw">{{t .Lang "mkt.cat_field_fields"}}</label>
         <textarea class="form-control font-monospace" id="fields_raw" name="fields_raw" rows="7" placeholder="gpu_model|GPU modell|text|true&#10;memory_size|Memória|select|true|8 GB,12 GB,16 GB,24 GB&#10;warranty_months|Garancia hónap|number|false">{{if .Category}}{{.Category.FieldsRaw}}{{end}}</textarea>
-        <div class="form-text">Formátum soronként: <code>kulcs|Címke|típus|required|opció1,opció2</code>. Típusok: text, number, select, boolean.</div>
+        <div class="form-text">{{t .Lang "mkt.cat_fields_hint"}}</div>
     </div>
     <div class="col-12">
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="active" name="active" {{if .Category}}{{if .Category.Active}}checked{{end}}{{else}}checked{{end}}>
-            <label class="form-check-label fw-semibold" for="active">Aktív kategória</label>
+            <label class="form-check-label fw-semibold" for="active">{{t .Lang "mkt.cat_field_active"}}</label>
         </div>
     </div>
     <div class="col-12">
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="allow_listings" name="allow_listings" {{if .Category}}{{if .Category.AllowListings}}checked{{end}}{{end}} data-new-category="{{if .Category}}0{{else}}1{{end}}">
-            <label class="form-check-label fw-semibold" for="allow_listings">Hirdetés feladható közvetlenül ebbe a kategóriába</label>
-            <div class="form-text">Főkategóriáknál, például PC, PlayStation, XBOX vagy Nintendo esetén kapcsold ki. Alkategóriáknál, például Videókártya vagy CPU esetén maradjon bekapcsolva.</div>
+            <label class="form-check-label fw-semibold" for="allow_listings">{{t .Lang "mkt.cat_field_allow"}}</label>
+            <div class="form-text">{{t .Lang "mkt.cat_allow_hint"}}</div>
         </div>
     </div>
 </div>

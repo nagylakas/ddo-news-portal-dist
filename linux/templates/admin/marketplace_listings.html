@@ -3,11 +3,11 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-1">Marketplace hirdetések</h1>
-        <p class="text-muted mb-0">Feladott apróhirdetések moderálása és státuszkezelése.</p>
+        <h1 class="h3 mb-1">{{t .Lang "mkt.listings_title"}}</h1>
+        <p class="text-muted mb-0">{{t .Lang "mkt.listings_sub"}}</p>
     </div>
     <a href="/admin/marketplace" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Marketplace
+        <i class="bi bi-arrow-left"></i> {{t .Lang "mkt.dashboard_title"}}
     </a>
 </div>
 
@@ -16,13 +16,13 @@
 <div class="card mb-4">
     <div class="card-body">
         <div class="d-flex flex-wrap gap-2">
-            <a class="btn btn-sm {{if eq .StatusFilter ""}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings">Mind</a>
-            <a class="btn btn-sm {{if eq .StatusFilter "active"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=active">Aktív</a>
-            <a class="btn btn-sm {{if eq .StatusFilter "reserved"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=reserved">Foglalva</a>
-            <a class="btn btn-sm {{if eq .StatusFilter "sold"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=sold">Eladva</a>
-            <a class="btn btn-sm {{if eq .StatusFilter "hidden"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=hidden">Rejtett</a>
-            <a class="btn btn-sm {{if eq .StatusFilter "draft"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=draft">Vázlat</a>
-            <a class="btn btn-sm {{if eq .StatusFilter "expired"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=expired">Lejárt</a>
+            <a class="btn btn-sm {{if eq .StatusFilter ""}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings">{{t .Lang "mkt.filter_all"}}</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "active"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=active">{{t .Lang "mkt.filter_active"}}</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "reserved"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=reserved">{{t .Lang "mkt.filter_reserved"}}</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "sold"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=sold">{{t .Lang "mkt.filter_sold"}}</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "hidden"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=hidden">{{t .Lang "mkt.filter_hidden"}}</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "draft"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=draft">{{t .Lang "mkt.filter_draft"}}</a>
+            <a class="btn btn-sm {{if eq .StatusFilter "expired"}}btn-primary{{else}}btn-outline-primary{{end}}" href="/admin/marketplace/listings?status=expired">{{t .Lang "mkt.filter_expired"}}</a>
         </div>
     </div>
 </div>
@@ -32,11 +32,11 @@
         <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
-                    <th>Hirdetés</th>
-                    <th>Kategória</th>
-                    <th>Ár</th>
-                    <th>Státusz</th>
-                    <th class="text-end">Műveletek</th>
+                    <th>{{t .Lang "mkt.col_listing"}}</th>
+                    <th>{{t .Lang "mkt.col_category"}}</th>
+                    <th>{{t .Lang "mkt.col_price"}}</th>
+                    <th>{{t .Lang "mkt.col_status"}}</th>
+                    <th class="text-end">{{t .Lang "mkt.col_actions"}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -59,7 +59,7 @@
                                     {{.Title}}
                                     {{end}}
                                 </div>
-                                <div class="small text-muted">{{.SellerName}} · frissítve: {{formatDateTime .UpdatedAt}}</div>
+                                <div class="small text-muted">{{.SellerName}} &middot; {{t $.Lang "mkt.updated"}} {{formatDateTime .UpdatedAt}}</div>
                             </div>
                         </div>
                     </td>
@@ -68,16 +68,16 @@
                     <td><span class="badge bg-secondary">{{.StatusLabel}}</span></td>
                     <td class="text-end">
                         <div class="d-flex flex-wrap justify-content-end gap-2">
-                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "active" "Label" "Aktív" "Class" "btn-outline-success"}}
-                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "reserved" "Label" "Foglalva" "Class" "btn-outline-warning"}}
-                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "sold" "Label" "Eladva" "Class" "btn-outline-secondary"}}
-                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "hidden" "Label" "Rejtés" "Class" "btn-outline-danger"}}
+                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "active" "Label" (t $.Lang "mkt.status_active") "Class" "btn-outline-success"}}
+                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "reserved" "Label" (t $.Lang "mkt.status_reserved") "Class" "btn-outline-warning"}}
+                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "sold" "Label" (t $.Lang "mkt.status_sold") "Class" "btn-outline-secondary"}}
+                            {{template "admin-marketplace-status-form" dict "ID" .ID.Hex "Status" "hidden" "Label" (t $.Lang "mkt.status_hidden") "Class" "btn-outline-danger"}}
                         </div>
                     </td>
                 </tr>
                 {{else}}
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-5">Nincs megjeleníthető hirdetés.</td>
+                    <td colspan="5" class="text-center text-muted py-5">{{t .Lang "mkt.no_listings"}}</td>
                 </tr>
                 {{end}}
             </tbody>
@@ -90,17 +90,17 @@
     <ul class="pagination justify-content-center">
         <li class="page-item {{if not .HasPrev}}disabled{{end}}">
             {{if .StatusFilter}}
-            <a class="page-link" href="/admin/marketplace/listings?status={{.StatusFilter}}&page={{subtract .CurrentPage 1}}">Előző</a>
+            <a class="page-link" href="/admin/marketplace/listings?status={{.StatusFilter}}&page={{subtract .CurrentPage 1}}">{{t .Lang "mkt.prev"}}</a>
             {{else}}
-            <a class="page-link" href="/admin/marketplace/listings?page={{subtract .CurrentPage 1}}">Előző</a>
+            <a class="page-link" href="/admin/marketplace/listings?page={{subtract .CurrentPage 1}}">{{t .Lang "mkt.prev"}}</a>
             {{end}}
         </li>
         <li class="page-item disabled"><span class="page-link">{{.CurrentPage}}. oldal</span></li>
         <li class="page-item {{if not .HasNext}}disabled{{end}}">
             {{if .StatusFilter}}
-            <a class="page-link" href="/admin/marketplace/listings?status={{.StatusFilter}}&page={{add .CurrentPage 1}}">Következő</a>
+            <a class="page-link" href="/admin/marketplace/listings?status={{.StatusFilter}}&page={{add .CurrentPage 1}}">{{t .Lang "mkt.next"}}</a>
             {{else}}
-            <a class="page-link" href="/admin/marketplace/listings?page={{add .CurrentPage 1}}">Következő</a>
+            <a class="page-link" href="/admin/marketplace/listings?page={{add .CurrentPage 1}}">{{t .Lang "mkt.next"}}</a>
             {{end}}
         </li>
     </ul>
