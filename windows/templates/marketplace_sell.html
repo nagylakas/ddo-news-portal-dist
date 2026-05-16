@@ -109,19 +109,100 @@
                         <h2 class="h4 mb-3">Média és ár</h2>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold" for="price">Eladási ár HUF</label>
+                                <label class="form-label fw-semibold" for="price">Eladási ár (Ft)</label>
                                 <input class="form-control" id="price" name="price" inputmode="numeric" value="{{.Form.Price}}" placeholder="165000">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold" for="location">Lokáció</label>
-                                <input class="form-control" id="location" name="location" value="{{.Form.Location}}" placeholder="Budapest, XI. kerület">
+                                <div class="form-check form-switch mt-4 pt-2">
+                                    <input class="form-check-input" type="checkbox" id="negotiable" name="negotiable" {{if .Form.Negotiable}}checked{{end}}>
+                                    <label class="form-check-label fw-semibold" for="negotiable">Alkudható ár</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="location">Helyszín</label>
+                                <input class="form-control" id="location" name="location" list="hu-locations" value="{{.Form.Location}}" placeholder="Pl. Budapest, XI. Kerület" autocomplete="off">
+                                <datalist id="hu-locations">
+                                    <option value="Budapest, I. Kerület">
+                                    <option value="Budapest, II. Kerület">
+                                    <option value="Budapest, III. Kerület">
+                                    <option value="Budapest, IV. Kerület">
+                                    <option value="Budapest, V. Kerület">
+                                    <option value="Budapest, VI. Kerület">
+                                    <option value="Budapest, VII. Kerület">
+                                    <option value="Budapest, VIII. Kerület">
+                                    <option value="Budapest, IX. Kerület">
+                                    <option value="Budapest, X. Kerület">
+                                    <option value="Budapest, XI. Kerület">
+                                    <option value="Budapest, XII. Kerület">
+                                    <option value="Budapest, XIII. Kerület">
+                                    <option value="Budapest, XIV. Kerület">
+                                    <option value="Budapest, XV. Kerület">
+                                    <option value="Budapest, XVI. Kerület">
+                                    <option value="Budapest, XVII. Kerület">
+                                    <option value="Budapest, XVIII. Kerület">
+                                    <option value="Budapest, XIX. Kerület">
+                                    <option value="Budapest, XX. Kerület">
+                                    <option value="Budapest, XXI. Kerület">
+                                    <option value="Budapest, XXII. Kerület">
+                                    <option value="Budapest, XXIII. Kerület">
+                                    <option value="Békéscsaba">
+                                    <option value="Debrecen">
+                                    <option value="Eger">
+                                    <option value="Győr">
+                                    <option value="Kaposvár">
+                                    <option value="Kecskemét">
+                                    <option value="Miskolc">
+                                    <option value="Nyíregyháza">
+                                    <option value="Pécs">
+                                    <option value="Salgótarján">
+                                    <option value="Sopron">
+                                    <option value="Székesfehérvár">
+                                    <option value="Szekszárd">
+                                    <option value="Szolnok">
+                                    <option value="Szombathely">
+                                    <option value="Tatabánya">
+                                    <option value="Veszprém">
+                                    <option value="Zalaegerszeg">
+                                </datalist>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Átvétel / szállítás</label>
+                                {{if .DeliveryTypes}}
+                                <div class="border rounded-3 p-3">
+                                    {{range .DeliveryTypes}}
+                                    {{$typeID := .ID.Hex}}
+                                    {{$checked := index $.Form.DeliveryIDs $typeID}}
+                                    <div class="delivery-option mb-3">
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input delivery-checkbox" type="checkbox"
+                                                   id="delivery_{{$typeID}}" name="delivery" value="{{$typeID}}"
+                                                   data-target="price_{{$typeID}}">
+                                            <label class="form-check-label fw-semibold" for="delivery_{{$typeID}}">
+                                                {{if .Icon}}<i class="bi bi-{{.Icon}} me-1"></i>{{end}}{{.Name}}
+                                            </label>
+                                            {{if .Description}}<div class="small text-muted ms-4">{{.Description}}</div>{{end}}
+                                        </div>
+                                        <div class="ms-4 delivery-price-row" id="price_{{$typeID}}" hidden>
+                                            <label class="form-label small text-muted" for="delivery_price_{{$typeID}}">Szállítási díj (Ft) — 0 vagy üresen hagyva: egyéni megállapodás</label>
+                                            <input class="form-control form-control-sm" style="max-width:200px;"
+                                                   id="delivery_price_{{$typeID}}" name="delivery_price_{{$typeID}}"
+                                                   type="number" min="0" placeholder="0">
+                                        </div>
+                                    </div>
+                                    {{end}}
+                                </div>
+                                {{else}}
+                                <div class="alert alert-info mb-0">
+                                    <i class="bi bi-info-circle me-1"></i>Nincs elérhető szállítási mód konfigurálva. Az admin felületen adj hozzá szállítási módokat.
+                                </div>
+                                {{end}}
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-semibold" for="images">Képek feltöltése</label>
                                 <input class="form-control" id="images" name="images" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple {{if not .S3Enabled}}disabled{{end}}>
                                 <div class="form-text">
                                     {{if .S3Enabled}}
-                                    Maximum 5 kép, képenként legfeljebb 5 MB. A feltöltött képek a médiatár <code>marketplace</code> kategóriájába kerülnek.
+                                    Maximum 5 kép, képenként legfeljebb 5 MB.
                                     {{else}}
                                     A közvetlen képfeltöltéshez S3 konfiguráció szükséges. Addig használj kép URL-eket.
                                     {{end}}
@@ -129,35 +210,8 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-semibold" for="image_urls">Kép URL-ek</label>
-                                <textarea class="form-control" id="image_urls" name="image_urls" rows="4" placeholder="Egy URL soronként, maximum 5 kép">{{.Form.ImageURLs}}</textarea>
+                                <textarea class="form-control" id="image_urls" name="image_urls" rows="3" placeholder="Egy URL soronként, maximum 5 kép">{{.Form.ImageURLs}}</textarea>
                                 <div class="form-text">Külső vagy már médiatárban lévő kép URL-ek. A feltöltött képek a lista elejére kerülnek.</div>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Átvétel / szállítás</label>
-                                <div class="d-flex flex-wrap gap-3">
-                                    <label class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="delivery" value="Személyes">
-                                        <span class="form-check-label">Személyes</span>
-                                    </label>
-                                    <label class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="delivery" value="Foxpost">
-                                        <span class="form-check-label">Foxpost</span>
-                                    </label>
-                                    <label class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="delivery" value="MPL">
-                                        <span class="form-check-label">MPL</span>
-                                    </label>
-                                    <label class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="delivery" value="Futár">
-                                        <span class="form-check-label">Futár</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="negotiable" name="negotiable" {{if .Form.Negotiable}}checked{{end}}>
-                                    <label class="form-check-label fw-semibold" for="negotiable">Alkudható ár</label>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -172,27 +226,31 @@
             </form>
             {{else}}
             <div class="alert alert-warning">
-                Még nincs olyan aktív marketplace kategória, amelybe közvetlenül feladható hirdetés. Az admin felületen engedélyezd a “Hirdetés feladható közvetlenül ebbe a kategóriába” kapcsolót legalább egy alkategórián.
+                Még nincs olyan aktív marketplace kategória, amelybe közvetlenül feladható hirdetés. Az admin felületen engedélyezd a "Hirdetés feladható közvetlenül ebbe a kategóriába" kapcsolót legalább egy alkategórián.
             </div>
             {{end}}
         </div>
     </div>
 </section>
 <script>
-    (function() {
-        var select = document.getElementById('category_id');
-        var groups = Array.prototype.slice.call(document.querySelectorAll('.marketplace-spec-group'));
-        function sync() {
-            var selected = select ? select.value : '';
-            groups.forEach(function(group) {
-                group.hidden = group.getAttribute('data-category-id') !== selected;
-            });
-        }
-        if (select) {
-            select.addEventListener('change', sync);
-            sync();
-        }
-    })();
+(function() {
+    // Spec group show/hide on category select
+    var select = document.getElementById('category_id');
+    var groups = Array.prototype.slice.call(document.querySelectorAll('.marketplace-spec-group'));
+    function syncSpecs() {
+        var selected = select ? select.value : '';
+        groups.forEach(function(g) { g.hidden = g.getAttribute('data-category-id') !== selected; });
+    }
+    if (select) { select.addEventListener('change', syncSpecs); syncSpecs(); }
+
+    // Delivery price row show/hide on checkbox toggle
+    document.querySelectorAll('.delivery-checkbox').forEach(function(cb) {
+        var target = document.getElementById(cb.getAttribute('data-target'));
+        function syncPrice() { if (target) target.hidden = !cb.checked; }
+        cb.addEventListener('change', syncPrice);
+        syncPrice();
+    });
+})();
 </script>
 {{template "footer" .}}
 {{end}}

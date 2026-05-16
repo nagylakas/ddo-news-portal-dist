@@ -1,0 +1,273 @@
+{{define "marketplace/edit"}}
+{{template "header" .}}
+<section class="container py-5" style="margin-top:90px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Hirdetés szerkesztése</h1>
+                    <p class="text-muted mb-0">A cím, kategória és típus a feladás után nem módosítható.</p>
+                </div>
+                <a href="/marketplace/my" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Vissza
+                </a>
+            </div>
+
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger">{{.ErrorMessage}}</div>
+            {{end}}
+
+            <form method="POST" action="/marketplace/my/{{.Listing.ID.Hex}}/edit" enctype="multipart/form-data">
+
+                {{/* Locked fields — display only */}}
+                <div class="card shadow-sm mb-4 border-secondary-subtle">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Rögzített adatok</h2>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-muted">Hirdetés címe</label>
+                                <p class="form-control-plaintext fw-semibold fs-5 mb-0">{{.Listing.Title}}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-muted">Kategória</label>
+                                <p class="form-control-plaintext mb-0">{{.Listing.CategoryName}}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-muted">Típus</label>
+                                <p class="form-control-plaintext mb-0">
+                                    {{if eq .Listing.ListingType "sell"}}Eladás
+                                    {{else if eq .Listing.ListingType "buy"}}Keresek
+                                    {{else if eq .Listing.ListingType "trade"}}Csere
+                                    {{else}}{{.Listing.ListingType}}{{end}}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{/* Editable fields */}}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Szerkeszthető adatok</h2>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold" for="condition">Állapot</label>
+                                <select class="form-select" id="condition" name="condition">
+                                    {{$c := .Form.Condition}}
+                                    <option value="Új" {{if eq $c "Új"}}selected{{end}}>Új</option>
+                                    <option value="Újszerű" {{if eq $c "Újszerű"}}selected{{end}}>Újszerű</option>
+                                    <option value="Használt" {{if eq $c "Használt"}}selected{{end}}>Használt</option>
+                                    <option value="Hibás" {{if eq $c "Hibás"}}selected{{end}}>Hibás</option>
+                                    <option value="Alkatrésznek" {{if eq $c "Alkatrésznek"}}selected{{end}}>Alkatrésznek</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold" for="price">Eladási ár (Ft)</label>
+                                <input class="form-control" id="price" name="price" inputmode="numeric" value="{{.Form.Price}}" placeholder="165000">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch mt-4 pt-2">
+                                    <input class="form-check-input" type="checkbox" id="negotiable" name="negotiable" {{if .Form.Negotiable}}checked{{end}}>
+                                    <label class="form-check-label fw-semibold" for="negotiable">Alkudható ár</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="location">Helyszín</label>
+                                <input class="form-control" id="location" name="location" list="hu-locations" value="{{.Form.Location}}" placeholder="Pl. Budapest, XI. Kerület" autocomplete="off">
+                                <datalist id="hu-locations">
+                                    <option value="Budapest, I. Kerület">
+                                    <option value="Budapest, II. Kerület">
+                                    <option value="Budapest, III. Kerület">
+                                    <option value="Budapest, IV. Kerület">
+                                    <option value="Budapest, V. Kerület">
+                                    <option value="Budapest, VI. Kerület">
+                                    <option value="Budapest, VII. Kerület">
+                                    <option value="Budapest, VIII. Kerület">
+                                    <option value="Budapest, IX. Kerület">
+                                    <option value="Budapest, X. Kerület">
+                                    <option value="Budapest, XI. Kerület">
+                                    <option value="Budapest, XII. Kerület">
+                                    <option value="Budapest, XIII. Kerület">
+                                    <option value="Budapest, XIV. Kerület">
+                                    <option value="Budapest, XV. Kerület">
+                                    <option value="Budapest, XVI. Kerület">
+                                    <option value="Budapest, XVII. Kerület">
+                                    <option value="Budapest, XVIII. Kerület">
+                                    <option value="Budapest, XIX. Kerület">
+                                    <option value="Budapest, XX. Kerület">
+                                    <option value="Budapest, XXI. Kerület">
+                                    <option value="Budapest, XXII. Kerület">
+                                    <option value="Budapest, XXIII. Kerület">
+                                    <option value="Békéscsaba">
+                                    <option value="Debrecen">
+                                    <option value="Eger">
+                                    <option value="Győr">
+                                    <option value="Kaposvár">
+                                    <option value="Kecskemét">
+                                    <option value="Miskolc">
+                                    <option value="Nyíregyháza">
+                                    <option value="Pécs">
+                                    <option value="Salgótarján">
+                                    <option value="Sopron">
+                                    <option value="Székesfehérvár">
+                                    <option value="Szekszárd">
+                                    <option value="Szolnok">
+                                    <option value="Szombathely">
+                                    <option value="Tatabánya">
+                                    <option value="Veszprém">
+                                    <option value="Zalaegerszeg">
+                                </datalist>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="description">Leírás <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="description" name="description" rows="8" required>{{.Form.Description}}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{/* Specs */}}
+                {{if .CategorySpecs}}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Specifikációk</h2>
+                        <div class="row g-3">
+                            {{range .CategorySpecs}}
+                            {{$value := index $.Form.Specs .Key}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="spec_{{.Key}}">{{.Label}}</label>
+                                {{if eq .Type "select"}}
+                                <select class="form-select" id="spec_{{.Key}}" name="spec_{{.Key}}">
+                                    <option value="">Válassz</option>
+                                    {{range .Options}}
+                                    <option value="{{.}}" {{if eq $value .}}selected{{end}}>{{.}}</option>
+                                    {{end}}
+                                </select>
+                                {{else if eq .Type "boolean"}}
+                                <select class="form-select" id="spec_{{.Key}}" name="spec_{{.Key}}">
+                                    <option value="">Válassz</option>
+                                    <option value="Igen" {{if eq $value "Igen"}}selected{{end}}>Igen</option>
+                                    <option value="Nem" {{if eq $value "Nem"}}selected{{end}}>Nem</option>
+                                </select>
+                                {{else}}
+                                <input class="form-control" id="spec_{{.Key}}" name="spec_{{.Key}}" value="{{$value}}" {{if eq .Type "number"}}type="number"{{else}}type="text"{{end}}>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+
+                {{/* Delivery */}}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Átvétel / szállítás</h2>
+                        {{if .DeliveryTypes}}
+                        <div class="border rounded-3 p-3">
+                            {{range .DeliveryTypes}}
+                            {{$typeID := .ID.Hex}}
+                            {{$price := index $.Form.DeliveryPrices $typeID}}
+                            <div class="delivery-option mb-3">
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input delivery-checkbox" type="checkbox"
+                                           id="delivery_{{$typeID}}" name="delivery" value="{{$typeID}}"
+                                           data-target="price_{{$typeID}}"
+                                           {{range $.Form.DeliveryIDs}}{{if eq . $typeID}}checked{{end}}{{end}}>
+                                    <label class="form-check-label fw-semibold" for="delivery_{{$typeID}}">
+                                        {{if .Icon}}<i class="bi bi-{{.Icon}} me-1"></i>{{end}}{{.Name}}
+                                    </label>
+                                    {{if .Description}}<div class="small text-muted ms-4">{{.Description}}</div>{{end}}
+                                </div>
+                                <div class="ms-4 delivery-price-row" id="price_{{$typeID}}">
+                                    <label class="form-label small text-muted" for="delivery_price_{{$typeID}}">Szállítási díj (Ft) — 0 vagy üresen hagyva: egyéni megállapodás</label>
+                                    <input class="form-control form-control-sm" style="max-width:200px;"
+                                           id="delivery_price_{{$typeID}}" name="delivery_price_{{$typeID}}"
+                                           type="number" min="0" value="{{$price}}" placeholder="0">
+                                </div>
+                            </div>
+                            {{end}}
+                        </div>
+                        {{else}}
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-1"></i>Nincs elérhető szállítási mód konfigurálva.
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+
+                {{/* Images */}}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Képek</h2>
+                        {{if .Listing.ImageURLs}}
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            {{range .Listing.ImageURLs}}
+                            <img src="{{.}}" alt="" class="rounded border" style="width:100px;height:75px;object-fit:cover;">
+                            {{end}}
+                        </div>
+                        <p class="small text-muted">Meglévő képek. Új képek feltöltésével vagy URL megadásával cserélheted őket.</p>
+                        {{end}}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="images">Új képek feltöltése</label>
+                            <input class="form-control" id="images" name="images" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple {{if not .S3Enabled}}disabled{{end}}>
+                            <div class="form-text">Maximum 5 kép összesen (a meglévőkkel együtt).</div>
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold" for="image_urls">Kép URL-ek</label>
+                            <textarea class="form-control" id="image_urls" name="image_urls" rows="3" placeholder="Egy URL soronként">{{.Form.ImageURLs}}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mb-5">
+                    <a href="/marketplace/my" class="btn btn-outline-secondary">Mégse</a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-lg me-1"></i>Mentés
+                    </button>
+                </div>
+            </form>
+
+            {{/* Price history */}}
+            {{if .History}}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-clock-history me-2"></i>Árváltozási előzmények</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Időpont</th>
+                            <th>Korábbi ár</th>
+                            <th>Új ár</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{range .History}}
+                        <tr>
+                            <td class="text-muted small">{{formatDateTime .ChangedAt}}</td>
+                            <td class="text-decoration-line-through text-muted">{{.OldPriceFormatted}}</td>
+                            <td class="fw-semibold">{{.NewPriceFormatted}}</td>
+                        </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+<script>
+(function() {
+    document.querySelectorAll('.delivery-checkbox').forEach(function(cb) {
+        var target = document.getElementById(cb.getAttribute('data-target'));
+        function syncPrice() { if (target) target.hidden = !cb.checked; }
+        cb.addEventListener('change', syncPrice);
+        syncPrice();
+    });
+})();
+</script>
+{{template "footer" .}}
+{{end}}

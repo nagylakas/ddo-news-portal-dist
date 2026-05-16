@@ -55,10 +55,13 @@
                     <td class="text-end">
                         <div class="d-flex justify-content-end gap-2 flex-wrap">
                             {{if eq .Status "active"}}
-                            <a href="/marketplace/listing/{{.Slug}}" class="btn btn-sm btn-outline-primary">
+                            <a href="/marketplace/listing/{{.Slug}}" class="btn btn-sm btn-outline-primary" title="Megtekintés">
                                 <i class="bi bi-eye"></i>
                             </a>
                             {{end}}
+                            <a href="/marketplace/my/{{.ID.Hex}}/edit" class="btn btn-sm btn-outline-secondary" title="Szerkesztés">
+                                <i class="bi bi-pencil"></i>
+                            </a>
                             {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "active" "Label" "Aktív"}}
                             {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "reserved" "Label" "Foglalt"}}
                             {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "sold" "Label" "Eladva"}}

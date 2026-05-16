@@ -134,8 +134,13 @@
                     {{end}}
                     {{if .Listing.Delivery}}
                     <div class="mb-3">
-                        <div class="small text-muted">Átvétel / szállítás</div>
-                        <div>{{join .Listing.Delivery ", "}}</div>
+                        <div class="small text-muted mb-1">Átvétel / szállítás</div>
+                        {{range .Listing.Delivery}}
+                        <div class="d-flex justify-content-between align-items-center border rounded-2 px-3 py-2 mb-1 bg-light">
+                            <span>{{if .Icon}}<i class="bi bi-{{.Icon}} me-1"></i>{{end}}{{.TypeName}}</span>
+                            <span class="text-muted small">{{.PriceLabel}}</span>
+                        </div>
+                        {{end}}
                     </div>
                     {{end}}
                     {{if ne .Listing.Status "active"}}

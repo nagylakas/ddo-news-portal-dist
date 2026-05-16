@@ -1,0 +1,91 @@
+{{define "admin/marketplace_delivery_type_edit"}}
+{{template "admin-header" .}}
+<div class="container-fluid">
+    {{template "admin-flash" .}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-truck me-2 text-primary"></i>
+            {{if .DeliveryType}}Szállítási mód szerkesztése{{else}}Új szállítási mód{{end}}
+        </h2>
+        <a href="/admin/marketplace/delivery-types" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Vissza
+        </a>
+    </div>
+
+    {{if .ErrorMessage}}
+    <div class="alert alert-danger">{{.ErrorMessage}}</div>
+    {{end}}
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="name">Név <span class="text-danger">*</span></label>
+                            <input class="form-control" id="name" name="name" required maxlength="100"
+                                   value="{{if .DeliveryType}}{{.DeliveryType.Name}}{{end}}"
+                                   placeholder="Pl. GLS futár, Személyes átvétel, MPL csomag">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="icon">Ikon (Bootstrap Icons osztálynév)</label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="icon-preview">
+                                    <i class="bi bi-{{if .DeliveryType}}{{.DeliveryType.Icon}}{{else}}box{{end}}" id="icon-preview-i"></i>
+                                </span>
+                                <input class="form-control" id="icon" name="icon" maxlength="80"
+                                       value="{{if .DeliveryType}}{{.DeliveryType.Icon}}{{end}}"
+                                       placeholder="pl. truck, box, person-walking, bicycle">
+                            </div>
+                            <div class="form-text">
+                                Kereshetsz ikonokat a <a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener">Bootstrap Icons</a> oldalon. Csak az osztálynevet add meg (pl. <code>truck</code>).
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="description">Leírás</label>
+                            <input class="form-control" id="description" name="description" maxlength="200"
+                                   value="{{if .DeliveryType}}{{.DeliveryType.Description}}{{end}}"
+                                   placeholder="Rövid leírás a hirdetőknek">
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold" for="display_order">Megjelenési sorrend</label>
+                                <input class="form-control" id="display_order" name="display_order" type="number" min="0"
+                                       value="{{if .DeliveryType}}{{.DeliveryType.DisplayOrder}}{{else}}0{{end}}">
+                                <div class="form-text">Kisebb szám = előrébb jelenik meg.</div>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold d-block">&nbsp;</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="active" name="active"
+                                           {{if .DeliveryType}}{{if .DeliveryType.Active}}checked{{end}}{{else}}checked{{end}}>
+                                    <label class="form-check-label" for="active">Aktív (látható a hirdetők számára)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>Mentés
+                            </button>
+                            <a href="/admin/marketplace/delivery-types" class="btn btn-outline-secondary">Mégse</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    var iconInput = document.getElementById('icon');
+    var iconEl = document.getElementById('icon-preview-i');
+    if (iconInput && iconEl) {
+        iconInput.addEventListener('input', function() {
+            var val = this.value.trim();
+            iconEl.className = 'bi bi-' + (val || 'box');
+        });
+    }
+})();
+</script>
+{{template "admin-footer" .}}
+{{end}}
