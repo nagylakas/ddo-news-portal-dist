@@ -1,0 +1,107 @@
+{{define "admin/marketplace_reports"}}
+{{template "admin-header" .}}
+<div class="container-fluid">
+    {{template "admin-flash" .}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-flag me-2 text-danger"></i>{{t .Lang "mkt.reports_title"}}</h2>
+            <p class="text-muted mb-0">
+                {{t .Lang "mkt.reports_sub"}}
+                {{if gt .UnresolvedCount 0}}
+                <span class="badge text-bg-danger ms-2">{{.UnresolvedCount}} {{t .Lang "mkt.reports_unresolved"}}</span>
+                {{end}}
+            </p>
+        </div>
+        <a href="/admin/marketplace" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{{t .Lang "mkt.dashboard_title"}}
+        </a>
+    </div>
+
+    {{if .Reports}}
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>{{t .Lang "mkt.reports_col_listing"}}</th>
+                    <th>{{t .Lang "mkt.reports_col_reason"}}</th>
+                    <th>{{t .Lang "mkt.reports_col_reporter"}}</th>
+                    <th>{{t .Lang "mkt.reports_col_date"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.reports_col_status"}}</th>
+                    <th class="text-end">{{t .Lang "mkt.reports_col_actions"}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Reports}}
+                <tr class="{{if not .Resolved}}table-danger bg-opacity-10{{end}}">
+                    <td>
+                        <a href="/marketplace/listing/{{.ListingSlug}}" target="_blank" rel="noopener" class="fw-semibold text-decoration-none">
+                            {{.ListingTitle}}
+                        </a>
+                        <div class="small text-muted">{{.ListingSlug}}</div>
+                    </td>
+                    <td>{{.Reason}}</td>
+                    <td>
+                        {{if .ReporterName}}{{.ReporterName}}{{else}}<span class="text-muted fst-italic">{{t $.Lang "mkt.reports_anonymous"}}</span>{{end}}
+                    </td>
+                    <td class="small text-muted text-nowrap">{{formatDateTime .CreatedAt}}</td>
+                    <td class="text-center">
+                        {{if .Resolved}}
+                        <span class="badge text-bg-success">{{t $.Lang "mkt.reports_resolved"}}</span>
+                        {{else}}
+                        <span class="badge text-bg-danger">{{t $.Lang "mkt.reports_open"}}</span>
+                        {{end}}
+                    </td>
+                    <td class="text-end">
+                        {{if .Details}}
+                        <button class="btn btn-sm btn-outline-secondary me-1"
+                                data-bs-toggle="popover" data-bs-trigger="click"
+                                data-bs-content="{{.Details}}" data-bs-title="Részletek"
+                                title="Részletek megtekintése">
+                            <i class="bi bi-chat-left-text"></i>
+                        </button>
+                        {{end}}
+                        {{if .Resolved}}
+                        <form method="POST" action="/admin/marketplace/reports/{{.ID.Hex}}/unresolve" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">{{t $.Lang "mkt.reports_mark_open"}}</button>
+                        </form>
+                        {{else}}
+                        <form method="POST" action="/admin/marketplace/reports/{{.ID.Hex}}/resolve" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success">{{t $.Lang "mkt.reports_mark_resolved"}}</button>
+                        </form>
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{if or .HasPrev .HasNext}}
+    <nav class="mt-4" aria-label="Jelentések lapozás">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                <a class="page-link" href="/admin/marketplace/reports?page={{subtract .CurrentPage 1}}">{{t .Lang "mkt.prev"}}</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">{{.CurrentPage}}. oldal</span></li>
+            <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                <a class="page-link" href="/admin/marketplace/reports?page={{add .CurrentPage 1}}">{{t .Lang "mkt.next"}}</a>
+            </li>
+        </ul>
+    </nav>
+    {{end}}
+    {{else}}
+    <div class="text-center py-5 border rounded-3 bg-light">
+        <i class="bi bi-flag text-muted" style="font-size:4rem;"></i>
+        <h3 class="h5 mt-3 text-muted">{{t .Lang "mkt.reports_empty"}}</h3>
+    </div>
+    {{end}}
+</div>
+<script>
+document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function(el) {
+    new bootstrap.Popover(el);
+});
+</script>
+{{template "admin-footer" .}}
+{{end}}

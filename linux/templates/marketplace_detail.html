@@ -181,15 +181,18 @@
                     </div>
                     {{end}}
                     {{if ne .Listing.Status "active"}}
-                    <div class="alert alert-warning mb-0">
+                    <div class="alert alert-warning mb-2">
                         <i class="bi bi-exclamation-triangle me-1"></i>
                         Ez a hirdetés jelenleg <strong>{{.Listing.StatusLabel}}</strong> állapotú — az eladóval való kapcsolatfelvétel nem lehetséges.
                     </div>
                     {{else}}
-                    <div class="small text-muted text-center">
-                        <i class="bi bi-shield-check me-1"></i>Vásárlás előtt mindig egyeztesd az átvétel részleteit az eladóval.
+                    <div class="alert alert-danger mb-2 small">
+                        <i class="bi bi-shield-exclamation me-1"></i><strong>Soha ne utalj előre!</strong> Probléma, csalás esetén a hirdetésben jelentsd nekünk!
                     </div>
                     {{end}}
+                    <button class="btn btn-outline-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#reportModal">
+                        <i class="bi bi-flag me-1"></i>Hirdetés jelentése
+                    </button>
                 </div>
             </div>
         </aside>
@@ -254,6 +257,46 @@
             </div>
         </div>
     </section>
+
+    {{/* Report modal */}}
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="/marketplace/report/{{.Listing.Slug}}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reportModalLabel">
+                            <i class="bi bi-flag me-2 text-danger"></i>Hirdetés jelentése
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bezárás"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger small mb-3">
+                            <i class="bi bi-shield-exclamation me-1"></i><strong>Soha ne utalj előre!</strong> Ha az eladó előre utalást vagy ajándékkártyát kér, az szinte biztosan csalás.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="report-reason">Ok <span class="text-danger">*</span></label>
+                            <select class="form-select" id="report-reason" name="reason" required>
+                                <option value="">— Válassz okot —</option>
+                                {{range .ReportReasons}}
+                                <option value="{{.}}">{{.}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="mb-1">
+                            <label class="form-label fw-semibold" for="report-details">Részletek (opcionális)</label>
+                            <textarea class="form-control" id="report-details" name="details" rows="3" maxlength="1000" placeholder="Írd le röviden a problémát..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Mégse</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-flag me-1"></i>Jelentés elküldése
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     {{if .RelatedListings}}
     <section class="mt-5">
