@@ -75,6 +75,9 @@
     {{if .Articles}}
     {{$articles := .Articles}}
 
+    {{if eq .CurrentPage 1}}
+    {{/* ===== PAGE 1: magazin elrendezés ===== */}}
+
     <!-- Section header -->
     <div class="section-header mb-4">
         <h3 class="section-title">A <span class="text-primary">Legfrissebb</span> hírek</h3>
@@ -104,7 +107,6 @@
                             <span class="latest-meta-author">Szerző: {{upper $art.Author}}</span>
                             <span class="latest-meta-dot">•</span>
                             <span>{{formatDate $art.PublishedAt}}</span>
-                            {{/* comment count hidden until comments are implemented */}}
                         </div>
                     </div>
                 </div>
@@ -159,6 +161,153 @@
             </div>
         </div>
     </div>
+
+    {{else}}
+    {{/* ===== PAGE 2+: 3× legfrissebb blokk, felváltva tükrözve ===== */}}
+    {{/* Articles[0-1] a hero-side-ban van, Articles[2-16] az alábbi 3 blokkban */}}
+
+    <!-- Blokk 1: nagy bal, kis jobb (Articles[2–6]) -->
+    <div class="section-header mb-4">
+        <h3 class="section-title">A <span class="text-primary">Legfrissebb</span> hírek</h3>
+    </div>
+    <div class="row g-4">
+        {{range $i, $art := $articles}}
+        {{if eq $i 2}}
+        <div class="col-lg-6 col-xl-7 col-xxl-6">
+            <a href="/article/{{$art.Slug}}" class="text-decoration-none text-dark">
+                <div class="latest-main">
+                    <div class="latest-main-img-wrap">
+                        {{if $art.ImageURL}}
+                        <img src="{{$art.ImageURL}}" class="latest-main-img" alt="{{$art.Title}}">
+                        {{else}}
+                        <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-white" style="font-size:4rem;"></i>
+                        </div>
+                        {{end}}
+                        <span class="latest-badge latest-badge-overlay">{{$art.Category}}</span>
+                    </div>
+                    <div class="latest-main-body">
+                        <h3 class="latest-main-title">{{$art.Title}}</h3>
+                        <p class="latest-main-summary">{{truncate $art.Summary 160}}</p>
+                        <div class="latest-meta">
+                            <span class="latest-meta-author">Szerző: {{upper $art.Author}}</span>
+                            <span class="latest-meta-dot">•</span>
+                            <span>{{formatDate $art.PublishedAt}}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{end}}
+        {{end}}
+        <div class="col-lg-6 col-xl-5 col-xxl-6">
+            <div class="row g-3 h-100">
+                {{range $i, $art := $articles}}
+                {{if and (gt $i 2) (lt $i 7)}}
+                <div class="col-6 latest-small-col">
+                    {{template "home-small-card" $art}}
+                </div>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="section-divider my-5">
+
+    <!-- Blokk 2: kis bal, nagy jobb (Articles[7–11]) — tükrözött -->
+    <div class="row g-4 flex-row-reverse">
+        {{range $i, $art := $articles}}
+        {{if eq $i 7}}
+        <div class="col-lg-6 col-xl-7 col-xxl-6">
+            <a href="/article/{{$art.Slug}}" class="text-decoration-none text-dark">
+                <div class="latest-main">
+                    <div class="latest-main-img-wrap">
+                        {{if $art.ImageURL}}
+                        <img src="{{$art.ImageURL}}" class="latest-main-img" alt="{{$art.Title}}">
+                        {{else}}
+                        <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-white" style="font-size:4rem;"></i>
+                        </div>
+                        {{end}}
+                        <span class="latest-badge latest-badge-overlay">{{$art.Category}}</span>
+                    </div>
+                    <div class="latest-main-body">
+                        <h3 class="latest-main-title">{{$art.Title}}</h3>
+                        <p class="latest-main-summary">{{truncate $art.Summary 160}}</p>
+                        <div class="latest-meta">
+                            <span class="latest-meta-author">Szerző: {{upper $art.Author}}</span>
+                            <span class="latest-meta-dot">•</span>
+                            <span>{{formatDate $art.PublishedAt}}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{end}}
+        {{end}}
+        <div class="col-lg-6 col-xl-5 col-xxl-6">
+            <div class="row g-3 h-100">
+                {{range $i, $art := $articles}}
+                {{if and (gt $i 7) (lt $i 12)}}
+                <div class="col-6 latest-small-col">
+                    {{template "home-small-card" $art}}
+                </div>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="section-divider my-5">
+
+    <!-- Blokk 3: nagy bal, kis jobb (Articles[12–16]) -->
+    <div class="row g-4">
+        {{range $i, $art := $articles}}
+        {{if eq $i 12}}
+        <div class="col-lg-6 col-xl-7 col-xxl-6">
+            <a href="/article/{{$art.Slug}}" class="text-decoration-none text-dark">
+                <div class="latest-main">
+                    <div class="latest-main-img-wrap">
+                        {{if $art.ImageURL}}
+                        <img src="{{$art.ImageURL}}" class="latest-main-img" alt="{{$art.Title}}">
+                        {{else}}
+                        <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-white" style="font-size:4rem;"></i>
+                        </div>
+                        {{end}}
+                        <span class="latest-badge latest-badge-overlay">{{$art.Category}}</span>
+                    </div>
+                    <div class="latest-main-body">
+                        <h3 class="latest-main-title">{{$art.Title}}</h3>
+                        <p class="latest-main-summary">{{truncate $art.Summary 160}}</p>
+                        <div class="latest-meta">
+                            <span class="latest-meta-author">Szerző: {{upper $art.Author}}</span>
+                            <span class="latest-meta-dot">•</span>
+                            <span>{{formatDate $art.PublishedAt}}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{end}}
+        {{end}}
+        <div class="col-lg-6 col-xl-5 col-xxl-6">
+            <div class="row g-3 h-100">
+                {{range $i, $art := $articles}}
+                {{if and (gt $i 12) (lt $i 17)}}
+                <div class="col-6 latest-small-col">
+                    {{template "home-small-card" $art}}
+                </div>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    {{end}}
 
     <!-- Pagination -->
     {{if or .HasPrev .HasNext}}

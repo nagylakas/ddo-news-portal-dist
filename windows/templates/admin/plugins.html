@@ -7,12 +7,9 @@
             <h2 class="mb-1"><i class="bi bi-puzzle me-2 text-primary"></i>Bővítmények</h2>
             <p class="text-muted mb-0">Opcionális portálmodulok ki- és bekapcsolása.</p>
         </div>
-        <form method="POST" action="/admin/restart" onsubmit="return confirm('Biztosan újraindítja az alkalmazást? A módosított bővítményállapot csak újraindítás után lép érvénybe.');">
-            <input type="hidden" name="return" value="/admin/plugins">
-            <button type="submit" class="btn btn-warning">
+        <button type="button" class="btn btn-warning" id="pluginRestartBtn" onclick="triggerPluginRestart()">
                 <i class="bi bi-arrow-clockwise me-1"></i>Alkalmazás újraindítása
-            </button>
-        </form>
+        </button>
     </div>
 
     <div class="alert alert-info">
@@ -66,5 +63,64 @@
         {{end}}
     </div>
 </div>
+<div id="restartOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:2.5rem 3rem; text-align:center; max-width:380px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.3);">
+        <div class="spinner-border text-warning mb-3" role="status" style="width:3rem;height:3rem;">
+            <span class="visually-hidden">Töltés...</span>
+        </div>
+        <h5 class="mb-2 fw-bold" id="restartOverlayTitle">Az alkalmazás újraindul</h5>
+        <p class="text-muted mb-3" style="font-size:.9rem;" id="restartOverlayText">Kérjük várjon, ez néhány másodpercet vesz igénybe...</p>
+        <div id="restartStatus" class="text-muted" style="font-size:.8rem;"></div>
+    </div>
+</div>
+<script>
+function triggerPluginRestart() {
+    if (!confirm('Biztosan újraindítja az alkalmazást? A módosított bővítményállapot csak újraindítás után lép érvénybe.')) return;
+
+    var overlay = document.getElementById('restartOverlay');
+    var status = document.getElementById('restartStatus');
+    var btn = document.getElementById('pluginRestartBtn');
+
+    status.textContent = 'Leállítás folyamatban...';
+    overlay.style.display = 'flex';
+    btn.disabled = true;
+
+    fetch('/admin/restart', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'return=' + encodeURIComponent('/admin/plugins')
+    }).catch(function() {});
+
+    setTimeout(function() {
+        status.textContent = 'Újraindítás folyamatban...';
+        pollPluginsUntilAlive(0);
+    }, 2000);
+}
+
+function pollPluginsUntilAlive(attempts) {
+    var status = document.getElementById('restartStatus');
+    var maxAttempts = 30;
+    if (attempts >= maxAttempts) {
+        status.textContent = 'Az újraindítás túl sokáig tart - töltse újra az oldalt manuálisan.';
+        return;
+    }
+    fetch('/admin', {method: 'HEAD', cache: 'no-store'})
+        .then(function(resp) {
+            if (resp.ok || resp.status === 302 || resp.status === 200) {
+                status.textContent = 'Kész! Átirányítás...';
+                window.location.href = '/admin/plugins?flash=' + encodeURIComponent('Az alkalmazás sikeresen újraindult.');
+                return;
+            }
+            retryPluginsRestart(attempts);
+        })
+        .catch(function() { retryPluginsRestart(attempts); });
+}
+
+function retryPluginsRestart(attempts) {
+    var status = document.getElementById('restartStatus');
+    status.textContent = 'Várakozás a szerverre... (' + (attempts + 1) + ')';
+    setTimeout(function() { pollPluginsUntilAlive(attempts + 1); }, 2000);
+}
+</script>
 {{template "admin-footer" .}}
 {{end}}
