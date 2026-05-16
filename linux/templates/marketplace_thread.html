@@ -1,0 +1,90 @@
+{{define "marketplace/thread"}}
+{{template "header" .}}
+<section class="container py-5" style="margin-top:90px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {{if .Thread}}
+            {{$first := index .Thread 0}}
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 mb-1">{{$first.ListingTitle}}</h1>
+                    <p class="text-muted mb-0">
+                        <a href="/marketplace/listing/{{$first.ListingSlug}}" class="text-decoration-none">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>Hirdetés megtekintése
+                        </a>
+                    </p>
+                </div>
+                <a href="/marketplace/messages" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Vissza
+                </a>
+            </div>
+
+            {{if .FlashMessage}}
+            <div class="alert alert-success">{{.FlashMessage}}</div>
+            {{end}}
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger">{{.ErrorMessage}}</div>
+            {{end}}
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-0">
+                    <div class="d-flex flex-column gap-0">
+                        {{range .Thread}}
+                        {{$sent := .IsSentByUser $.CurrentUser.ID}}
+                        <div class="d-flex {{if $sent}}justify-content-end{{end}} px-4 py-3 border-bottom">
+                            <div class="{{if $sent}}text-end{{end}}" style="max-width:85%;">
+                                {{if .IsSystemMsg}}
+                                <div class="alert alert-info py-2 px-3 mb-0 small">
+                                    <i class="bi bi-info-circle me-1"></i>{{.Content}}
+                                </div>
+                                {{else}}
+                                <div class="mb-1">
+                                    <span class="fw-semibold small">
+                                        {{if $sent}}Te{{else}}{{.SenderName}}{{end}}
+                                    </span>
+                                    <span class="text-muted small ms-2">{{formatDateTime .CreatedAt}}</span>
+                                </div>
+                                <div class="rounded-3 px-3 py-2 {{if $sent}}bg-primary text-white{{else}}bg-light border{{end}}">
+                                    {{.Content}}
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Válasz küldése</h2>
+                    <form method="POST" action="/marketplace/messages/{{.ThreadID}}">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="content" rows="4" maxlength="2000" required
+                                      placeholder="Írd meg válaszodat..."></textarea>
+                            <div class="form-text text-end"><span id="reply-count">0</span>/2000</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-1"></i>Küldés
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+<script>
+(function() {
+    var ta = document.querySelector('textarea[name="content"]');
+    var counter = document.getElementById('reply-count');
+    if (ta && counter) {
+        ta.addEventListener('input', function() { counter.textContent = this.value.length; });
+    }
+    // Scroll to bottom of messages
+    var card = document.querySelector('.card .d-flex.flex-column');
+    if (card) card.scrollTop = card.scrollHeight;
+})();
+</script>
+{{template "footer" .}}
+{{end}}

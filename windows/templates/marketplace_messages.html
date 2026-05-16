@@ -4,7 +4,7 @@
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
             <h1 class="h2 mb-1">Marketplace üzenetek</h1>
-            <p class="text-muted mb-0">Hirdetésekhez kapcsolódó bejövő és kimenő üzenetek.</p>
+            <p class="text-muted mb-0">Hirdetésekhez kapcsolódó beszélgetések.</p>
         </div>
         <a href="/marketplace/my" class="btn btn-outline-secondary">
             <i class="bi bi-shop-window me-1"></i>Saját hirdetéseim
@@ -14,26 +14,30 @@
     {{if .Messages}}
     <div class="list-group shadow-sm">
         {{range .Messages}}
-        <a href="/marketplace/listing/{{.ListingSlug}}" class="list-group-item list-group-item-action">
-            <div class="d-flex justify-content-between gap-3">
-                <div>
+        <a href="/marketplace/messages/{{.ThreadID.Hex}}" class="list-group-item list-group-item-action {{if not .Read}}fw-semibold{{end}}">
+            <div class="d-flex justify-content-between gap-3 align-items-center">
+                <div class="min-w-0">
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <span class="badge text-bg-secondary">{{.Direction $.CurrentUser.ID}}</span>
-                        <strong>{{.ListingTitle}}</strong>
+                        {{if not .Read}}
+                        <span class="badge text-bg-primary">Új</span>
+                        {{end}}
+                        <span class="{{if not .Read}}fw-bold{{end}}">{{.ListingTitle}}</span>
                     </div>
-                    <div class="small text-muted mb-2">
-                        Partner: {{.OtherParty $.CurrentUser.ID}} &middot; {{formatDateTime .CreatedAt}}
+                    <div class="small text-muted mb-1">
+                        <i class="bi bi-person me-1"></i>{{.OtherParty $.CurrentUser.ID}} &middot; {{formatDateTime .CreatedAt}}
                     </div>
-                    <p class="mb-0">{{truncate .Content 220}}</p>
+                    <p class="mb-0 text-truncate small {{if .IsSystemMsg}}fst-italic text-muted{{end}}">
+                        {{if .IsSystemMsg}}<i class="bi bi-info-circle me-1"></i>{{end}}{{truncate .Content 120}}
+                    </p>
                 </div>
-                <i class="bi bi-chevron-right text-muted align-self-center"></i>
+                <i class="bi bi-chevron-right text-muted flex-shrink-0"></i>
             </div>
         </a>
         {{end}}
     </div>
 
     {{if or .HasPrev .HasNext}}
-    <nav class="mt-4" aria-label="Marketplace üzenetek lapozás">
+    <nav class="mt-4" aria-label="Üzenetek lapozás">
         <ul class="pagination justify-content-center">
             <li class="page-item {{if not .HasPrev}}disabled{{end}}">
                 <a class="page-link" href="/marketplace/messages?page={{subtract .CurrentPage 1}}">Előző</a>
