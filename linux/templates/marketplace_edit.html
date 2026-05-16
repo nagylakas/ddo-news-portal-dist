@@ -159,6 +159,39 @@
                 </div>
                 {{end}}
 
+                {{/* Warranty */}}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Garancia</h2>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="warranty_enabled" name="warranty_enabled"
+                                   {{if .Form.WarrantyEnabled}}checked{{end}}>
+                            <label class="form-check-label fw-semibold" for="warranty_enabled">Garanciális-e még?</label>
+                        </div>
+                        <div id="warranty-panel" {{if not .Form.WarrantyEnabled}}hidden{{end}}>
+                            <div class="border rounded-3 p-3 bg-light">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="warranty_lifetime" name="warranty_lifetime"
+                                           {{if .Form.WarrantyLifetime}}checked{{end}}>
+                                    <label class="form-check-label" for="warranty_lifetime">Élettartam garancia</label>
+                                </div>
+                                <div id="warranty-months-row" {{if ne .Form.Condition "Új"}}hidden{{end}}>
+                                    <label class="form-label small fw-semibold" for="warranty_months">Gyári garancia (hónapokban)</label>
+                                    <input class="form-control form-control-sm" style="max-width:180px;"
+                                           id="warranty_months" name="warranty_months" type="number" min="1" max="360"
+                                           value="{{.Form.WarrantyMonths}}" placeholder="pl. 24">
+                                </div>
+                                <div id="warranty-until-row" {{if eq .Form.Condition "Új"}}hidden{{end}}>
+                                    <label class="form-label small fw-semibold" for="warranty_until">Garancia lejárata</label>
+                                    <input class="form-control form-control-sm" style="max-width:220px;"
+                                           id="warranty_until" name="warranty_until" type="date"
+                                           value="{{.Form.WarrantyUntil}}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {{/* Delivery */}}
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
@@ -173,7 +206,7 @@
                                     <input class="form-check-input delivery-checkbox" type="checkbox"
                                            id="delivery_{{$typeID}}" name="delivery" value="{{$typeID}}"
                                            data-target="price_{{$typeID}}"
-                                           {{range $.Form.DeliveryIDs}}{{if eq . $typeID}}checked{{end}}{{end}}>
+                                           {{if index $.Form.DeliveryIDSet $typeID}}checked{{end}}>
                                     <label class="form-check-label fw-semibold" for="delivery_{{$typeID}}">
                                         {{if .Icon}}<i class="bi bi-{{.Icon}} me-1"></i>{{end}}{{.Name}}
                                     </label>
@@ -261,12 +294,39 @@
 </section>
 <script>
 (function() {
+    // Delivery price rows
     document.querySelectorAll('.delivery-checkbox').forEach(function(cb) {
         var target = document.getElementById(cb.getAttribute('data-target'));
         function syncPrice() { if (target) target.hidden = !cb.checked; }
         cb.addEventListener('change', syncPrice);
         syncPrice();
     });
+
+    // Warranty panel
+    var warrantyEnabled  = document.getElementById('warranty_enabled');
+    var warrantyPanel    = document.getElementById('warranty-panel');
+    var warrantyLifetime = document.getElementById('warranty_lifetime');
+    var monthsRow = document.getElementById('warranty-months-row');
+    var untilRow  = document.getElementById('warranty-until-row');
+    var conditionSel = document.getElementById('condition');
+    var untilInput = document.getElementById('warranty_until');
+
+    if (untilInput) untilInput.min = new Date().toISOString().split('T')[0];
+
+    function syncWarrantyRows() {
+        var isNew = conditionSel && conditionSel.value === 'Új';
+        var isLifetime = warrantyLifetime && warrantyLifetime.checked;
+        if (monthsRow) monthsRow.hidden = !isNew || isLifetime;
+        if (untilRow)  untilRow.hidden  = isNew || isLifetime;
+    }
+    function syncWarrantyPanel() {
+        if (warrantyPanel) warrantyPanel.hidden = !(warrantyEnabled && warrantyEnabled.checked);
+        syncWarrantyRows();
+    }
+    if (warrantyEnabled)  warrantyEnabled.addEventListener('change', syncWarrantyPanel);
+    if (warrantyLifetime) warrantyLifetime.addEventListener('change', syncWarrantyRows);
+    if (conditionSel)     conditionSel.addEventListener('change', syncWarrantyRows);
+    syncWarrantyPanel();
 })();
 </script>
 {{template "footer" .}}

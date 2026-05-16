@@ -126,6 +126,12 @@
                             {{.ReviewStats.AverageLabel}}{{if gt .ReviewStats.Count 0}} ({{.ReviewStats.Count}} értékelés){{end}}
                         </div>
                     </div>
+                    {{if .Listing.HasWarranty}}
+                    <div class="mb-3">
+                        <div class="small text-muted">Garancia</div>
+                        <div class="fw-semibold text-success"><i class="bi bi-shield-check me-1"></i>{{.Listing.WarrantyLabel}}</div>
+                    </div>
+                    {{end}}
                     {{if .Listing.Location}}
                     <div class="mb-3">
                         <div class="small text-muted">Lokáció</div>
