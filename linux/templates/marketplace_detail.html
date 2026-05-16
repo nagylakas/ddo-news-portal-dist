@@ -171,7 +171,12 @@
                     <div id="seller-listing-unread" data-poll-url="/marketplace/listing/{{.Listing.Slug}}/messages">
                         {{if gt .ListingUnread 0}}
                         <div class="alert alert-primary py-2 mb-2">
-                            <i class="bi bi-envelope-exclamation me-1"></i>{{.ListingUnread}} olvasatlan üzenet érkezett ehhez a hirdetéshez.
+                            <i class="bi bi-envelope-exclamation me-1"></i>
+                            {{if .ListingUnreadThreadID}}
+                            <a class="alert-link" href="/marketplace/messages/{{.ListingUnreadThreadID}}">{{.ListingUnread}} olvasatlan üzenet érkezett ehhez a hirdetéshez.</a>
+                            {{else}}
+                            {{.ListingUnread}} olvasatlan üzenet érkezett ehhez a hirdetéshez.
+                            {{end}}
                         </div>
                         {{end}}
                     </div>
@@ -446,15 +451,19 @@ document.addEventListener('DOMContentLoaded', function() {
     var sellerUnread = document.getElementById('seller-listing-unread');
     if (sellerUnread) {
         var unreadUrl = sellerUnread.getAttribute('data-poll-url');
-        function renderUnread(count) {
+        function renderUnread(count, threadID) {
+            var text = count + ' olvasatlan üzenet érkezett ehhez a hirdetéshez.';
+            var content = threadID
+                ? '<a class="alert-link" href="/marketplace/messages/' + esc(threadID) + '">' + text + '</a>'
+                : text;
             sellerUnread.innerHTML = count > 0
-                ? '<div class="alert alert-primary py-2 mb-2"><i class="bi bi-envelope-exclamation me-1"></i>' + count + ' olvasatlan üzenet érkezett ehhez a hirdetéshez.</div>'
+                ? '<div class="alert alert-primary py-2 mb-2"><i class="bi bi-envelope-exclamation me-1"></i>' + content + '</div>'
                 : '';
         }
         function pollUnread() {
             fetch(unreadUrl, {headers: {'Accept': 'application/json'}})
                 .then(function(resp) { return resp.ok ? resp.json() : null; })
-                .then(function(data) { if (data) renderUnread(data.unread_count || 0); })
+                .then(function(data) { if (data) renderUnread(data.unread_count || 0, data.unread_thread_id || ''); })
                 .catch(function() {});
         }
         setInterval(pollUnread, 15000);

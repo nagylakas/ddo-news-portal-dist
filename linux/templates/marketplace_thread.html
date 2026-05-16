@@ -59,7 +59,7 @@
                                             <input type="hidden" name="action" value="counter">
                                             <label class="form-label fw-semibold" for="counter-price-{{.ID.Hex}}">Ellenajánlat összege</label>
                                             <div class="input-group input-group-sm">
-                                                <input class="form-control" id="counter-price-{{.ID.Hex}}" name="counter_price" inputmode="numeric" min="{{add .OfferPriceHUF 1}}" placeholder="Köztes ár">
+                                                <input class="form-control" id="counter-price-{{.ID.Hex}}" name="counter_price" inputmode="numeric" min="{{.OfferCounterMin}}" placeholder="Köztes ár">
                                                 <span class="input-group-text">Ft</span>
                                                 <button type="submit" class="btn btn-outline-primary">Ellenajánlat küldése</button>
                                             </div>
