@@ -69,7 +69,24 @@
                         <h2 class="h4 mb-3">Részletek</h2>
                         <div class="mb-3">
                             <label class="form-label fw-semibold" for="description">Leírás <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="description" name="description" rows="8" required placeholder="Írd le a termék állapotát, tartozékait, garanciáját...">{{.Form.Description}}</textarea>
+                            <div class="md-toolbar mb-1 d-flex gap-1 flex-wrap align-items-center">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('description','**','**')" title="Félkövér"><b>B</b></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary fst-italic" onclick="mdWrap('description','*','*')" title="Dőlt">I</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-decoration-line-through" onclick="mdWrap('description','~~','~~')" title="Áthúzott">S</button>
+                                <span class="text-muted" style="font-size:0.8rem;">|</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('description','## ')" title="Címsor">H2</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('description','- ')" title="Lista">&#8226; Lista</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('description','`','`')" title="Kód"><code>code</code></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdInsertLink('description')" title="Link">&#128279; Link</button>
+                                <div class="ms-auto">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn-preview-description" onclick="togglePreview('description','md-preview-description','btn-preview-description')">&#128065; Előnézet</button>
+                                </div>
+                            </div>
+                            <div class="md-editor-wrap">
+                                <textarea class="form-control font-monospace" id="description" name="description" rows="10" required placeholder="Írd le a termék állapotát, tartozékait, garanciáját..." oninput="livePreview('description','md-preview-description')">{{.Form.Description}}</textarea>
+                                <div id="md-preview-description" class="md-preview d-none article-content border rounded p-3 bg-white"></div>
+                            </div>
+                            <div class="form-text">Markdown formátum: **félkövér**, *dőlt*, ## Cím, - lista, [szöveg](url)</div>
                         </div>
 
                         {{range .MarketCategories}}
@@ -243,6 +260,9 @@
                                     A közvetlen képfeltöltéshez S3 konfiguráció szükséges. Addig használj kép URL-eket.
                                     {{end}}
                                 </div>
+                                <div class="form-text text-muted">
+                                    Kijelentem, hogy a feltöltött kép jogtisztaságát ellenőriztem: a kép felhasználási jogosultságával rendelkezem (ha forrásmegjelölés szükséges, azt megteszem). A kép feltöltéséért a teljes jogi és anyagi felelősséget vállalom.
+                                </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-semibold" for="image_urls">Kép URL-ek</label>
@@ -344,5 +364,7 @@
     syncWarrantyPanel();
 })();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/js/md-editor.js"></script>
 {{template "footer" .}}
 {{end}}
