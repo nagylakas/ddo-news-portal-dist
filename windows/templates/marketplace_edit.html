@@ -256,19 +256,26 @@
                             <img src="{{.}}" alt="" class="rounded border" style="width:100px;height:75px;object-fit:cover;">
                             {{end}}
                         </div>
-                        <p class="small text-muted">Meglévő képek. Új képek feltöltésével vagy URL megadásával cserélheted őket.</p>
+                        <p class="small text-muted">Meglévő képek. A lenti URL mezőben hagyd meg azokat, amelyeket továbbra is használni szeretnél.</p>
                         {{end}}
                         <div class="mb-3">
                             <label class="form-label fw-semibold" for="images">Új képek feltöltése</label>
                             <input class="form-control" id="images" name="images" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple {{if not .S3Enabled}}disabled{{end}}>
-                            <div class="form-text">Maximum 5 kép összesen (a meglévőkkel együtt).</div>
+                            <div class="form-text">
+                                {{if .S3Enabled}}
+                                Maximum 5 kép összesen (a megőrzött meglévő képekkel együtt).
+                                {{else}}
+                                A közvetlen képfeltöltéshez S3 konfiguráció szükséges. Addig használj kép URL-eket.
+                                {{end}}
+                            </div>
                             <div class="form-text text-muted">
                                 Kijelentem, hogy a feltöltött kép jogtisztaságát ellenőriztem: a kép felhasználási jogosultságával rendelkezem (ha forrásmegjelölés szükséges, azt megteszem). A kép feltöltéséért a teljes jogi és anyagi felelősséget vállalom.
                             </div>
                         </div>
                         <div>
-                            <label class="form-label fw-semibold" for="image_urls">Kép URL-ek</label>
-                            <textarea class="form-control" id="image_urls" name="image_urls" rows="3" placeholder="Egy URL soronként">{{.Form.ImageURLs}}</textarea>
+                            <label class="form-label fw-semibold" for="image_urls">Megőrzött és külső kép URL-ek</label>
+                            <textarea class="form-control" id="image_urls" name="image_urls" rows="5" placeholder="Egy URL soronként">{{.Form.ImageURLs}}</textarea>
+                            <div class="form-text">A mentés után a feltöltött új képek a lista elejére kerülnek.</div>
                         </div>
                     </div>
                 </div>
