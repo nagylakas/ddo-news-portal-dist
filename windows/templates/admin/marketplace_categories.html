@@ -1,0 +1,79 @@
+{{define "admin/marketplace_categories"}}
+{{template "admin-header" .}}
+<div class="container-fluid">
+    {{template "admin-flash" .}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-folder2-open me-2 text-primary"></i>Marketplace kategóriák</h2>
+            <p class="text-muted mb-0">Az apróhirdetések kategóriái és kategória-specifikus specifikációs mezői.</p>
+        </div>
+        <a href="/admin/marketplace/categories/create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Új kategória
+        </a>
+    </div>
+
+    {{if .Categories}}
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Név</th>
+                    <th>Slug</th>
+                    <th>Szülő</th>
+                    <th>Mezők</th>
+                    <th class="text-center">Sorrend</th>
+                    <th class="text-center">Állapot</th>
+                    <th class="text-end">Műveletek</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Categories}}
+                <tr>
+                    <td>
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} me-2 text-primary"></i>
+                        <strong>{{.Name}}</strong>
+                        {{if .Description}}<div class="small text-muted">{{.Description}}</div>{{end}}
+                    </td>
+                    <td><code>{{.Slug}}</code></td>
+                    <td>{{if .ParentName}}{{.ParentName}}{{else}}<span class="text-muted">-</span>{{end}}</td>
+                    <td><span class="badge text-bg-secondary">{{len .Fields}}</span></td>
+                    <td class="text-center">{{.DisplayOrder}}</td>
+                    <td class="text-center">
+                        {{if .Active}}
+                        <span class="badge text-bg-success">Aktív</span>
+                        {{else}}
+                        <span class="badge text-bg-secondary">Inaktív</span>
+                        {{end}}
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a href="/admin/marketplace/categories/edit/{{.ID.Hex}}" class="btn btn-outline-secondary" title="Szerkesztés">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form action="/admin/marketplace/categories/delete/{{.ID.Hex}}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger" data-confirm="Biztosan törlöd ezt a marketplace kategóriát?" title="Törlés">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-folder2-open display-4 text-muted"></i>
+        <h5 class="mt-3 text-muted">Még nincsenek marketplace kategóriák</h5>
+        <p class="text-muted">Hozd létre az első kategóriát, például Videókártyák, Processzorok vagy Memória.</p>
+        <a href="/admin/marketplace/categories/create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Első kategória létrehozása
+        </a>
+    </div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}
