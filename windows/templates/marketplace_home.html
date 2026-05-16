@@ -62,8 +62,35 @@
             {{if .Listings}}
             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4">
                 {{range .Listings}}
+                {{$isFav := index $.FavoritedIDs .ID.Hex}}
                 <div class="col">
-                    {{template "marketplace-card" .}}
+                    <a href="/marketplace/listing/{{.Slug}}" class="card h-100 text-decoration-none text-dark shadow-sm marketplace-card">
+                        {{if .CoverImage}}
+                        <img src="{{.CoverImage}}" class="card-img-top" alt="{{.Title}}" style="aspect-ratio:4/3;object-fit:cover;">
+                        {{else}}
+                        <div class="card-img-top bg-secondary-subtle d-flex align-items-center justify-content-center" style="aspect-ratio:4/3;">
+                            <i class="bi bi-image text-secondary" style="font-size:3rem;"></i>
+                        </div>
+                        {{end}}
+                        <div class="card-body">
+                            <div class="d-flex gap-2 mb-2">
+                                <span class="badge text-bg-secondary">{{.Condition}}</span>
+                                {{if .CategoryName}}<span class="badge text-bg-light border">{{.CategoryName}}</span>{{end}}
+                            </div>
+                            <h3 class="h6 card-title mb-2">{{truncate .Title 70}}</h3>
+                            <div class="small text-muted mb-3">
+                                {{if .Location}}<i class="bi bi-geo-alt me-1"></i>{{.Location}}{{else}}<i class="bi bi-person me-1"></i>{{.SellerName}}{{end}}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                <strong class="fs-5 text-primary">{{.PriceFormatted}}</strong>
+                                {{if $isFav}}
+                                <i class="bi bi-heart-fill text-danger"></i>
+                                {{else}}
+                                <i class="bi bi-heart text-muted"></i>
+                                {{end}}
+                            </div>
+                        </div>
+                    </a>
                 </div>
                 {{end}}
             </div>
@@ -85,7 +112,7 @@
             <div class="text-center py-5 border rounded-3 bg-light">
                 <i class="bi bi-shop text-muted" style="font-size:4rem;"></i>
                 <h3 class="h5 mt-3 text-muted">{{if .Query}}Nincs találat{{else}}Még nincsenek aktív hirdetések{{end}}</h3>
-                <p class="text-muted mb-0">{{if .Query}}Próbálj más keresőkifejezést vagy kategóriát.{{else}}A hirdetésfeladás a következő ütemben kapcsolódik ehhez a felülethez.{{end}}</p>
+                <p class="text-muted mb-0">{{if .Query}}Próbálj más keresőkifejezést vagy kategóriát.{{else}}Még senki sem adott fel hirdetést. Legyél az első — kattints a "Hirdetés feladása" gombra!{{end}}</p>
             </div>
             {{end}}
         </main>

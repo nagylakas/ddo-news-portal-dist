@@ -3,8 +3,8 @@
 <section class="container py-5" style="margin-top:90px;">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="h2 mb-1">Marketplace kedvencek</h1>
-            <p class="text-muted mb-0">Mentett hirdetések és mentett keresések.</p>
+            <h1 class="h2 mb-1">Kedvenceim</h1>
+            <p class="text-muted mb-0">Mentett hirdetések és keresések.</p>
         </div>
         <a href="/marketplace" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i>Marketplace
@@ -12,36 +12,70 @@
     </div>
 
     {{if .Favorites}}
-    <div class="list-group shadow-sm">
+    <div class="row g-4">
         {{range .Favorites}}
-        {{if eq .Type "listing"}}
-        <a href="/marketplace/listing/{{.ListingSlug}}" class="list-group-item list-group-item-action">
-            <div class="d-flex justify-content-between align-items-center gap-3">
-                <div>
-                    <span class="badge text-bg-primary mb-2">Hirdetés</span>
-                    <div class="fw-semibold">{{.ListingTitle}}</div>
-                    <div class="small text-muted">Mentve: {{formatDateTime .CreatedAt}}</div>
+        {{if eq .Favorite.Type "listing"}}
+        {{if .Listing}}
+        {{$l := .Listing}}
+        {{$fav := .Favorite}}
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <a href="/marketplace/listing/{{$l.Slug}}" class="card h-100 text-decoration-none text-dark shadow-sm marketplace-card">
+                {{if $l.CoverImage}}
+                <img src="{{$l.CoverImage}}" class="card-img-top" alt="{{$l.Title}}" style="aspect-ratio:4/3;object-fit:cover;">
+                {{else}}
+                <div class="card-img-top bg-secondary-subtle d-flex align-items-center justify-content-center" style="aspect-ratio:4/3;">
+                    <i class="bi bi-image text-secondary" style="font-size:3rem;"></i>
                 </div>
-                <i class="bi bi-chevron-right text-muted"></i>
-            </div>
-        </a>
-        {{else if eq .Type "search"}}
-        <a href="/marketplace?q={{.Query}}" class="list-group-item list-group-item-action">
-            <div class="d-flex justify-content-between align-items-center gap-3">
-                <div>
-                    <span class="badge text-bg-secondary mb-2">Keresés</span>
-                    <div class="fw-semibold">{{.Query}}</div>
-                    <div class="small text-muted">Mentve: {{formatDateTime .CreatedAt}}</div>
+                {{end}}
+                <div class="card-body">
+                    <div class="d-flex gap-2 mb-2">
+                        <span class="badge text-bg-secondary">{{$l.Condition}}</span>
+                        {{if ne $l.Status "active"}}<span class="badge text-bg-warning text-dark">{{$l.StatusLabel}}</span>{{end}}
+                        {{if $l.CategoryName}}<span class="badge text-bg-light border">{{$l.CategoryName}}</span>{{end}}
+                    </div>
+                    <h3 class="h6 card-title mb-2">{{truncate $l.Title 70}}</h3>
+                    <div class="small text-muted mb-3">
+                        {{if $l.Location}}<i class="bi bi-geo-alt me-1"></i>{{$l.Location}}{{else}}<i class="bi bi-person me-1"></i>{{$l.SellerName}}{{end}}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <strong class="fs-5 text-primary">{{$l.PriceFormatted}}</strong>
+                        <span class="small text-muted"><i class="bi bi-heart-fill text-danger me-1"></i>Mentve: {{formatDate $fav.CreatedAt}}</span>
+                    </div>
                 </div>
-                <i class="bi bi-search text-muted"></i>
+            </a>
+        </div>
+        {{else}}
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card h-100 shadow-sm border-secondary-subtle opacity-50">
+                <div class="card-img-top bg-secondary-subtle d-flex align-items-center justify-content-center" style="aspect-ratio:4/3;">
+                    <i class="bi bi-trash text-secondary" style="font-size:3rem;"></i>
+                </div>
+                <div class="card-body">
+                    <h3 class="h6 card-title mb-2">{{.Favorite.ListingTitle}}</h3>
+                    <p class="small text-muted mb-0">Ez a hirdetés már nem elérhető.</p>
+                </div>
             </div>
-        </a>
+        </div>
+        {{end}}
+        {{else if eq .Favorite.Type "search"}}
+        <div class="col-12">
+            <a href="/marketplace?q={{.Favorite.Query}}" class="list-group-item list-group-item-action border rounded-3 shadow-sm p-3">
+                <div class="d-flex justify-content-between align-items-center gap-3">
+                    <div>
+                        <span class="badge text-bg-secondary mb-2">Mentett keresés</span>
+                        <div class="fw-semibold"><i class="bi bi-search me-1"></i>{{.Favorite.Query}}</div>
+                        <div class="small text-muted">Mentve: {{formatDateTime .Favorite.CreatedAt}}</div>
+                    </div>
+                    <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+            </a>
+        </div>
         {{end}}
         {{end}}
     </div>
 
     {{if or .HasPrev .HasNext}}
-    <nav class="mt-4" aria-label="Marketplace kedvencek lapozás">
+    <nav class="mt-4" aria-label="Kedvencek lapozás">
         <ul class="pagination justify-content-center">
             <li class="page-item {{if not .HasPrev}}disabled{{end}}">
                 <a class="page-link" href="/marketplace/favorites?page={{subtract .CurrentPage 1}}">Előző</a>
@@ -56,8 +90,8 @@
     {{else}}
     <div class="text-center py-5 border rounded-3 bg-light">
         <i class="bi bi-heart text-muted" style="font-size:4rem;"></i>
-        <h2 class="h5 mt-3 text-muted">Még nincs mentett marketplace elemed</h2>
-        <p class="text-muted">Hirdetéseket a részletező oldalon, kereséseket a találati oldalon tudsz menteni.</p>
+        <h2 class="h5 mt-3 text-muted">Még nincs mentett elemed</h2>
+        <p class="text-muted">Hirdetéseket a termék oldalán, kereséseket a találati oldalon tudod menteni a szív ikonra kattintva.</p>
     </div>
     {{end}}
 </section>

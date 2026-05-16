@@ -87,6 +87,7 @@
                     <button class="btn btn-primary w-100 mb-2" disabled>
                         <i class="bi bi-cart me-1"></i>Vásárlási szándék
                     </button>
+                    {{if eq .Listing.Status "active"}}
                     {{if .CurrentUser}}
                     {{if ne .CurrentUser.ID .Listing.SellerIDHex}}
                     <form method="POST" action="/marketplace/listing/{{.Listing.Slug}}/contact" class="mb-4">
@@ -110,6 +111,13 @@
                         <i class="bi bi-chat-left-text me-1"></i>Kapcsolat az eladóval
                     </button>
                     {{end}}
+                    {{else if .CurrentUser}}
+                    {{if eq .CurrentUser.ID .Listing.SellerIDHex}}
+                    <a href="/marketplace/my" class="btn btn-outline-secondary w-100 mb-4">
+                        <i class="bi bi-shop-window me-1"></i>Saját hirdetés kezelése
+                    </a>
+                    {{end}}
+                    {{end}}
                     <hr>
                     <div class="mb-3">
                         <div class="small text-muted">Eladó</div>
@@ -130,10 +138,16 @@
                         <div>{{join .Listing.Delivery ", "}}</div>
                     </div>
                     {{end}}
-                    <div class="alert alert-info mb-0">
-                        <i class="bi bi-shield-check me-1"></i>
-                        A vevői védelem és üzenetküldés a következő ütemben kapcsolódik ehhez a hirdetéshez.
+                    {{if ne .Listing.Status "active"}}
+                    <div class="alert alert-warning mb-0">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Ez a hirdetés jelenleg <strong>{{.Listing.StatusLabel}}</strong> állapotú — az eladóval való kapcsolatfelvétel nem lehetséges.
                     </div>
+                    {{else}}
+                    <div class="small text-muted text-center">
+                        <i class="bi bi-shield-check me-1"></i>Vásárlás előtt mindig egyeztesd az átvétel részleteit az eladóval.
+                    </div>
+                    {{end}}
                 </div>
             </div>
         </aside>
