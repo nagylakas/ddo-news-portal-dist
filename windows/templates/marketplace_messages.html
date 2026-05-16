@@ -11,8 +11,9 @@
         </a>
     </div>
 
+    <div id="marketplace-message-list" data-poll-url="/marketplace/messages/poll">
     {{if .Messages}}
-    <div class="list-group shadow-sm">
+    <div class="list-group shadow-sm" id="marketplace-message-items">
         {{range .Messages}}
         <a href="/marketplace/messages/{{.ThreadID.Hex}}" class="list-group-item list-group-item-action {{if not .Read}}fw-semibold{{end}}">
             <div class="d-flex justify-content-between gap-3 align-items-center">
@@ -35,6 +36,14 @@
         </a>
         {{end}}
     </div>
+    {{else}}
+    <div class="text-center py-5 border rounded-3 bg-light" id="marketplace-message-empty">
+        <i class="bi bi-envelope text-muted" style="font-size:4rem;"></i>
+        <h2 class="h5 mt-3 text-muted">Még nincsenek marketplace üzeneteid</h2>
+        <p class="text-muted">Ha kapcsolatba lépsz egy eladóval, vagy valaki ír a hirdetésedre, itt fog megjelenni.</p>
+    </div>
+    {{end}}
+    </div>
 
     {{if or .HasPrev .HasNext}}
     <nav class="mt-4" aria-label="Üzenetek lapozás">
@@ -49,13 +58,44 @@
         </ul>
     </nav>
     {{end}}
-    {{else}}
-    <div class="text-center py-5 border rounded-3 bg-light">
-        <i class="bi bi-envelope text-muted" style="font-size:4rem;"></i>
-        <h2 class="h5 mt-3 text-muted">Még nincsenek marketplace üzeneteid</h2>
-        <p class="text-muted">Ha kapcsolatba lépsz egy eladóval, vagy valaki ír a hirdetésedre, itt fog megjelenni.</p>
-    </div>
-    {{end}}
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var root = document.getElementById('marketplace-message-list');
+    if (!root) return;
+    function esc(value) {
+        return String(value || '').replace(/[&<>"']/g, function(ch) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+        });
+    }
+    var lastHTML = root.innerHTML;
+    function render(threads) {
+        if (!Array.isArray(threads)) return;
+        if (!threads.length) return;
+        var html = '<div class="list-group shadow-sm" id="marketplace-message-items">' + threads.map(function(t) {
+            return '<a href="/marketplace/messages/' + encodeURIComponent(t.thread_id) + '" class="list-group-item list-group-item-action ' + (t.unread ? 'fw-semibold' : '') + '">' +
+                '<div class="d-flex justify-content-between gap-3 align-items-center"><div class="min-w-0">' +
+                '<div class="d-flex align-items-center gap-2 mb-1">' +
+                (t.unread ? '<span class="badge text-bg-primary">Új</span>' : '') +
+                '<span class="' + (t.unread ? 'fw-bold' : '') + '">' + esc(t.listing_title) + '</span></div>' +
+                '<div class="small text-muted mb-1"><i class="bi bi-person me-1"></i>' + esc(t.other_party) + ' &middot; ' + esc(t.created_at) + '</div>' +
+                '<p class="mb-0 text-truncate small ' + (t.is_system_msg ? 'fst-italic text-muted' : '') + '">' +
+                (t.is_system_msg ? '<i class="bi bi-info-circle me-1"></i>' : '') + esc(t.content).slice(0, 120) + '</p>' +
+                '</div><i class="bi bi-chevron-right text-muted flex-shrink-0"></i></div></a>';
+        }).join('') + '</div>';
+        if (html !== lastHTML) {
+            root.innerHTML = html;
+            lastHTML = html;
+        }
+    }
+    function poll() {
+        fetch(root.getAttribute('data-poll-url'), {headers: {'Accept': 'application/json'}})
+            .then(function(resp) { return resp.ok ? resp.json() : null; })
+            .then(function(data) { if (data) render(data.threads || []); })
+            .catch(function() {});
+    }
+    setInterval(poll, 15000);
+});
+</script>
 {{template "footer" .}}
 {{end}}

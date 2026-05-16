@@ -28,7 +28,7 @@
 
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-0">
-                    <div class="d-flex flex-column gap-0">
+                    <div class="d-flex flex-column gap-0" id="marketplace-thread-messages" data-poll-url="/marketplace/messages/{{.ThreadID}}/poll" data-current-user="{{.CurrentUser.ID}}">
                         {{range .Thread}}
                         {{$sent := .IsSentByUser $.CurrentUser.ID}}
                         <div class="d-flex {{if $sent}}justify-content-end{{end}} px-4 py-3 border-bottom">
@@ -81,9 +81,46 @@
     if (ta && counter) {
         ta.addEventListener('input', function() { counter.textContent = this.value.length; });
     }
-    // Scroll to bottom of messages
-    var card = document.querySelector('.card .d-flex.flex-column');
-    if (card) card.scrollTop = card.scrollHeight;
+
+    function esc(value) {
+        return String(value || '').replace(/[&<>"']/g, function(ch) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+        });
+    }
+    var list = document.getElementById('marketplace-thread-messages');
+    var lastHTML = list ? list.innerHTML : '';
+    function render(messages) {
+        if (!list || !Array.isArray(messages)) return;
+        var currentUser = list.getAttribute('data-current-user');
+        var html = messages.map(function(msg) {
+            var sent = msg.sender_id === currentUser;
+            if (msg.is_system_msg) {
+                return '<div class="d-flex px-4 py-3 border-bottom"><div style="max-width:85%;"><div class="alert alert-info py-2 px-3 mb-0 small"><i class="bi bi-info-circle me-1"></i>' + esc(msg.content) + '</div></div></div>';
+            }
+            return '<div class="d-flex ' + (sent ? 'justify-content-end' : '') + ' px-4 py-3 border-bottom">' +
+                '<div class="' + (sent ? 'text-end' : '') + '" style="max-width:85%;">' +
+                '<div class="mb-1"><span class="fw-semibold small">' + (sent ? 'Te' : esc(msg.sender_name)) + '</span>' +
+                '<span class="text-muted small ms-2">' + esc(msg.created_at) + '</span></div>' +
+                '<div class="rounded-3 px-3 py-2 ' + (sent ? 'bg-primary text-white' : 'bg-light border') + '">' + esc(msg.content) + '</div>' +
+                '</div></div>';
+        }).join('');
+        if (html && html !== lastHTML) {
+            list.innerHTML = html;
+            lastHTML = html;
+            list.lastElementChild && list.lastElementChild.scrollIntoView({block: 'end'});
+        }
+    }
+    function poll() {
+        if (!list) return;
+        fetch(list.getAttribute('data-poll-url'), {headers: {'Accept': 'application/json'}})
+            .then(function(resp) { return resp.ok ? resp.json() : null; })
+            .then(function(data) { if (data) render(data.messages || []); })
+            .catch(function() {});
+    }
+    if (list) {
+        list.lastElementChild && list.lastElementChild.scrollIntoView({block: 'end'});
+        setInterval(poll, 15000);
+    }
 })();
 </script>
 {{template "footer" .}}
