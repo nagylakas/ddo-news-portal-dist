@@ -94,7 +94,7 @@
                                 {{if .Location}}<i class="bi bi-geo-alt me-1"></i>{{.Location}}{{else}}<i class="bi bi-person me-1"></i>{{.SellerName}}{{end}}
                             </div>
                             <div class="d-flex justify-content-between align-items-center border-top pt-3">
-                                <strong class="fs-5 text-primary">{{.PriceFormatted}}</strong>
+                                <strong class="fs-5 text-primary">{{.ListPriceFormatted}}</strong>
                                 {{if $isFav}}
                                 <i class="bi bi-heart-fill text-danger"></i>
                                 {{else}}
@@ -152,7 +152,7 @@
             {{if .Location}}<i class="bi bi-geo-alt me-1"></i>{{.Location}}{{else}}<i class="bi bi-person me-1"></i>{{.SellerName}}{{end}}
         </div>
         <div class="d-flex justify-content-between align-items-center border-top pt-3">
-            <strong class="fs-5 text-primary">{{.PriceFormatted}}</strong>
+            <strong class="fs-5 text-primary">{{.ListPriceFormatted}}</strong>
             <i class="bi bi-heart text-muted"></i>
         </div>
     </div>

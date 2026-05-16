@@ -50,22 +50,28 @@
                         </div>
                     </td>
                     <td>{{.CategoryName}}</td>
-                    <td class="fw-semibold">{{.PriceFormatted}}</td>
+                    <td class="fw-semibold">{{.ListPriceFormatted}}</td>
                     <td class="text-center"><span class="badge text-bg-secondary">{{.StatusLabel}}</span></td>
                     <td class="text-end">
                         <div class="d-flex justify-content-end gap-2 flex-wrap">
-                            {{if eq .Status "active"}}
+                            {{if or (eq .Status "active") (eq .Status "reserved") (eq .Status "sold")}}
                             <a href="/marketplace/listing/{{.Slug}}" class="btn btn-sm btn-outline-primary" title="Megtekintés">
                                 <i class="bi bi-eye"></i>
                             </a>
                             {{end}}
+                            {{if and (ne .Status "reserved") (ne .Status "sold")}}
                             <a href="/marketplace/my/{{.ID.Hex}}/edit" class="btn btn-sm btn-outline-secondary" title="Szerkesztés">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "active" "Label" "Aktív"}}
-                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "reserved" "Label" "Foglalt"}}
-                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "sold" "Label" "Eladva"}}
-                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "hidden" "Label" "Rejtés"}}
+                            {{end}}
+                            {{if ne .Status "sold"}}
+                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "active" "Label" "Aktív" "Confirm" ""}}
+                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "reserved" "Label" "Foglalt" "Confirm" ""}}
+                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "sold" "Label" "Eladva" "Confirm" "Az eladottra állítás lezárja a hirdetést. Ezután felhasználóként már nem tudod újra aktívvá tenni, csak admin segítségével. Folytatod?"}}
+                            {{template "marketplace-status-form" dict "ID" .ID.Hex "Status" "hidden" "Label" "Rejtés" "Confirm" ""}}
+                            {{else}}
+                            <span class="text-muted small align-self-center">Admin nyithatja újra</span>
+                            {{end}}
                         </div>
                     </td>
                 </tr>
@@ -105,6 +111,6 @@
 {{define "marketplace-status-form"}}
 <form method="POST" action="/marketplace/my/{{.ID}}/status" class="d-inline">
     <input type="hidden" name="status" value="{{.Status}}">
-    <button type="submit" class="btn btn-sm btn-outline-secondary">{{.Label}}</button>
+    <button type="submit" class="btn btn-sm btn-outline-secondary" {{if .Confirm}}onclick="return confirm('{{.Confirm}}')"{{end}}>{{.Label}}</button>
 </form>
 {{end}}
