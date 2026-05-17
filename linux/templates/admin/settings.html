@@ -64,15 +64,41 @@
                             <div class="text-muted mb-2" style="font-size:.95rem;">
                                 {{t .Lang "settings.oidc_register_text"}}
                             </div>
-                            <div class="d-flex flex-wrap gap-2">
+                            <div class="d-flex flex-wrap gap-2 mb-2">
                                 <span class="badge bg-light text-secondary border">{{t .Lang "settings.oidc_issuer"}}: {{.OIDCRegisterIssuer}}</span>
                                 <span class="badge bg-light text-secondary border">{{t .Lang "settings.oidc_redirect"}}: {{.OIDCRegisterRedirect}}</span>
                             </div>
+                            {{if .OIDCRegisterInsecure}}
+                            <div class="alert alert-warning py-1 px-2 mb-0" style="font-size:.85rem;">
+                                <i class="bi bi-exclamation-triangle me-1"></i>{{t .Lang "settings.oidc_register_insecure"}}
+                            </div>
+                            {{end}}
                         </div>
                         <form action="/admin/oidc/register-client" method="POST" class="d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-start" style="min-width:min(100%, 420px);">
                             <input type="password" class="form-control form-control-sm" name="admin_key" placeholder="{{t .Lang "settings.oidc_admin_key_ph"}}" autocomplete="off" required>
                             <button type="submit" class="btn btn-primary btn-sm text-nowrap">
                                 <i class="bi bi-plus-circle me-1"></i>{{t .Lang "settings.oidc_register_btn"}}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+
+            {{if .S3PolicyFixAvailable}}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                        <div>
+                            <h5 class="mb-1 fw-semibold"><i class="bi bi-cloud-check me-2 text-primary"></i>{{t .Lang "settings.s3_policy_title"}}</h5>
+                            <div class="text-muted mb-2" style="font-size:.95rem;">
+                                {{.S3PolicyStatusText}}
+                            </div>
+                            <span class="badge bg-light text-secondary border">{{t .Lang "settings.s3_policy_scope"}}: {{.S3PolicyBaseURL}}</span>
+                        </div>
+                        <form action="/admin/s3/fix-policy" method="POST">
+                            <button type="submit" class="btn btn-primary btn-sm text-nowrap">
+                                <i class="bi bi-shield-check me-1"></i>{{t .Lang "settings.s3_policy_btn"}}
                             </button>
                         </form>
                     </div>
