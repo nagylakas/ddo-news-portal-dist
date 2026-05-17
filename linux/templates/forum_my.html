@@ -16,7 +16,7 @@
                         <strong>{{truncate .Content 120}}</strong>
                         <small>{{formatDateTime .CreatedAt}}</small>
                     </div>
-                    <form method="POST" action="/forum/post/{{.ID.Hex}}/delete">
+                    <form method="POST" action="/forum/post/{{.ID.Hex}}/delete" onsubmit="return confirm('Biztosan törlöd ezt a hozzászólást?')">
                         <button class="btn btn-sm btn-outline-danger" type="submit">Törlés</button>
                     </form>
                 </div>
