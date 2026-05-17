@@ -1,20 +1,10 @@
 {{define "forum/home"}}
 {{template "header" .}}
-<section class="forum-page container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+{{template "module/hero" dict "Title" "Fórum" "Description" "Szakmai kérdések, tapasztalatok és közösségi beszélgetések." "Crumb" "FÓRUM"}}
+<section class="forum-page module-page container-fluid px-4 px-lg-5 py-4">
     <div class="row g-4">
         {{template "forum/sidebar" .}}
         <main class="col-lg-9 col-xl-10">
-            <div class="forum-hero mb-4">
-                <div>
-                    <h1>Fórum</h1>
-                    <p>Szakmai kérdések, tapasztalatok és közösségi beszélgetések.</p>
-                </div>
-                <form action="/forum/search" method="GET" class="forum-search" role="search">
-                    <input class="form-control" type="search" name="q" value="{{.Query}}" placeholder="Keresés témákban...">
-                    <button class="btn btn-primary" type="submit"><i class="bi bi-search me-1"></i>Keresés</button>
-                </form>
-            </div>
-
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h4 mb-0">Fórum kategóriák</h2>
                 <a href="/forum/new-topic" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Új téma</a>
@@ -58,8 +48,6 @@
 <aside class="col-lg-3 col-xl-2">
     <div class="card border-0 shadow-sm forum-sidebar">
         <div class="card-body">
-            <h2 class="h5 mb-1">Fórum</h2>
-            <p class="text-muted small mb-4">Közösségi beszélgetések</p>
             <div class="list-group list-group-flush">
                 <a href="/forum" class="list-group-item list-group-item-action px-0 {{if not .Category}}fw-semibold text-primary{{end}}">
                     <i class="bi bi-grid me-2"></i>Összes téma
@@ -84,6 +72,9 @@
 {{define "forum/topic_list"}}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="h4 mb-0">{{if .Category}}{{.Category.Name}} témái{{else if .Query}}Keresési eredmények{{else}}Legfrissebb témák{{end}}</h2>
+    {{if and .Category .Category.AllowTopics}}
+    <a href="/forum/new-topic?category={{.Category.ID.Hex}}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Új téma</a>
+    {{end}}
 </div>
 <div class="forum-topic-list">
     {{range .Topics}}

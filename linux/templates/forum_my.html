@@ -1,16 +1,10 @@
 {{define "forum/my"}}
 {{template "header" .}}
-<section class="forum-page container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+{{template "module/hero" dict "Title" "Saját fórum aktivitás" "Description" "Témáid és legutóbbi hozzászólásaid." "Crumb" "FÓRUM"}}
+<section class="forum-page module-page container-fluid px-4 px-lg-5 py-4">
     <div class="row g-4">
         {{template "forum/sidebar" .}}
         <main class="col-lg-9 col-xl-10">
-            <div class="forum-hero mb-4">
-                <div>
-                    <h1>Saját fórum aktivitás</h1>
-                    <p>Témáid és legutóbbi hozzászólásaid.</p>
-                </div>
-                <a href="/forum/new-topic" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Új téma</a>
-            </div>
             {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
             {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
             {{template "forum/topic_list" .}}

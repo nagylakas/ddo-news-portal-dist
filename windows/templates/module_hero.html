@@ -1,0 +1,28 @@
+{{define "listing/hero"}}
+<div class="listing-hero module-listing-hero">
+    <div class="listing-hero-inner">
+        <nav class="art-breadcrumb mb-2" aria-label="breadcrumb">
+            <a href="/">KEZDŐLAP</a>
+            <span class="art-bc-sep">›</span>
+            <span>{{.Crumb}}</span>
+        </nav>
+        <h1 class="listing-hero-title">{{.Title}}</h1>
+        <p class="listing-hero-sub">{{.Description}}</p>
+    </div>
+</div>
+{{end}}
+
+{{define "module/hero"}}
+{{template "listing/hero" .}}
+{{end}}
+
+{{define "module/searchbar"}}
+{{if .SearchAction}}
+<form action="{{.SearchAction}}" method="GET" class="module-searchbar mb-4" role="search">
+    <input class="form-control" type="search" name="q" value="{{.Query}}" placeholder="{{.SearchPlaceholder}}">
+    <button class="btn btn-primary" type="submit">
+        <i class="bi bi-search me-1"></i>Keresés
+    </button>
+</form>
+{{end}}
+{{end}}

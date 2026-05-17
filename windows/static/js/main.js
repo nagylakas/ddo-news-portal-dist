@@ -81,7 +81,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchForm = document.querySelector('form[action="/search"]');
     if (searchForm) {
         const searchInput = searchForm.querySelector('input[name="q"]');
+        const scopeInput = searchForm.querySelector('input[name="scope"]');
+        const marketplaceEnabled = searchForm.getAttribute('data-marketplace-enabled') === 'true';
+        const forumEnabled = searchForm.getAttribute('data-forum-enabled') === 'true';
+        const path = window.location.pathname;
+        let scope = 'articles';
+        if (marketplaceEnabled && path.indexOf('/marketplace') === 0) {
+            scope = 'marketplace';
+        } else if (forumEnabled && path.indexOf('/forum') === 0) {
+            scope = 'forum';
+        } else if (path === '/search') {
+            const requestedScope = new URLSearchParams(window.location.search).get('scope');
+            if (marketplaceEnabled && requestedScope === 'marketplace') {
+                scope = 'marketplace';
+            } else if (forumEnabled && requestedScope === 'forum') {
+                scope = 'forum';
+            }
+        }
+        if (scopeInput) {
+            scopeInput.value = scope;
+        }
         if (searchInput) {
+            if (scope === 'marketplace') {
+                searchInput.placeholder = 'Keresés hirdetésekben...';
+            } else if (scope === 'forum') {
+                searchInput.placeholder = 'Keresés témákban...';
+            } else {
+                searchInput.placeholder = 'Keresés cikkekben...';
+            }
             searchInput.addEventListener('keyup', function(e) {
                 if (e.key === 'Escape') {
                     this.value = '';
@@ -216,6 +243,7 @@ function showToast(message) {
 // ===== Live Search Widget =====
 (function () {
     var input = document.getElementById('navSearchInput');
+    var scopeInput = document.getElementById('navSearchScope');
     var dropdown = document.getElementById('searchDropdown');
     if (!input || !dropdown) return;
 
@@ -249,32 +277,39 @@ function showToast(message) {
 
     function fetchResults(q) {
         lastQ = q;
-        fetch('/api/search?q=' + encodeURIComponent(q))
+        var scope = scopeInput ? scopeInput.value : 'articles';
+        fetch('/api/search/preview?q=' + encodeURIComponent(q) + '&scope=' + encodeURIComponent(scope))
             .then(function (r) { return r.json(); })
             .then(function (data) { renderDropdown(q, data); })
             .catch(function () { dropdown.hidden = true; });
     }
 
-    function renderDropdown(q, items) {
-        if (!items || items.length === 0) {
+    function renderDropdown(q, data) {
+        var sections = data && data.sections ? data.sections : [];
+        if (sections.length === 0) {
             dropdown.innerHTML = '<div class="search-dropdown-empty">Nincs találat</div>';
             dropdown.hidden = false;
             return;
         }
-        var html = items.map(function (a) {
-            var thumb = a.image_url
-                ? '<img class="search-dropdown-thumb" src="' + esc(a.image_url) + '" alt="" loading="lazy">'
-                : '<div class="search-dropdown-thumb-placeholder"><i class="bi bi-image"></i></div>';
-            var summary = a.summary ? esc(a.summary.substring(0, 80)) + '\u2026' : '';
-            return '<a href="/article/' + esc(a.slug) + '" class="search-dropdown-item">'
-                + thumb
-                + '<div class="search-dropdown-text">'
-                + '<div class="search-dropdown-title">' + esc(a.title) + '</div>'
-                + (summary ? '<div class="search-dropdown-summary">' + summary + '</div>' : '')
-                + '</div></a>';
+        var html = sections.map(function (section) {
+            var items = (section.items || []).map(function (item) {
+                var thumb = item.image_url
+                    ? '<img class="search-dropdown-thumb" src="' + esc(item.image_url) + '" alt="" loading="lazy">'
+                    : '<div class="search-dropdown-thumb-placeholder"><i class="bi bi-search"></i></div>';
+                var summary = item.summary ? esc(item.summary.substring(0, 80)) + (item.summary.length > 80 ? '\u2026' : '') : '';
+                return '<a href="' + esc(item.url) + '" class="search-dropdown-item">'
+                    + thumb
+                    + '<div class="search-dropdown-text">'
+                    + '<div class="search-dropdown-title">' + esc(item.title) + '</div>'
+                    + (summary ? '<div class="search-dropdown-summary">' + summary + '</div>' : '')
+                    + '</div></a>';
+            }).join('');
+            return '<div class="search-dropdown-section">'
+                + '<div class="search-dropdown-section-title">' + esc(section.label) + '</div>'
+                + items
+                + '<a href="' + esc(section.url) + '" class="search-dropdown-footer">Összes ' + esc(section.label.toLowerCase()) + ' találat &rarr;</a>'
+                + '</div>';
         }).join('');
-        html += '<a href="/search?q=' + encodeURIComponent(q)
-            + '" class="search-dropdown-footer">Összes találat megtekintése &rarr;</a>';
         dropdown.innerHTML = html;
         dropdown.hidden = false;
     }

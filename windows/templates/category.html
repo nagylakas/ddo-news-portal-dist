@@ -11,18 +11,7 @@
 }
 </script>
 
-<!-- Category Hero Banner -->
-<div class="listing-hero">
-    <div class="listing-hero-inner">
-        <nav class="art-breadcrumb mb-2" aria-label="breadcrumb">
-            <a href="/">KEZDŐLAP</a>
-            <span class="art-bc-sep">›</span>
-            <span>{{upper .Category}}</span>
-        </nav>
-        <h1 class="listing-hero-title">{{.Category}}</h1>
-        <p class="listing-hero-sub">Összes cikk a <strong>{{.Category}}</strong> kategóriában</p>
-    </div>
-</div>
+{{template "listing/hero" dict "Crumb" (upper .Category) "Title" .Category "Description" (printf "Összes cikk a %s kategóriában" .Category)}}
 
 <!-- Content -->
 <div class="container-fluid px-4 px-lg-5 py-5">

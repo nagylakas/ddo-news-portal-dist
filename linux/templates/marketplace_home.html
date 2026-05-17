@@ -1,12 +1,15 @@
 {{define "marketplace/home"}}
 {{template "header" .}}
-<section class="marketplace-page container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+{{if .MarketCategory}}
+{{template "module/hero" dict "Title" .MarketCategory.Name "Description" .MarketCategory.Description "Crumb" "MARKETPLACE"}}
+{{else}}
+{{template "module/hero" dict "Title" "Marketplace" "Description" "Vásárolj, adj el és keress hardvereket a portál közösségében." "Crumb" "MARKETPLACE"}}
+{{end}}
+<section class="marketplace-page module-page container-fluid px-4 px-lg-5 py-4">
     <div class="row g-4">
         <aside class="col-lg-3 col-xl-2">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <h2 class="h5 mb-1">Marketplace</h2>
-                    <p class="text-muted small mb-4">Hardveres apróhirdetések</p>
                     <div class="list-group list-group-flush">
                         <a href="/marketplace" class="list-group-item list-group-item-action px-0 {{if not .CategorySlug}}fw-semibold text-primary{{end}}">
                             <i class="bi bi-grid me-2"></i>Összes hirdetés
@@ -34,25 +37,6 @@
         </aside>
 
         <main class="col-lg-9 col-xl-10">
-            <div class="p-4 p-lg-5 bg-light rounded-3 border mb-4">
-                <div class="row align-items-center g-4">
-                    <div class="col-lg-7">
-                        <h1 class="display-6 fw-bold mb-2">{{if .MarketCategory}}{{.MarketCategory.Name}}{{else}}Marketplace{{end}}</h1>
-                        <p class="lead text-muted mb-0">{{if .MarketCategory}}{{.MarketCategory.Description}}{{else}}Vásárolj, adj el és keress hardvereket a portál közösségében.{{end}}</p>
-                    </div>
-                    <div class="col-lg-5">
-                        <form action="/marketplace" method="GET" role="search">
-                            <div class="input-group input-group-lg">
-                                <input class="form-control" type="search" name="q" value="{{.Query}}" placeholder="Keresés pl. RTX 4080, Ryzen 7...">
-                                <button class="btn btn-primary" type="submit">
-                                    <i class="bi bi-search me-1"></i>Keresés
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h4 mb-0">{{if .Query}}Keresési eredmények{{else}}Legújabb hirdetések{{end}}</h2>
                 <div class="d-flex gap-2">
