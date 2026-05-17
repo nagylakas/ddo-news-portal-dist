@@ -16,7 +16,7 @@
                     <option value="">Válassz kategóriát...</option>
                     {{range .ListableCategories}}
                     <option value="{{.ID.Hex}}" data-parent="{{.ParentName}}" {{if eq $.Form.CategoryID .ID.Hex}}selected{{end}}>
-                        {{if .ParentName}}{{.Name}}{{else}}◆ {{.Name}}{{end}}
+                        {{.SelectLabel}}
                     </option>
                     {{end}}
                 </select>

@@ -14,7 +14,7 @@
                     <span>Kategória</span><span>Témák</span><span>Hozzászólások</span><span>Utolsó aktivitás</span>
                 </div>
                 {{range .ForumCategories}}
-                {{if eq .ParentIDHex ""}}
+                {{if .IsRoot}}
                 <div class="forum-section-row">
                     <div><i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}folder{{end}} me-2"></i>{{.Name}}</div>
                     <span>{{.TopicCount}}</span>
@@ -23,7 +23,7 @@
                 </div>
                 {{else}}
                 <a class="forum-category-row" href="/forum/category/{{.Slug}}">
-                    <div>
+                    <div style="{{.TreeIndentStyle}}">
                         <strong><i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}chat-square-text{{end}} me-2"></i>{{.Name}}</strong>
                         <small>{{.Description}}</small>
                     </div>
@@ -53,7 +53,7 @@
                     <i class="bi bi-grid me-2"></i>Összes téma
                 </a>
                 {{range .ForumCategories}}
-                {{if eq .ParentIDHex ""}}
+                {{if .IsRoot}}
                 <div class="list-group-item px-0 pt-3 pb-1 border-0 bg-transparent">
                     <a href="/forum/category/{{.Slug}}"
                        class="text-decoration-none fw-semibold small text-uppercase text-muted d-flex align-items-center gap-1 {{if and $.Category (eq $.Category.Slug .Slug)}}text-primary{{end}}">
@@ -61,7 +61,7 @@
                     </a>
                 </div>
                 {{else}}
-                <a href="/forum/category/{{.Slug}}" class="list-group-item list-group-item-action border-0 py-1 ps-4 pe-0 {{if and $.Category (eq $.Category.Slug .Slug)}}fw-semibold text-primary{{end}}">
+                <a href="/forum/category/{{.Slug}}" class="list-group-item list-group-item-action border-0 py-1 pe-0 {{if and $.Category (eq $.Category.Slug .Slug)}}fw-semibold text-primary{{end}}" style="{{.SidebarIndentStyle}}">
                     <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}chat-square-text{{end}} me-1 small"></i><span class="small">{{.Name}}</span>
                 </a>
                 {{end}}
