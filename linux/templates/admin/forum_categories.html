@@ -13,7 +13,11 @@
             <tbody>
                 {{range .Categories}}
                 <tr>
-                    <td><i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}folder{{end}} me-2"></i>{{.Name}}</td>
+                    <td>
+                        <span class="{{if .ParentIDHex}}ms-4{{end}}">
+                            {{if .ParentIDHex}}<i class="bi bi-arrow-return-right me-2 text-muted"></i>{{end}}<i class="bi bi-{{if .Icon}}{{.Icon}}{{else if .ParentIDHex}}chat-square-text{{else}}folder{{end}} me-2"></i>{{.Name}}
+                        </span>
+                    </td>
                     <td>{{.ParentName}}</td>
                     <td>{{.TopicCount}}</td>
                     <td>{{.PostCount}}</td>

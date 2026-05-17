@@ -15,7 +15,9 @@
                 <select name="category_id" class="form-select" required>
                     <option value="">Válassz kategóriát...</option>
                     {{range .ListableCategories}}
-                    <option value="{{.ID.Hex}}" {{if eq $.Form.CategoryID .ID.Hex}}selected{{end}}>{{.Name}}</option>
+                    <option value="{{.ID.Hex}}" data-parent="{{.ParentName}}" {{if eq $.Form.CategoryID .ID.Hex}}selected{{end}}>
+                        {{if .ParentName}}{{.Name}}{{else}}◆ {{.Name}}{{end}}
+                    </option>
                     {{end}}
                 </select>
             </div>
@@ -25,7 +27,21 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Nyitó hozzászólás</label>
-                <textarea name="content" class="form-control" rows="10" maxlength="12000" required>{{.Form.Content}}</textarea>
+                <div class="d-flex flex-wrap gap-1 mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('content','**','**')" title="Félkövér"><b>B</b></button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary fst-italic" onclick="mdWrap('content','*','*')" title="Dőlt">I</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary text-decoration-line-through" onclick="mdWrap('content','~~','~~')" title="Áthúzott">S</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','## ')" title="Címsor">H2</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','- ')" title="Lista">&#8226; Lista</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('content','`','`')" title="Kód"><code>code</code></button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdInsertLink('content')" title="Link">&#128279; Link</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary ms-auto" id="btn-preview-content" onclick="togglePreview('content','md-preview-content','btn-preview-content')">&#128065; Előnézet</button>
+                </div>
+                <div class="md-editor-wrap">
+                    <textarea id="content" name="content" class="form-control font-monospace" rows="10" maxlength="12000" required oninput="livePreview('content','md-preview-content')">{{.Form.Content}}</textarea>
+                    <div id="md-preview-content" class="md-preview d-none article-content border rounded p-3 bg-white"></div>
+                </div>
+                <div class="form-text">Markdown formátum: **félkövér**, *dőlt*, ## Cím, - lista, [szöveg](url)</div>
             </div>
             <div class="mb-3">
                 <label class="form-label">Tagek</label>
@@ -38,5 +54,35 @@
         </div>
     </form>
 </section>
+<script>
+(function() {
+    var select = document.querySelector('select[name="category_id"]');
+    if (!select) return;
+    var options = Array.prototype.slice.call(select.querySelectorAll('option[data-parent]'));
+    var groups = {};
+    var groupOrder = [];
+    options.forEach(function(opt) {
+        var parent = opt.getAttribute('data-parent') || '';
+        if (!groups[parent]) {
+            groups[parent] = [];
+            groupOrder.push(parent);
+        }
+        groups[parent].push(opt);
+        opt.parentNode.removeChild(opt);
+    });
+    groupOrder.forEach(function(parent) {
+        if (parent) {
+            var optgroup = document.createElement('optgroup');
+            optgroup.label = parent;
+            groups[parent].forEach(function(opt) { optgroup.appendChild(opt); });
+            select.appendChild(optgroup);
+        } else {
+            groups[parent].forEach(function(opt) { select.appendChild(opt); });
+        }
+    });
+}());
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/js/md-editor.js"></script>
 {{template "footer" .}}
 {{end}}

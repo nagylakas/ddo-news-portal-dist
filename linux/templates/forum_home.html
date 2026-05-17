@@ -24,7 +24,7 @@
                 {{else}}
                 <a class="forum-category-row" href="/forum/category/{{.Slug}}">
                     <div>
-                        <strong>{{.Name}}</strong>
+                        <strong><i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}chat-square-text{{end}} me-2"></i>{{.Name}}</strong>
                         <small>{{.Description}}</small>
                     </div>
                     <span>{{.TopicCount}}</span>

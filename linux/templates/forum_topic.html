@@ -41,7 +41,21 @@
             {{if and .CurrentUser .Topic.IsOpen}}
             <form method="POST" action="/forum/topic/{{.Topic.Slug}}/reply" class="forum-reply mt-4">
                 <h2 class="h5">Válasz írása</h2>
-                <textarea name="content" class="form-control" rows="6" required maxlength="12000"></textarea>
+                <div class="d-flex flex-wrap gap-1 mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('reply-content','**','**')" title="Félkövér"><b>B</b></button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary fst-italic" onclick="mdWrap('reply-content','*','*')" title="Dőlt">I</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary text-decoration-line-through" onclick="mdWrap('reply-content','~~','~~')" title="Áthúzott">S</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('reply-content','## ')" title="Címsor">H2</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('reply-content','- ')" title="Lista">&#8226; Lista</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('reply-content','`','`')" title="Kód"><code>code</code></button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdInsertLink('reply-content')" title="Link">&#128279; Link</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary ms-auto" id="btn-preview-reply-content" onclick="togglePreview('reply-content','md-preview-reply-content','btn-preview-reply-content')">&#128065; Előnézet</button>
+                </div>
+                <div class="md-editor-wrap">
+                    <textarea id="reply-content" name="content" class="form-control font-monospace" rows="6" required maxlength="12000" oninput="livePreview('reply-content','md-preview-reply-content')"></textarea>
+                    <div id="md-preview-reply-content" class="md-preview d-none article-content border rounded p-3 bg-white"></div>
+                </div>
+                <div class="form-text">Markdown formátum: **félkövér**, *dőlt*, ## Cím, - lista, [szöveg](url)</div>
                 <div class="d-flex justify-content-end mt-3">
                     <button class="btn btn-primary" type="submit"><i class="bi bi-send me-1"></i>Küldés</button>
                 </div>
@@ -54,5 +68,7 @@
         </main>
     </div>
 </section>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/js/md-editor.js"></script>
 {{template "footer" .}}
 {{end}}
