@@ -1,0 +1,37 @@
+{{define "forum/my"}}
+{{template "header" .}}
+<section class="forum-page container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+    <div class="row g-4">
+        {{template "forum/sidebar" .}}
+        <main class="col-lg-9 col-xl-10">
+            <div class="forum-hero mb-4">
+                <div>
+                    <h1>Saját fórum aktivitás</h1>
+                    <p>Témáid és legutóbbi hozzászólásaid.</p>
+                </div>
+                <a href="/forum/new-topic" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Új téma</a>
+            </div>
+            {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+            {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+            {{template "forum/topic_list" .}}
+            <h2 class="h4 mt-5 mb-3">Legutóbbi hozzászólásaid</h2>
+            <div class="forum-topic-list">
+                {{range .UserPosts}}
+                <div class="forum-topic-row">
+                    <div>
+                        <strong>{{truncate .Content 120}}</strong>
+                        <small>{{formatDateTime .CreatedAt}}</small>
+                    </div>
+                    <form method="POST" action="/forum/post/{{.ID.Hex}}/delete">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Törlés</button>
+                    </form>
+                </div>
+                {{else}}
+                <div class="forum-empty">Még nincs hozzászólásod.</div>
+                {{end}}
+            </div>
+        </main>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}

@@ -1,0 +1,58 @@
+{{define "forum/topic"}}
+{{template "header" .}}
+<section class="forum-page container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+    <div class="row g-4">
+        {{template "forum/sidebar" .}}
+        <main class="col-lg-9 col-xl-10">
+            <nav class="small mb-3"><a href="/forum">Fórum</a> / <a href="/forum/category/{{.Topic.CategorySlug}}">{{.Topic.CategoryName}}</a></nav>
+            {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+            {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+            <div class="forum-topic-header mb-3">
+                <div>
+                    <h1>{{.Topic.Title}}</h1>
+                    <div class="text-muted small">{{.Topic.CreatedByName}} nyitotta · {{formatDateTime .Topic.CreatedAt}} · {{.Topic.ViewCount}} megtekintés</div>
+                </div>
+                <form action="/forum/topic/{{.Topic.Slug}}" method="GET" class="forum-topic-search">
+                    <input class="form-control form-control-sm" type="search" name="q" value="{{.Query}}" placeholder="Keresés ebben a témában">
+                </form>
+            </div>
+            {{template "forum/pager" .}}
+            <div class="forum-posts">
+                {{range .Posts}}
+                <article class="forum-post" id="post-{{.ID.Hex}}">
+                    <aside>
+                        {{if .UserAvatarURL}}<img src="{{.UserAvatarURL}}" alt="" referrerpolicy="no-referrer">{{else}}<span>{{initial .UserName}}</span>{{end}}
+                        <strong>{{.UserName}}</strong>
+                        <small>{{formatDateTime .CreatedAt}}</small>
+                    </aside>
+                    <div class="forum-post-body">
+                        {{if .Deleted}}
+                        <p class="text-muted fst-italic mb-0">Ez a hozzászólás törölve lett.</p>
+                        {{else}}
+                        <div class="article-content">{{.ContentHTML}}</div>
+                        {{end}}
+                    </div>
+                </article>
+                {{else}}
+                <div class="forum-empty">Nincs hozzászólás.</div>
+                {{end}}
+            </div>
+            {{template "forum/pager" .}}
+            {{if and .CurrentUser .Topic.IsOpen}}
+            <form method="POST" action="/forum/topic/{{.Topic.Slug}}/reply" class="forum-reply mt-4">
+                <h2 class="h5">Válasz írása</h2>
+                <textarea name="content" class="form-control" rows="6" required maxlength="12000"></textarea>
+                <div class="d-flex justify-content-end mt-3">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-send me-1"></i>Küldés</button>
+                </div>
+            </form>
+            {{else if .CurrentUser}}
+            <div class="alert alert-secondary mt-4">Ez a téma zárolt.</div>
+            {{else if .OIDCEnabled}}
+            <div class="alert alert-light border mt-4"><a href="/auth/login?force=1&return=/forum/topic/{{.Topic.Slug}}">Jelentkezz be</a> a hozzászóláshoz.</div>
+            {{end}}
+        </main>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}

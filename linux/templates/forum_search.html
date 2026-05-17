@@ -1,0 +1,22 @@
+{{define "forum/search"}}
+{{template "header" .}}
+<section class="forum-page container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+    <div class="row g-4">
+        {{template "forum/sidebar" .}}
+        <main class="col-lg-9 col-xl-10">
+            <div class="forum-hero mb-4">
+                <div>
+                    <h1>Fórum keresés</h1>
+                    <p>Topikcímekben, tagekben és kategóriákban keres.</p>
+                </div>
+                <form action="/forum/search" method="GET" class="forum-search" role="search">
+                    <input class="form-control" type="search" name="q" value="{{.Query}}" placeholder="Keresés...">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search me-1"></i>Keresés</button>
+                </form>
+            </div>
+            {{template "forum/topic_list" .}}
+        </main>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}

@@ -1,0 +1,42 @@
+{{define "forum/new_topic"}}
+{{template "header" .}}
+<section class="forum-page container py-5" style="margin-top:90px; max-width:980px;">
+    <div class="forum-topic-header mb-4">
+        <div>
+            <h1>Új fórum téma</h1>
+            <div class="text-muted">Válassz kategóriát, adj címet és írd meg a nyitó hozzászólást.</div>
+        </div>
+    </div>
+    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+    <form method="POST" action="/forum/new-topic" class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Kategória</label>
+                <select name="category_id" class="form-select" required>
+                    <option value="">Válassz kategóriát...</option>
+                    {{range .ListableCategories}}
+                    <option value="{{.ID.Hex}}" {{if eq $.Form.CategoryID .ID.Hex}}selected{{end}}>{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Cím</label>
+                <input name="title" class="form-control" value="{{.Form.Title}}" maxlength="150" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Nyitó hozzászólás</label>
+                <textarea name="content" class="form-control" rows="10" maxlength="12000" required>{{.Form.Content}}</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tagek</label>
+                <input name="tags" class="form-control" value="{{.Form.Tags}}" placeholder="pl. videokártya, driver, kérdés">
+            </div>
+            <div class="d-flex justify-content-between">
+                <a href="/forum" class="btn btn-outline-secondary">Mégse</a>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i>Téma létrehozása</button>
+            </div>
+        </div>
+    </form>
+</section>
+{{template "footer" .}}
+{{end}}

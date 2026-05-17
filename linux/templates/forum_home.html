@@ -1,0 +1,123 @@
+{{define "forum/home"}}
+{{template "header" .}}
+<section class="forum-page container-fluid px-4 px-lg-5 py-5" style="margin-top:90px;">
+    <div class="row g-4">
+        {{template "forum/sidebar" .}}
+        <main class="col-lg-9 col-xl-10">
+            <div class="forum-hero mb-4">
+                <div>
+                    <h1>Fórum</h1>
+                    <p>Szakmai kérdések, tapasztalatok és közösségi beszélgetések.</p>
+                </div>
+                <form action="/forum/search" method="GET" class="forum-search" role="search">
+                    <input class="form-control" type="search" name="q" value="{{.Query}}" placeholder="Keresés témákban...">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search me-1"></i>Keresés</button>
+                </form>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Fórum kategóriák</h2>
+                <a href="/forum/new-topic" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Új téma</a>
+            </div>
+            <div class="forum-board mb-4">
+                <div class="forum-board-head">
+                    <span>Kategória</span><span>Témák</span><span>Hozzászólások</span><span>Utolsó aktivitás</span>
+                </div>
+                {{range .ForumCategories}}
+                {{if eq .ParentIDHex ""}}
+                <div class="forum-section-row">
+                    <div><i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}folder{{end}} me-2"></i>{{.Name}}</div>
+                    <span>{{.TopicCount}}</span>
+                    <span>{{.PostCount}}</span>
+                    <span>{{if .LastPostAt}}{{formatDateTime .LastPostAt}} · {{.LastPostUser}}{{else}}-{{end}}</span>
+                </div>
+                {{else}}
+                <a class="forum-category-row" href="/forum/category/{{.Slug}}">
+                    <div>
+                        <strong>{{.Name}}</strong>
+                        <small>{{.Description}}</small>
+                    </div>
+                    <span>{{.TopicCount}}</span>
+                    <span>{{.PostCount}}</span>
+                    <span>{{if .LastPostAt}}{{formatDateTime .LastPostAt}}<br><small>{{.LastPostUser}}</small>{{else}}-{{end}}</span>
+                </a>
+                {{end}}
+                {{else}}
+                <div class="forum-empty">Még nincs fórum kategória.</div>
+                {{end}}
+            </div>
+
+            {{template "forum/topic_list" .}}
+        </main>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}
+
+{{define "forum/sidebar"}}
+<aside class="col-lg-3 col-xl-2">
+    <div class="card border-0 shadow-sm forum-sidebar">
+        <div class="card-body">
+            <h2 class="h5 mb-1">Fórum</h2>
+            <p class="text-muted small mb-4">Közösségi beszélgetések</p>
+            <div class="list-group list-group-flush">
+                <a href="/forum" class="list-group-item list-group-item-action px-0 {{if not .Category}}fw-semibold text-primary{{end}}">
+                    <i class="bi bi-grid me-2"></i>Összes téma
+                </a>
+                {{range .ForumCategories}}
+                {{if eq .ParentIDHex ""}}
+                <div class="list-group-item px-0 pt-3 pb-1 border-0 bg-transparent">
+                    <span class="fw-semibold small text-uppercase text-muted"><i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}folder{{end}} me-1"></i>{{.Name}}</span>
+                </div>
+                {{else}}
+                <a href="/forum/category/{{.Slug}}" class="list-group-item list-group-item-action border-0 py-1 ps-4 pe-0 {{if and $.Category (eq $.Category.Slug .Slug)}}fw-semibold text-primary{{end}}">
+                    <i class="bi bi-chat-square-text me-1 small"></i><span class="small">{{.Name}}</span>
+                </a>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+    </div>
+</aside>
+{{end}}
+
+{{define "forum/topic_list"}}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">{{if .Category}}{{.Category.Name}} témái{{else if .Query}}Keresési eredmények{{else}}Legfrissebb témák{{end}}</h2>
+</div>
+<div class="forum-topic-list">
+    {{range .Topics}}
+    <a class="forum-topic-row" href="/forum/topic/{{.Slug}}">
+        <div>
+            <div class="forum-topic-title">
+                {{if .Pinned}}<i class="bi bi-pin-angle-fill text-primary"></i>{{end}}
+                {{if eq .Status "locked"}}<i class="bi bi-lock-fill text-secondary"></i>{{end}}
+                {{if eq .Status "hidden"}}<i class="bi bi-eye-slash-fill text-warning"></i>{{end}}
+                <strong>{{.Title}}</strong>
+            </div>
+            <small>{{.CategoryName}} · {{.CreatedByName}} · {{formatDateTime .CreatedAt}}</small>
+        </div>
+        <div class="forum-topic-stats">
+            <span>{{.ReplyCount}} válasz</span>
+            <span>{{.ViewCount}} megtekintés</span>
+        </div>
+        <div class="forum-topic-last">
+            {{formatDateTime .LastPostAt}}<br><small>{{.LastPostUser}}</small>
+        </div>
+    </a>
+    {{else}}
+    <div class="forum-empty">Nincs megjeleníthető téma.</div>
+    {{end}}
+</div>
+{{template "forum/pager" .}}
+{{end}}
+
+{{define "forum/pager"}}
+{{if or .HasPrev .HasNext}}
+<nav class="d-flex justify-content-center gap-2 mt-4">
+    {{if .HasPrev}}<a class="btn btn-outline-secondary btn-sm" href="?page={{subtract .CurrentPage 1}}{{if .Query}}&q={{.Query}}{{end}}">Előző</a>{{end}}
+    <span class="btn btn-light btn-sm disabled">{{.CurrentPage}}. oldal</span>
+    {{if .HasNext}}<a class="btn btn-outline-secondary btn-sm" href="?page={{add .CurrentPage 1}}{{if .Query}}&q={{.Query}}{{end}}">Következő</a>{{end}}
+</nav>
+{{end}}
+{{end}}

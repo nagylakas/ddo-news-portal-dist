@@ -30,10 +30,18 @@
                                 Env kulcs: <code>{{.EnvKey}}</code>
                                 <span class="mx-2">&middot;</span>
                                 Futó állapot:
+                                {{if eq .ID "marketplace"}}
                                 {{if marketplaceEnabled}}
                                 <span class="badge text-bg-success">bekapcsolva</span>
                                 {{else}}
                                 <span class="badge text-bg-secondary">kikapcsolva</span>
+                                {{end}}
+                                {{else if eq .ID "forum"}}
+                                {{if forumEnabled}}
+                                <span class="badge text-bg-success">bekapcsolva</span>
+                                {{else}}
+                                <span class="badge text-bg-secondary">kikapcsolva</span>
+                                {{end}}
                                 {{end}}
                             </div>
                         </div>
@@ -45,7 +53,8 @@
                     <hr>
 
                     <form method="POST" action="/admin/plugins" class="d-flex flex-wrap align-items-center gap-3">
-                        <input type="hidden" name="marketplace_enabled" value="{{if .Enabled}}false{{else}}true{{end}}">
+                        <input type="hidden" name="plugin_id" value="{{.ID}}">
+                        <input type="hidden" name="enabled" value="{{if .Enabled}}false{{else}}true{{end}}">
                         <button type="submit" class="btn {{if .Enabled}}btn-outline-danger{{else}}btn-success{{end}}">
                             {{if .Enabled}}
                             <i class="bi bi-toggle-off me-1"></i>Kikapcsolás
