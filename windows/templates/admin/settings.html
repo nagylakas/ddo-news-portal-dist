@@ -55,6 +55,31 @@
                 </div>
             </div>
 
+            {{if .OIDCRegisterAvailable}}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                        <div>
+                            <h5 class="mb-1 fw-semibold"><i class="bi bi-person-badge me-2 text-primary"></i>{{t .Lang "settings.oidc_register_title"}}</h5>
+                            <div class="text-muted mb-2" style="font-size:.95rem;">
+                                {{t .Lang "settings.oidc_register_text"}}
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-secondary border">{{t .Lang "settings.oidc_issuer"}}: {{.OIDCRegisterIssuer}}</span>
+                                <span class="badge bg-light text-secondary border">{{t .Lang "settings.oidc_redirect"}}: {{.OIDCRegisterRedirect}}</span>
+                            </div>
+                        </div>
+                        <form action="/admin/oidc/register-client" method="POST" class="d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-start" style="min-width:min(100%, 420px);">
+                            <input type="password" class="form-control form-control-sm" name="admin_key" placeholder="{{t .Lang "settings.oidc_admin_key_ph"}}" autocomplete="off" required>
+                            <button type="submit" class="btn btn-primary btn-sm text-nowrap">
+                                <i class="bi bi-plus-circle me-1"></i>{{t .Lang "settings.oidc_register_btn"}}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+
             {{if .Entries}}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
