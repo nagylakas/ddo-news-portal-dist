@@ -99,38 +99,27 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Kezdőlap</a>
-                    </li>
-                    {{if marketplaceEnabled}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/marketplace">Marketplace</a>
-                    </li>
-                    {{else if marketplaceExternalURL}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{marketplaceExternalURL}}" target="_blank" rel="noopener">Marketplace</a>
-                    </li>
-                    {{end}}
-                    {{if forumEnabled}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/forum">Fórum</a>
-                    </li>
-                    {{else if forumExternalURL}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{forumExternalURL}}" target="_blank" rel="noopener">Fórum</a>
-                    </li>
-                    {{end}}
+                    {{range .NavMenu}}
+                    {{if navMenuItemVisible .}}
+                    {{if eq .Kind "categories"}}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
-                            Kategóriák
+                            {{.Label}}
                         </a>
                         <ul class="dropdown-menu">
-                            {{range .Categories}}
+                            {{range $.Categories}}
                             <li><a class="dropdown-item" href="/category/{{lower .}}">{{.}}</a></li>
                             {{end}}
                         </ul>
                     </li>
+                    {{else}}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{navMenuItemURL .}}" {{if navMenuItemNewTab .}}target="_blank" rel="noopener"{{end}}>{{.Label}}</a>
+                    </li>
+                    {{end}}
+                    {{end}}
+                    {{end}}
                 </ul>
                 <form class="d-flex me-3 search-wrap" action="/search" method="GET" role="search" autocomplete="off"
                       data-marketplace-enabled="{{if marketplaceEnabled}}true{{else}}false{{end}}"

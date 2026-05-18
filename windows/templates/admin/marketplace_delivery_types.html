@@ -2,20 +2,7 @@
 {{template "admin-header" .}}
 <div class="container-fluid">
     {{template "admin-flash" .}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1"><i class="bi bi-truck me-2 text-primary"></i>{{t .Lang "mkt.del_title"}}</h2>
-            <p class="text-muted mb-0">{{t .Lang "mkt.del_sub"}}</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="/admin/marketplace/delivery-types/create" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>{{t .Lang "mkt.del_new"}}
-            </a>
-            <a href="/admin/marketplace" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>{{t .Lang "mkt.dashboard_title"}}
-            </a>
-        </div>
-    </div>
+    {{template "admin-page-header" dict "Title" (t .Lang "mkt.del_title") "Subtitle" (t .Lang "mkt.del_sub") "Icon" "truck" "Actions" (list (dict "URL" "/admin/marketplace/delivery-types/create" "Label" (t .Lang "mkt.del_new") "Icon" "plus-lg") (dict "URL" "/admin/marketplace" "Label" (t .Lang "mkt.dashboard_title") "Icon" "arrow-left" "Class" "btn btn-outline-secondary btn-sm"))}}
 
     {{if .DeliveryTypes}}
     <div class="card shadow-sm">

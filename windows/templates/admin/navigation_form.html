@@ -1,0 +1,67 @@
+{{define "admin/navigation_form"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 fw-bold">
+            <i class="bi bi-list-nested me-2 text-primary"></i>{{if .Item.ID.IsZero}}{{t .Lang "navmenu.create_title"}}{{else}}{{t .Lang "navmenu.edit_title"}}{{end}}
+        </h4>
+        <a href="/admin/navigation" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>{{t .Lang "common.back"}}
+        </a>
+    </div>
+
+    {{template "admin-flash" .}}
+
+    <div class="row">
+        <div class="col-lg-7 col-xl-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="POST" action="{{if .Item.ID.IsZero}}/admin/navigation/create{{else}}/admin/navigation/edit/{{.Item.ID.Hex}}{{end}}">
+                        <input type="hidden" name="kind" value="{{if .Item.Kind}}{{.Item.Kind}}{{else}}link{{end}}">
+                        <input type="hidden" name="module" value="{{.Item.Module}}">
+
+                        <div class="mb-3">
+                            <label for="label" class="form-label fw-semibold">{{t .Lang "navmenu.field_label"}}</label>
+                            <input type="text" class="form-control" id="label" name="label" value="{{.Item.Label}}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="display_order" class="form-label fw-semibold">{{t .Lang "navmenu.field_order"}}</label>
+                            <input type="number" class="form-control" id="display_order" name="display_order" value="{{.Item.DisplayOrder}}">
+                        </div>
+
+                        {{if .Item.IsBuiltIn}}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{t .Lang "navmenu.field_kind"}}</label>
+                            <input type="text" class="form-control" value="{{.Item.Kind}}{{if .Item.Module}} / {{.Item.Module}}{{end}}" disabled>
+                        </div>
+                        {{else}}
+                        <div class="mb-3">
+                            <label for="url" class="form-label fw-semibold">{{t .Lang "navmenu.field_url"}}</label>
+                            <input type="text" class="form-control" id="url" name="url" value="{{.Item.URL}}" placeholder="/oldal vagy https://example.com" required>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="open_in_new_tab" name="open_in_new_tab" {{if .Item.OpenInNewTab}}checked{{end}}>
+                            <label class="form-check-label" for="open_in_new_tab">{{t .Lang "navmenu.field_new_tab"}}</label>
+                        </div>
+                        {{end}}
+
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" id="enabled" name="enabled" {{if .Item.Enabled}}checked{{end}}>
+                            <label class="form-check-label" for="enabled">{{t .Lang "navmenu.field_enabled"}}</label>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>{{t .Lang "common.save"}}
+                            </button>
+                            <a href="/admin/navigation" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}

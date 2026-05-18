@@ -1,10 +1,7 @@
 {{define "admin/forum_categories"}}
 {{template "admin-header" .}}
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Fórum kategóriák</h1>
-        <a href="/admin/forum/categories/create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Új kategória</a>
-    </div>
+    {{template "admin-page-header" dict "Title" "Fórum kategóriák" "Icon" "folder2-open" "Actions" (list (dict "URL" "/admin/forum/categories/create" "Label" "Új kategória" "Icon" "plus-lg"))}}
     {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
     {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
     <div class="card border-0 shadow-sm"><div class="table-responsive">

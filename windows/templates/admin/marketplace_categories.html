@@ -2,15 +2,7 @@
 {{template "admin-header" .}}
 <div class="container-fluid">
     {{template "admin-flash" .}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1"><i class="bi bi-folder2-open me-2 text-primary"></i>{{t .Lang "mkt.cat_title"}}</h2>
-            <p class="text-muted mb-0">{{t .Lang "mkt.cat_sub"}}</p>
-        </div>
-        <a href="/admin/marketplace/categories/create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>{{t .Lang "mkt.cat_new"}}
-        </a>
-    </div>
+    {{template "admin-page-header" dict "Title" (t .Lang "mkt.cat_title") "Subtitle" (t .Lang "mkt.cat_sub") "Icon" "folder2-open" "Actions" (list (dict "URL" "/admin/marketplace/categories/create" "Label" (t .Lang "mkt.cat_new") "Icon" "plus-lg"))}}
 
     {{if .Categories}}
     <div class="card shadow-sm">
