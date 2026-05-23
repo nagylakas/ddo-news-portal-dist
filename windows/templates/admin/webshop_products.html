@@ -1,0 +1,79 @@
+{{define "admin/webshop_products"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-flash" .}}
+    {{template "admin-page-header" dict "Title" (t .Lang "ws.prod_title") "Subtitle" (t .Lang "ws.prod_sub") "Icon" "box-seam" "Actions" (list (dict "URL" "/admin/webshop/products/create" "Label" (t .Lang "ws.prod_new") "Icon" "plus-lg") (dict "URL" "/admin/webshop" "Label" (t .Lang "ws.back_dashboard") "Icon" "arrow-left" "Class" "btn-outline-secondary btn-sm"))}}
+
+    <form method="GET" action="/admin/webshop/products" class="row g-2 mb-3">
+        <div class="col-md-5">
+            <input class="form-control" type="search" name="q" value="{{.Query}}" placeholder="{{t .Lang "ws.prod_search"}}">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search me-1"></i>{{t .Lang "article.search"}}</button>
+        </div>
+    </form>
+
+    {{if .Products}}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{t .Lang "ws.prod_col_product"}}</th>
+                        <th>{{t .Lang "ws.prod_col_sku"}}</th>
+                        <th>{{t .Lang "mkt.col_category"}}</th>
+                        <th>{{t .Lang "ws.variant_status"}}</th>
+                        <th class="text-end">{{t .Lang "ws.prod_col_price"}}</th>
+                        <th class="text-center">{{t .Lang "common.status"}}</th>
+                        <th class="text-end">{{t .Lang "common.actions"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Products}}
+                    <tr>
+                        <td>
+                            <strong>{{.Name}}</strong>
+                            <div class="small text-muted"><code>{{.Slug}}</code></div>
+                        </td>
+                        <td>{{.SKU}}{{if .EAN}}<div class="small text-muted">EAN: {{.EAN}}</div>{{end}}</td>
+                        <td>{{if .CategoryName}}{{.CategoryName}}{{else}}<span class="text-muted">-</span>{{end}}</td>
+                        <td>
+                            <span class="badge text-bg-light">{{.VariantStatusLabel}}</span>
+                            {{if .VariantOptionValue}}<div class="small text-muted">{{.VariantOptionName}}: {{.VariantOptionValue}}</div>{{end}}
+                        </td>
+                        <td class="text-end">{{fmtPrice .GrossPriceCents}} Ft</td>
+                        <td class="text-center">{{if .Active}}<span class="badge text-bg-success">{{t $.Lang "common.active"}}</span>{{else}}<span class="badge text-bg-secondary">{{t $.Lang "common.inactive"}}</span>{{end}}</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a class="btn btn-outline-secondary" href="/admin/webshop/products/edit/{{.ID.Hex}}" title="{{t $.Lang "common.edit"}}"><i class="bi bi-pencil"></i></a>
+                                <form method="POST" action="/admin/webshop/products/delete/{{.ID.Hex}}" onsubmit="return confirm('{{t $.Lang "ws.prod_confirm_delete"}}')">
+                                    <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                    <button class="btn btn-outline-danger" type="submit" title="{{t $.Lang "common.delete"}}"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{if gt .TotalPages 1}}
+    <nav class="mt-3">
+        <ul class="pagination pagination-sm">
+            <li class="page-item {{if not .HasPrev}}disabled{{end}}"><a class="page-link" href="/admin/webshop/products?page={{subtract .CurrentPage 1}}&q={{urlquery .Query}}">{{t .Lang "mkt.prev"}}</a></li>
+            <li class="page-item disabled"><span class="page-link">{{.CurrentPage}} / {{.TotalPages}}</span></li>
+            <li class="page-item {{if not .HasNext}}disabled{{end}}"><a class="page-link" href="/admin/webshop/products?page={{add .CurrentPage 1}}&q={{urlquery .Query}}">{{t .Lang "mkt.next"}}</a></li>
+        </ul>
+    </nav>
+    {{end}}
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-box-seam display-4 text-muted"></i>
+        <h5 class="mt-3 text-muted">{{t .Lang "ws.prod_empty"}}</h5>
+        <a href="/admin/webshop/products/create" class="btn btn-primary mt-2"><i class="bi bi-plus-lg me-1"></i>{{t .Lang "ws.prod_new"}}</a>
+    </div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}

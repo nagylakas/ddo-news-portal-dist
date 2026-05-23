@@ -1,0 +1,39 @@
+{{define "admin/webshop_reviews"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-page-header" dict "Title" "Webshop vélemény moderáció" "Icon" "chat-square-quote" "Actions" (list (dict "URL" "/admin/webshop" "Label" "Vissza" "Icon" "arrow-left" "Class" "btn-outline-secondary btn-sm"))}}
+    {{template "admin-flash" .}}
+
+    {{if .Reviews}}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light"><tr><th>Termék</th><th>Felhasználó</th><th>Értékelés</th><th>Tartalom</th><th>Státusz</th><th class="text-end">Művelet</th></tr></thead>
+                <tbody>
+                    {{range .Reviews}}
+                    <tr>
+                        <td>{{.ProductName}}</td>
+                        <td>{{.UserName}}</td>
+                        <td>{{.Rating}} / 5</td>
+                        <td>{{truncate .Content 120}}</td>
+                        <td><span class="badge text-bg-secondary">{{.Status}}</span></td>
+                        <td class="text-end">
+                            <form method="POST" action="/admin/webshop/reviews/{{.ID.Hex}}/status" class="d-inline-flex gap-1">
+                                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                <button class="btn btn-sm btn-outline-success" name="status" value="approved" type="submit">Jóváhagy</button>
+                                <button class="btn btn-sm btn-outline-warning" name="status" value="hidden" type="submit">Elrejt</button>
+                                <button class="btn btn-sm btn-outline-danger" name="status" value="rejected" type="submit">Elutasít</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{else}}
+    <div class="alert alert-info">Nincs moderálandó vélemény.</div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}

@@ -84,18 +84,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const scopeInput = searchForm.querySelector('input[name="scope"]');
         const marketplaceEnabled = searchForm.getAttribute('data-marketplace-enabled') === 'true';
         const forumEnabled = searchForm.getAttribute('data-forum-enabled') === 'true';
+        const webshopEnabled = searchForm.getAttribute('data-webshop-enabled') === 'true';
         const path = window.location.pathname;
         let scope = 'articles';
         if (marketplaceEnabled && path.indexOf('/marketplace') === 0) {
             scope = 'marketplace';
         } else if (forumEnabled && path.indexOf('/forum') === 0) {
             scope = 'forum';
+        } else if (webshopEnabled && path.indexOf('/webshop') === 0) {
+            scope = 'webshop';
         } else if (path === '/search') {
             const requestedScope = new URLSearchParams(window.location.search).get('scope');
             if (marketplaceEnabled && requestedScope === 'marketplace') {
                 scope = 'marketplace';
             } else if (forumEnabled && requestedScope === 'forum') {
                 scope = 'forum';
+            } else if (webshopEnabled && requestedScope === 'webshop') {
+                scope = 'webshop';
             }
         }
         if (scopeInput) {
@@ -106,6 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 searchInput.placeholder = 'Keresés hirdetésekben...';
             } else if (scope === 'forum') {
                 searchInput.placeholder = 'Keresés témákban...';
+            } else if (scope === 'webshop') {
+                searchInput.placeholder = 'Keresés termékek között...';
             } else {
                 searchInput.placeholder = 'Keresés cikkekben...';
             }

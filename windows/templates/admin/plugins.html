@@ -42,6 +42,12 @@
                                 {{else}}
                                 <span class="badge text-bg-secondary">kikapcsolva</span>
                                 {{end}}
+                                {{else if eq .ID "webshop"}}
+                                {{if webshopEnabled}}
+                                <span class="badge text-bg-success">bekapcsolva</span>
+                                {{else}}
+                                <span class="badge text-bg-secondary">kikapcsolva</span>
+                                {{end}}
                                 {{end}}
                             </div>
                         </div>

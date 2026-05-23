@@ -123,7 +123,8 @@
                 </ul>
                 <form class="d-flex me-3 search-wrap" action="/search" method="GET" role="search" autocomplete="off"
                       data-marketplace-enabled="{{if marketplaceEnabled}}true{{else}}false{{end}}"
-                      data-forum-enabled="{{if forumEnabled}}true{{else}}false{{end}}">
+                      data-forum-enabled="{{if forumEnabled}}true{{else}}false{{end}}"
+                      data-webshop-enabled="{{if webshopEnabled}}true{{else}}false{{end}}">
                     <div class="input-group search-input-group">
                         <input class="form-control search-input" type="search" name="q"
                                id="navSearchInput" placeholder="Keresés..." aria-label="Keresés"
@@ -157,6 +158,9 @@
                         <li><a class="dropdown-item" href="/marketplace/my"><i class="bi bi-shop-window me-2"></i>Saját hirdetéseim</a></li>
                         <li><a class="dropdown-item" href="/marketplace/messages"><i class="bi bi-envelope me-2"></i>Marketplace üzenetek</a></li>
                         <li><a class="dropdown-item" href="/marketplace/favorites"><i class="bi bi-heart me-2"></i>Marketplace kedvencek</a></li>
+                        {{end}}
+                        {{if webshopEnabled}}
+                        <li><a class="dropdown-item" href="/webshop/orders"><i class="bi bi-bag-check me-2"></i>Webshop rendeléseim</a></li>
                         {{end}}
                         {{if forumEnabled}}
                         <li><a class="dropdown-item" href="/forum/my"><i class="bi bi-chat-square-text me-2"></i>Saját fórum aktivitás</a></li>

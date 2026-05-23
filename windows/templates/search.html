@@ -13,7 +13,7 @@
                 <div class="search-cat-list mb-4">
                     {{range .AvailableScopes}}
                     <a class="search-cat-item text-decoration-none {{if eq $.ActiveScope .ID}}search-cat-active{{end}}" href="{{.URL}}">
-                        <i class="bi {{if eq .ID "articles"}}bi-newspaper{{else if eq .ID "marketplace"}}bi-shop{{else}}bi-chat-square-text{{end}} text-primary me-2"></i>
+                        <i class="bi {{if eq .ID "articles"}}bi-newspaper{{else if eq .ID "marketplace"}}bi-shop{{else if eq .ID "webshop"}}bi-bag-check{{else}}bi-chat-square-text{{end}} text-primary me-2"></i>
                         <span>{{.Label}}</span>
                         <span class="search-cat-count ms-auto">{{.Count}}</span>
                     </a>
@@ -54,6 +54,25 @@
                     <a class="search-cat-item text-decoration-none {{if eq $.SelectedCategory .Slug}}search-cat-active{{end}} {{if eq $count 0}}search-cat-disabled{{end}}" href="/search?q={{queryEscape $.Query}}&scope=marketplace&category={{.Slug}}">
                         <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} {{if eq $count 0}}text-muted{{else}}text-primary{{end}} me-2"></i>
                         <span>{{.Name}}</span>
+                        {{if gt $count 0}}<span class="search-cat-count ms-auto">{{$count}}</span>{{end}}
+                    </a>
+                    {{end}}
+                </div>
+                {{else if eq .ActiveScope "webshop"}}
+                <div class="section-header mb-3">
+                    <h5 class="section-title" style="font-size:1rem;">Webshop <span class="text-primary">kategória</span></h5>
+                </div>
+                <div class="search-cat-list">
+                    <a class="search-cat-item text-decoration-none {{if eq .SelectedCategory ""}}search-cat-active{{end}}" href="/search?q={{queryEscape .Query}}&scope=webshop">
+                        <i class="bi bi-grid text-primary me-2"></i>
+                        <span>Összes termék</span>
+                        <span class="search-cat-count ms-auto">{{.TotalCount}}</span>
+                    </a>
+                    {{range .WebshopCategories}}
+                    {{$count := index $.WebshopCounts .Slug}}
+                    <a class="search-cat-item text-decoration-none {{if eq $.SelectedCategory .Slug}}search-cat-active{{end}} {{if eq $count 0}}search-cat-disabled{{end}}" href="/search?q={{queryEscape $.Query}}&scope=webshop&category={{.Slug}}">
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} {{if eq $count 0}}text-muted{{else}}text-primary{{end}} me-2"></i>
+                        <span>{{.DisplayName "hu"}}</span>
                         {{if gt $count 0}}<span class="search-cat-count ms-auto">{{$count}}</span>{{end}}
                     </a>
                     {{end}}
@@ -106,6 +125,31 @@
                 </div>
                 {{else}}
                 {{template "search-empty" dict "Text" "Nincs marketplace találat. Próbálj más kulcsszavakat vagy kategóriát."}}
+                {{end}}
+            {{else if eq .ActiveScope "webshop"}}
+                {{if .Products}}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    {{range .Products}}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            {{if .ImageURLs}}
+                            <img src="{{index .ImageURLs 0}}" class="card-img-top" alt="{{.Name}}" style="object-fit:cover;height:220px;">
+                            {{end}}
+                            <div class="card-body d-flex flex-column">
+                                <h2 class="h5"><a class="text-decoration-none" href="/webshop/product/{{.Slug}}">{{.Name}}</a></h2>
+                                <p class="text-muted small mb-2">SKU: {{.SKU}}</p>
+                                <p class="mb-2">{{truncate .Description 140}}</p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <strong>{{fmtPrice .GrossPriceCents}} Ft</strong>
+                                    <a href="/webshop/product/{{.Slug}}" class="btn btn-sm btn-outline-primary">Részletek</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                {{template "search-empty" dict "Text" "Nincs webshop találat. Próbálj más kulcsszavakat vagy kategóriát."}}
                 {{end}}
             {{else if eq .ActiveScope "forum"}}
                 {{if .Topics}}

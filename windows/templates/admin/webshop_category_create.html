@@ -1,0 +1,193 @@
+{{define "admin/webshop_category_create"}}
+{{template "admin-header" .}}
+<div class="container">
+    {{template "admin-flash" .}}
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            {{template "admin-page-header" dict "Title" (t .Lang "ws.cat_create_title") "Icon" "folder-plus" "Actions" (list (dict "URL" "/admin/webshop/categories" "Label" (t .Lang "common.back") "Icon" "arrow-left" "Class" "btn-outline-secondary btn-sm"))}}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="POST" action="/admin/webshop/categories/create">
+                        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                        {{template "webshop-category-form" .}}
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="/admin/webshop/categories" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i>{{t .Lang "common.create"}}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}
+
+{{define "webshop-category-form"}}
+<div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label fw-semibold" for="name_hu">{{t .Lang "ws.cat_name_hu"}} <span class="text-danger">*</span></label>
+        <input class="form-control" id="name_hu" name="name_hu" required value="{{if .Category}}{{.Category.NameHU}}{{end}}">
+    </div>
+    <div class="col-md-6">
+        <label class="form-label fw-semibold" for="name_en">{{t .Lang "ws.cat_name_en"}}</label>
+        <input class="form-control" id="name_en" name="name_en" value="{{if .Category}}{{.Category.NameEN}}{{end}}">
+    </div>
+    <div class="col-md-8">
+        <label class="form-label fw-semibold" for="description">{{t .Lang "common.description"}}</label>
+        <textarea class="form-control" id="description" name="description" rows="2">{{if .Category}}{{.Category.Description}}{{end}}</textarea>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label fw-semibold" for="icon">{{t .Lang "cat.field_icon"}}</label>
+        <input class="form-control" id="icon" name="icon" value="{{if .Category}}{{.Category.Icon}}{{end}}" placeholder="cpu">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label fw-semibold" for="display_order">{{t .Lang "cat.field_order"}}</label>
+        <input class="form-control" id="display_order" name="display_order" type="number" value="{{if .Category}}{{.Category.DisplayOrder}}{{else}}0{{end}}">
+    </div>
+    <div class="col-12">
+        <label class="form-label fw-semibold" for="spec_schema_raw">{{t .Lang "ws.cat_spec_schema"}}</label>
+        <textarea class="form-control font-monospace" id="spec_schema_raw" name="spec_schema_raw" rows="8" placeholder="clock|Clock speed|number|false||0|10000|1&#10;color|Color|select|false|Black,White,Silver">{{if .Category}}{{.Category.SpecSchemaRaw}}{{end}}</textarea>
+        <div class="form-text">{{t .Lang "ws.cat_spec_hint"}}</div>
+    </div>
+    <div class="col-12">
+        <div class="border rounded p-3 bg-light">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                <div>
+                    <div class="fw-semibold">{{t .Lang "ws.cat_spec_builder_title"}}</div>
+                    <div class="small text-muted">{{t .Lang "ws.cat_spec_builder_hint"}}</div>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="specBuilderClear">
+                    <i class="bi bi-x-lg me-1"></i>{{t .Lang "ws.cat_spec_clear"}}
+                </button>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold" for="spec_builder_key">{{t .Lang "ws.cat_spec_key"}}</label>
+                    <input class="form-control form-control-sm" id="spec_builder_key" placeholder="socket">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold" for="spec_builder_label">{{t .Lang "ws.cat_spec_label"}}</label>
+                    <input class="form-control form-control-sm" id="spec_builder_label" placeholder="Foglalat">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold" for="spec_builder_type">{{t .Lang "ws.cat_spec_type"}}</label>
+                    <select class="form-select form-select-sm" id="spec_builder_type">
+                        <option value="text">text</option>
+                        <option value="number">number</option>
+                        <option value="select">select</option>
+                        <option value="multiselect">multiselect</option>
+                        <option value="boolean">boolean</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold" for="spec_builder_required">{{t .Lang "ws.cat_spec_required"}}</label>
+                    <select class="form-select form-select-sm" id="spec_builder_required">
+                        <option value="false">false</option>
+                        <option value="true">true</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold" for="spec_builder_step">{{t .Lang "ws.cat_spec_step"}}</label>
+                    <input class="form-control form-control-sm" id="spec_builder_step" placeholder="1">
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold" for="spec_builder_options">{{t .Lang "ws.cat_spec_options"}}</label>
+                    <textarea class="form-control form-control-sm" id="spec_builder_options" rows="4" placeholder="Intel 1851&#10;Intel 4677&#10;AMD AM5"></textarea>
+                    <div class="form-text">{{t .Lang "ws.cat_spec_options_hint"}}</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold" for="spec_builder_min">{{t .Lang "ws.cat_spec_min"}}</label>
+                    <input class="form-control form-control-sm" id="spec_builder_min">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold" for="spec_builder_max">{{t .Lang "ws.cat_spec_max"}}</label>
+                    <input class="form-control form-control-sm" id="spec_builder_max">
+                </div>
+                <div class="col-md-6 d-flex align-items-end justify-content-end gap-2">
+                    <button class="btn btn-outline-primary btn-sm" type="button" id="specBuilderPreview">
+                        <i class="bi bi-eye me-1"></i>{{t .Lang "ws.cat_spec_preview"}}
+                    </button>
+                    <button class="btn btn-primary btn-sm" type="button" id="specBuilderInsert">
+                        <i class="bi bi-plus-lg me-1"></i>{{t .Lang "ws.cat_spec_insert"}}
+                    </button>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold" for="spec_builder_line">{{t .Lang "ws.cat_spec_line"}}</label>
+                    <input class="form-control form-control-sm font-monospace" id="spec_builder_line" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="active" name="active" {{if .Category}}{{if .Category.Active}}checked{{end}}{{else}}checked{{end}}>
+            <label class="form-check-label fw-semibold" for="active">{{t .Lang "common.active"}}</label>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        var target = document.getElementById('spec_schema_raw');
+        var key = document.getElementById('spec_builder_key');
+        var label = document.getElementById('spec_builder_label');
+        var type = document.getElementById('spec_builder_type');
+        var required = document.getElementById('spec_builder_required');
+        var options = document.getElementById('spec_builder_options');
+        var min = document.getElementById('spec_builder_min');
+        var max = document.getElementById('spec_builder_max');
+        var step = document.getElementById('spec_builder_step');
+        var line = document.getElementById('spec_builder_line');
+        var preview = document.getElementById('specBuilderPreview');
+        var insert = document.getElementById('specBuilderInsert');
+        var clear = document.getElementById('specBuilderClear');
+        if (!target || !key || !label || !type || !required || !options || !min || !max || !step || !line) return;
+
+        function cleanPart(value) {
+            return String(value || '').replace(/[|\r\n]+/g, ' ').trim();
+        }
+        function optionCSV(value) {
+            return String(value || '').split(/\r?\n|,/).map(function (item) {
+                return cleanPart(item);
+            }).filter(Boolean).join(',');
+        }
+        function buildLine() {
+            var parts = [
+                cleanPart(key.value),
+                cleanPart(label.value),
+                cleanPart(type.value || 'text'),
+                cleanPart(required.value || 'false'),
+                optionCSV(options.value),
+                cleanPart(min.value),
+                cleanPart(max.value),
+                cleanPart(step.value)
+            ];
+            line.value = parts.join('|');
+            return line.value;
+        }
+        function insertLine() {
+            var built = buildLine();
+            if (!cleanPart(key.value) || !cleanPart(label.value)) {
+                key.reportValidity && key.reportValidity();
+                return;
+            }
+            var current = target.value.trim();
+            target.value = current ? current + '\n' + built : built;
+            target.focus();
+        }
+        function clearBuilder() {
+            [key, label, options, min, max, step, line].forEach(function (el) { el.value = ''; });
+            type.value = 'text';
+            required.value = 'false';
+        }
+        [key, label, type, required, options, min, max, step].forEach(function (el) {
+            el.addEventListener('input', buildLine);
+            el.addEventListener('change', buildLine);
+        });
+        if (preview) preview.addEventListener('click', buildLine);
+        if (insert) insert.addEventListener('click', insertLine);
+        if (clear) clear.addEventListener('click', clearBuilder);
+        buildLine();
+    }());
+</script>
+{{end}}

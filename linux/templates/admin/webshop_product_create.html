@@ -1,0 +1,186 @@
+{{define "admin/webshop_product_create"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-flash" .}}
+    {{template "admin-page-header" dict "Title" (t .Lang "ws.prod_create_title") "Icon" "box" "Actions" (list (dict "URL" "/admin/webshop/products" "Label" (t .Lang "common.back") "Icon" "arrow-left" "Class" "btn-outline-secondary btn-sm"))}}
+    <form method="POST" action="/admin/webshop/products/create" class="card border-0 shadow-sm">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <div class="card-body">
+            {{template "webshop-product-form" .}}
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="/admin/webshop/products" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i>{{t .Lang "common.create"}}</button>
+            </div>
+        </div>
+    </form>
+</div>
+{{template "admin-footer" .}}
+{{end}}
+
+{{define "webshop-product-form"}}
+{{$currentCat := ""}}{{if .Product}}{{if .Product.CategoryID}}{{$currentCat = .Product.CategoryID.Hex}}{{end}}{{end}}
+<div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="sku">{{t .Lang "ws.prod_sku"}} <span class="text-danger">*</span></label>
+        <input class="form-control" id="sku" name="sku" required value="{{if .Product}}{{.Product.SKU}}{{end}}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="ean">{{t .Lang "ws.prod_ean"}}</label>
+        <input class="form-control" id="ean" name="ean" value="{{if .Product}}{{.Product.EAN}}{{end}}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="category_id">{{t .Lang "mkt.col_category"}}</label>
+        <select class="form-select" id="category_id" name="category_id">
+            <option value="">{{t .Lang "article.choose_category"}}</option>
+            {{range .Categories}}
+            <option value="{{.ID.Hex}}" {{if eq .ID.Hex $currentCat}}selected{{end}}>{{.DisplayName $.Lang}}</option>
+            {{end}}
+        </select>
+    </div>
+    <div class="col-md-8">
+        <label class="form-label fw-semibold" for="name">{{t .Lang "common.name"}} <span class="text-danger">*</span></label>
+        <input class="form-control" id="name" name="name" required value="{{if .Product}}{{.Product.Name}}{{end}}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="manufacturer_url">{{t .Lang "ws.prod_manufacturer"}}</label>
+        <input class="form-control" id="manufacturer_url" name="manufacturer_url" type="url" value="{{if .Product}}{{.Product.ManufacturerURL}}{{end}}">
+    </div>
+    <div class="col-12">
+        <label class="form-label fw-semibold" for="description">{{t .Lang "common.description"}}</label>
+        <textarea class="form-control" id="description" name="description" rows="4">{{if .Product}}{{.Product.Description}}{{end}}</textarea>
+    </div>
+
+    <div class="col-12"><hr><h2 class="h6">{{t .Lang "ws.variant_section"}}</h2></div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="variant_mode">{{t .Lang "ws.variant_mode"}}</label>
+        <select class="form-select" id="variant_mode" name="variant_mode">
+            <option value="standalone" {{if .Product}}{{if eq .Product.VariantMode "standalone"}}selected{{end}}{{else}}selected{{end}}>{{t .Lang "ws.variant_standalone"}}</option>
+            <option value="primary" {{if .Product}}{{if eq .Product.VariantMode "primary"}}selected{{end}}{{end}}>{{t .Lang "ws.variant_primary"}}</option>
+            <option value="variant" {{if .Product}}{{if eq .Product.VariantMode "variant"}}selected{{end}}{{end}}>{{t .Lang "ws.variant_child"}}</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="variant_group_id">{{t .Lang "ws.variant_group"}}</label>
+        {{$groupID := ""}}{{if .Product}}{{$groupID = .Product.VariantGroupIDHex}}{{end}}
+        <select class="form-select" id="variant_group_id" name="variant_group_id">
+            <option value="">{{t .Lang "ws.variant_choose_group"}}</option>
+            {{range .VariantGroups}}
+            <option value="{{.ID.Hex}}" {{if eq .ID.Hex $groupID}}selected{{end}}>{{.Name}} ({{.SKU}})</option>
+            {{end}}
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="variant_option_name">{{t .Lang "ws.variant_option_name"}}</label>
+        <input class="form-control" id="variant_option_name" name="variant_option_name" value="{{if .Product}}{{if .Product.VariantOptionName}}{{.Product.VariantOptionName}}{{else}}Változat{{end}}{{else}}Változat{{end}}">
+    </div>
+    <div class="col-md-8">
+        <label class="form-label fw-semibold" for="variant_option_value">{{t .Lang "ws.variant_option_value"}}</label>
+        <input class="form-control" id="variant_option_value" name="variant_option_value" value="{{if .Product}}{{.Product.VariantOptionValue}}{{end}}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="variant_display_order">{{t .Lang "ws.variant_order"}}</label>
+        <input class="form-control" id="variant_display_order" name="variant_display_order" type="number" step="1" value="{{if .Product}}{{.Product.VariantDisplayOrder}}{{else}}0{{end}}">
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label fw-semibold" for="net_price_cents">{{t .Lang "ws.prod_net"}}</label>
+        <input class="form-control" id="net_price_cents" name="net_price_cents" type="number" min="0" step="1" value="{{if .Product}}{{.Product.NetPriceCents}}{{else}}0{{end}}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold" for="gross_price_cents">{{t .Lang "ws.prod_gross"}}</label>
+        <input class="form-control" id="gross_price_cents" name="gross_price_cents" type="number" min="0" step="1" value="{{if .Product}}{{.Product.GrossPriceCents}}{{else}}0{{end}}">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label fw-semibold" for="vat_percent">{{t .Lang "ws.prod_vat"}}</label>
+        <input class="form-control" id="vat_percent" name="vat_percent" type="number" min="0" max="100" step="0.01" value="{{if .Product}}{{.Product.VATPercent}}{{else}}27{{end}}">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label fw-semibold" for="unit_quantity">{{t .Lang "ws.prod_unit_qty"}}</label>
+        <input class="form-control" id="unit_quantity" name="unit_quantity" type="number" min="0" step="0.001" value="{{if .Product}}{{.Product.UnitQuantity}}{{else}}1{{end}}">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label fw-semibold" for="unit_name">{{t .Lang "ws.prod_unit"}}</label>
+        <input class="form-control" id="unit_name" name="unit_name" value="{{if .Product}}{{.Product.UnitName}}{{end}}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold" for="unit_price_gross_cents">{{t .Lang "ws.prod_unit_price"}}</label>
+        <input class="form-control" id="unit_price_gross_cents" name="unit_price_gross_cents" type="number" min="0" step="1" value="{{if .Product}}{{.Product.UnitPriceGrossCents}}{{else}}0{{end}}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold" for="weight_grams">{{t .Lang "ws.prod_weight"}}</label>
+        <input class="form-control" id="weight_grams" name="weight_grams" type="number" min="0" step="1" value="{{if .Product}}{{.Product.WeightGrams}}{{else}}0{{end}}">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label fw-semibold" for="length_cm">{{t .Lang "ws.prod_length"}}</label>
+        <input class="form-control" id="length_cm" name="length_cm" type="number" min="0" step="0.01" value="{{if .Product}}{{.Product.LengthCM}}{{else}}0{{end}}">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label fw-semibold" for="width_cm">{{t .Lang "ws.prod_width"}}</label>
+        <input class="form-control" id="width_cm" name="width_cm" type="number" min="0" step="0.01" value="{{if .Product}}{{.Product.WidthCM}}{{else}}0{{end}}">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label fw-semibold" for="height_cm">{{t .Lang "ws.prod_height"}}</label>
+        <input class="form-control" id="height_cm" name="height_cm" type="number" min="0" step="0.01" value="{{if .Product}}{{.Product.HeightCM}}{{else}}0{{end}}">
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="image_urls">{{t .Lang "ws.prod_images"}}</label>
+        <textarea class="form-control" id="image_urls" name="image_urls" rows="4">{{if .Product}}{{.Product.ImageURLsRaw}}{{end}}</textarea>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="youtube_links">{{t .Lang "ws.prod_youtube"}}</label>
+        <textarea class="form-control" id="youtube_links" name="youtube_links" rows="4">{{if .Product}}{{.Product.YouTubeLinksRaw}}{{end}}</textarea>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="promo_links">{{t .Lang "ws.prod_promos"}}</label>
+        <textarea class="form-control" id="promo_links" name="promo_links" rows="4">{{if .Product}}{{.Product.PromoLinksRaw}}{{end}}</textarea>
+    </div>
+
+    {{if .Product}}{{if .Product.SpecSchema}}
+    <div class="col-12"><hr><h2 class="h6">{{t .Lang "ws.prod_specs"}}</h2></div>
+    {{range .Product.SpecSchema}}
+    {{$value := $.Product.SpecString .Key}}
+    <div class="col-md-6">
+        <label class="form-label fw-semibold" for="spec_{{.Key}}">{{.Label}}{{if .Required}} <span class="text-danger">*</span>{{end}}</label>
+        {{if eq .Type "number"}}
+        <input class="form-control" id="spec_{{.Key}}" name="spec_{{.Key}}" type="number" value="{{$value}}" step="any">
+        {{else if eq .Type "select"}}
+        <select class="form-select" id="spec_{{.Key}}" name="spec_{{.Key}}">
+            <option value=""></option>
+            {{range .Options}}<option value="{{.}}" {{if eq . $value}}selected{{end}}>{{.}}</option>{{end}}
+        </select>
+        {{else if eq .Type "multiselect"}}
+        <select class="form-select" id="spec_{{.Key}}" name="spec_{{.Key}}" multiple size="4">
+            {{range .Options}}<option value="{{.}}" {{if containsCSV $value .}}selected{{end}}>{{.}}</option>{{end}}
+        </select>
+        {{else if eq .Type "boolean"}}
+        <div class="form-check form-switch pt-2">
+            <input class="form-check-input" id="spec_{{.Key}}" name="spec_{{.Key}}" type="checkbox" {{if eq $value "true"}}checked{{end}}>
+        </div>
+        {{else}}
+        <input class="form-control" id="spec_{{.Key}}" name="spec_{{.Key}}" value="{{$value}}">
+        {{end}}
+    </div>
+    {{end}}
+    {{end}}{{end}}
+
+    <div class="col-12">
+        <div class="form-check form-switch">
+            <input class="form-check-input" id="active" name="active" type="checkbox" role="switch" {{if .Product}}{{if .Product.Active}}checked{{end}}{{else}}checked{{end}}>
+            <label class="form-check-label fw-semibold" for="active">{{t .Lang "common.active"}}</label>
+        </div>
+    </div>
+</div>
+<script>
+    (function() {
+        var select = document.getElementById('category_id');
+        if (!select) return;
+        select.addEventListener('change', function() {
+            var url = new URL(window.location.href);
+            if (select.value) url.searchParams.set('category_id', select.value);
+            else url.searchParams.delete('category_id');
+            window.location.href = url.toString();
+        });
+    })();
+</script>
+{{end}}

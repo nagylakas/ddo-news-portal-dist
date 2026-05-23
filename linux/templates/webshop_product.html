@@ -1,0 +1,90 @@
+{{define "webshop_product"}}
+{{template "header" .}}
+<div class="container mt-4">
+    {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+    {{if .Product}}
+    <div class="row g-4">
+        <div class="col-lg-6">
+            {{if .Product.ImageURLs}}
+            <img src="{{index .Product.ImageURLs 0}}" class="img-fluid rounded shadow-sm" alt="{{.Product.Name}}">
+            {{end}}
+            {{if .Product.YouTubeLinks}}
+            {{range .Product.YouTubeLinks}}
+            {{with (youtubeEmbedURL .)}}
+            <div class="ratio ratio-16x9 mt-3"><iframe src="{{.}}" title="YouTube video" allowfullscreen loading="lazy"></iframe></div>
+            {{end}}
+            {{end}}
+            {{end}}
+        </div>
+        <div class="col-lg-6">
+            <h1 class="h3">{{.Product.Name}}</h1>
+            <p class="text-muted mb-2">SKU: {{.Product.SKU}}</p>
+            <p>{{.Product.Description}}</p>
+            <div class="mb-3">
+                <div><strong>Bruttó ár:</strong> {{fmtPrice .Product.GrossPriceCents}} Ft</div>
+                <div><strong>Nettó ár:</strong> {{fmtPrice .Product.NetPriceCents}} Ft</div>
+                <div><strong>ÁFA:</strong> {{.Product.VATPercent}}%</div>
+                <div><strong>Egység:</strong> {{.Product.UnitQuantity}} {{.Product.UnitName}} ({{fmtPrice .Product.UnitPriceGrossCents}} Ft / egység)</div>
+                <div><strong>Súly:</strong> {{.Product.WeightGrams}} g</div>
+                <div><strong>Méret:</strong> {{.Product.LengthCM}} × {{.Product.WidthCM}} × {{.Product.HeightCM}} cm</div>
+            </div>
+            {{if .VariantGroup}}
+            <div class="mb-3">
+                <div class="fw-semibold mb-2">{{.VariantGroup.OptionName}}</div>
+                <div class="d-flex flex-wrap gap-2">
+                    {{range .VariantGroup.Variants}}
+                    <a class="btn btn-sm {{if .Selected}}btn-primary{{else}}btn-outline-secondary{{end}} {{if not .Active}}disabled{{end}}" href="/webshop/product/{{.Product.Slug}}">
+                        <span class="fw-semibold">{{.Value}}</span>
+                        <span class="ms-1">{{fmtPrice .GrossCents}} Ft</span>
+                        {{if .InStock}}<span class="badge text-bg-success ms-1">Készleten</span>{{else}}<span class="badge text-bg-secondary ms-1">Elfogyott</span>{{end}}
+                    </a>
+                    {{end}}
+                </div>
+                {{if .VariantGroup.PriceDiffers}}<div class="small text-muted mt-2">A változatok ára eltérhet.</div>{{end}}
+            </div>
+            {{end}}
+            <form method="POST" action="/webshop/cart" class="card card-body border-0 shadow-sm">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <input type="hidden" name="product_id" value="{{.Product.ID.Hex}}">
+                <label class="form-label fw-semibold" for="qty">Mennyiség</label>
+                <input id="qty" class="form-control mb-3" type="number" name="qty" min="1" max="999" step="1" value="1" required {{if not .ProductInStock}}disabled{{end}}>
+                {{if .ProductInStock}}
+                <button type="submit" class="btn btn-primary"><i class="bi bi-cart-plus me-1"></i>Kosárba teszem</button>
+                {{else}}
+                <button type="button" class="btn btn-outline-secondary" disabled>Elfogyott</button>
+                {{end}}
+            </form>
+        </div>
+    </div>
+
+    <hr class="my-4">
+    <h2 class="h4">Vélemények</h2>
+    <div class="mb-4">
+        {{range .Reviews}}
+        <div class="card mb-2"><div class="card-body">
+            <div class="d-flex justify-content-between"><strong>{{.UserName}}</strong><span>{{.Rating}} / 5</span></div>
+            <p class="mb-0 mt-2">{{.Content}}</p>
+        </div></div>
+        {{else}}
+        <div class="text-muted">Még nincs jóváhagyott vélemény.</div>
+        {{end}}
+    </div>
+
+    {{if .CurrentUser}}
+    <form method="POST" action="/webshop/review/{{.Product.ID.Hex}}" class="card card-body border-0 shadow-sm">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <h3 class="h6">Írj véleményt (csak vásárlás után)</h3>
+        <label class="form-label" for="rating">Értékelés</label>
+        <input id="rating" class="form-control mb-2" type="number" name="rating" min="1" max="5" step="1" value="5" required>
+        <label class="form-label" for="content">Vélemény</label>
+        <textarea id="content" class="form-control mb-3" name="content" rows="4" required></textarea>
+        <button type="submit" class="btn btn-outline-primary">Vélemény beküldése</button>
+    </form>
+    {{else if .OIDCEnabled}}
+    <a class="btn btn-outline-primary" href="/auth/login?force=1&return={{queryEscape (printf "/webshop/product/%s" .Product.Slug)}}">Bejelentkezés a véleményezéshez</a>
+    {{end}}
+    {{end}}
+</div>
+{{template "footer" .}}
+{{end}}
