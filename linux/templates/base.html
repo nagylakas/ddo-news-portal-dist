@@ -113,6 +113,20 @@
                             {{end}}
                         </ul>
                     </li>
+                    {{else if eq .Kind "webshop-categories"}}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="/webshop" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            {{.Label}}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/webshop">Összes termék</a></li>
+                            {{if $.WebshopCategories}}<li><hr class="dropdown-divider"></li>{{end}}
+                            {{range $.WebshopCategories}}
+                            <li><a class="dropdown-item" href="/webshop/category/{{.Slug}}">{{.DisplayName "hu"}}</a></li>
+                            {{end}}
+                        </ul>
+                    </li>
                     {{else}}
                     <li class="nav-item">
                         <a class="nav-link" href="{{navMenuItemURL .}}" {{if navMenuItemNewTab .}}target="_blank" rel="noopener"{{end}}>{{.Label}}</a>

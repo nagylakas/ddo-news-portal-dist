@@ -33,7 +33,7 @@
                         {{if .Item.IsBuiltIn}}
                         <div class="mb-3">
                             <label class="form-label fw-semibold">{{t .Lang "navmenu.field_kind"}}</label>
-                            <input type="text" class="form-control" value="{{.Item.Kind}}{{if .Item.Module}} / {{.Item.Module}}{{end}}" disabled>
+                            <input type="text" class="form-control" value="{{if eq .Item.Kind "webshop-categories"}}webshop-categories (Webshop kategória lenyíló){{else if .Item.Module}}{{.Item.Kind}} / {{.Item.Module}}{{else}}{{.Item.Kind}}{{end}}" disabled>
                         </div>
                         {{else}}
                         <div class="mb-3">

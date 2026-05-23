@@ -1,34 +1,39 @@
 {{define "webshop_orders"}}
 {{template "header" .}}
-<div class="container mt-4">
-    <h1 class="h3 mb-3"><i class="bi bi-bag-check me-2"></i>Rendeléseim</h1>
-    {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
-    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
-    {{if .Orders}}
-    <div class="accordion" id="ordersAcc">
-        {{range $i, $o := .Orders}}
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="h{{$i}}">
-                <button class="accordion-button {{if ne $i 0}}collapsed{{end}}" type="button" data-bs-toggle="collapse" data-bs-target="#c{{$i}}">
-                    Rendelés #{{$o.ID.Hex}} &middot; {{$o.Status}} &middot; {{fmtMoney $o.TotalGrossCents $o.Currency}}
-                </button>
-            </h2>
-            <div id="c{{$i}}" class="accordion-collapse collapse {{if eq $i 0}}show{{end}}" data-bs-parent="#ordersAcc">
-                <div class="accordion-body">
-                    <div class="small text-muted mb-2">Szállítás: {{$o.ShippingMethod}} / Fizetés: {{$o.PaymentMethod}}</div>
-                    <ul class="mb-0">
-                        {{range $o.Items}}
-                        <li>{{.ProductName}} &times; {{.Quantity}} — {{fmtMoney .TotalGrossPriceCents .Currency}}</li>
-                        {{end}}
-                    </ul>
+{{template "module/hero" dict "Title" "Rendeléseim" "Description" "" "Crumb" "WEBSHOP"}}
+<section class="module-page container-fluid px-4 px-lg-5 py-4">
+    <div class="row g-4">
+        {{template "webshop/sidebar" .}}
+        <main class="col-lg-9 col-xl-10">
+            {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+            {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+            {{if .Orders}}
+            <div class="accordion" id="ordersAcc">
+                {{range $i, $o := .Orders}}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="h{{$i}}">
+                        <button class="accordion-button {{if ne $i 0}}collapsed{{end}}" type="button" data-bs-toggle="collapse" data-bs-target="#c{{$i}}">
+                            Rendelés #{{$o.ID.Hex}} &middot; {{$o.Status}} &middot; {{fmtMoney $o.TotalGrossCents $o.Currency}}
+                        </button>
+                    </h2>
+                    <div id="c{{$i}}" class="accordion-collapse collapse {{if eq $i 0}}show{{end}}" data-bs-parent="#ordersAcc">
+                        <div class="accordion-body">
+                            <div class="small text-muted mb-2">Szállítás: {{$o.ShippingMethod}} / Fizetés: {{$o.PaymentMethod}}</div>
+                            <ul class="mb-0">
+                                {{range $o.Items}}
+                                <li>{{.ProductName}} &times; {{.Quantity}} — {{fmtMoney .TotalGrossPriceCents .Currency}}</li>
+                                {{end}}
+                            </ul>
+                        </div>
+                    </div>
                 </div>
+                {{end}}
             </div>
-        </div>
-        {{end}}
+            {{else}}
+            <div class="alert alert-info">Még nincs rendelésed. <a href="/webshop">Böngéssz a termékek között.</a></div>
+            {{end}}
+        </main>
     </div>
-    {{else}}
-    <div class="alert alert-info">Még nincs rendelésed.</div>
-    {{end}}
-</div>
+</section>
 {{template "footer" .}}
 {{end}}
