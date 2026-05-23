@@ -19,6 +19,7 @@
 
 {{define "webshop-product-form"}}
 {{$currentCat := ""}}{{if .Product}}{{if .Product.CategoryID}}{{$currentCat = .Product.CategoryID.Hex}}{{end}}{{end}}
+{{$currentManufacturer := ""}}{{if .Product}}{{if .Product.ManufacturerID}}{{$currentManufacturer = .Product.ManufacturerID.Hex}}{{end}}{{end}}
 <div class="row g-3">
     <div class="col-md-4">
         <label class="form-label fw-semibold" for="sku">{{t .Lang "ws.prod_sku"}} <span class="text-danger">*</span></label>
@@ -42,7 +43,16 @@
         <input class="form-control" id="name" name="name" required value="{{if .Product}}{{.Product.Name}}{{end}}">
     </div>
     <div class="col-md-4">
-        <label class="form-label fw-semibold" for="manufacturer_url">{{t .Lang "ws.prod_manufacturer"}}</label>
+        <label class="form-label fw-semibold" for="manufacturer_id">{{t .Lang "ws.manufacturer"}}</label>
+        <select class="form-select" id="manufacturer_id" name="manufacturer_id">
+            <option value="">{{t .Lang "ws.manufacturer_none"}}</option>
+            {{range .Manufacturers}}
+            <option value="{{.ID.Hex}}" {{if eq .ID.Hex $currentManufacturer}}selected{{end}}>{{.Name}}</option>
+            {{end}}
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="manufacturer_url">{{t .Lang "ws.prod_manufacturer_url"}}</label>
         <input class="form-control" id="manufacturer_url" name="manufacturer_url" type="url" value="{{if .Product}}{{.Product.ManufacturerURL}}{{end}}">
     </div>
     <div class="col-12">

@@ -1,6 +1,24 @@
 // DDO News Portal - Main JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Decode contact e-mail links on the client so plain mailto addresses are not exposed in HTML.
+    const contactEmailLinks = document.querySelectorAll('.js-contact-email[data-email-token]');
+    contactEmailLinks.forEach(function(link) {
+        try {
+            const email = atob(link.getAttribute('data-email-token'));
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return;
+            }
+            const address = link.querySelector('.footer-contact-address');
+            if (address) {
+                address.textContent = email;
+            }
+            link.href = 'mailto:' + email;
+        } catch (_) {
+            link.removeAttribute('href');
+        }
+    });
+
     // Initialize tooltips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipTriggerList.forEach(function(tooltipTriggerEl) {

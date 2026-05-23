@@ -26,6 +26,9 @@
                 <div class="col-lg-6">
                     <h1 class="h3">{{.Product.Name}}</h1>
                     <p class="text-muted mb-2">SKU: {{.Product.SKU}}</p>
+                    {{if .Product.ManufacturerSlug}}
+                    <p class="mb-2"><a class="text-decoration-none" href="/webshop/manufacturer/{{.Product.ManufacturerSlug}}"><i class="bi bi-building me-1"></i>{{.Product.ManufacturerName}}</a></p>
+                    {{end}}
                     <p>{{.Product.Description}}</p>
                     <div class="mb-3">
                         <div><strong>Bruttó ár:</strong> {{fmtMoney .Product.GrossPriceCents .Product.CurrencyCode}}</div>

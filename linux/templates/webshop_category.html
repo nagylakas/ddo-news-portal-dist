@@ -13,6 +13,7 @@
                 <h2 class="h5 mb-0">{{if .Category}}{{.Category.DisplayName "hu"}}{{else}}Termékek{{end}}</h2>
                 <a href="/webshop/cart" class="btn btn-sm btn-primary"><i class="bi bi-cart3 me-1"></i>Kosár</a>
             </div>
+            {{template "webshop/product-filters" .}}
             <div class="row g-3">
                 {{range .ProductCards}}
                 <div class="col-12 col-md-6 col-xl-4">
