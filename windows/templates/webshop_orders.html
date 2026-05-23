@@ -10,7 +10,7 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="h{{$i}}">
                 <button class="accordion-button {{if ne $i 0}}collapsed{{end}}" type="button" data-bs-toggle="collapse" data-bs-target="#c{{$i}}">
-                    Rendelés #{{$o.ID.Hex}} &middot; {{$o.Status}} &middot; {{fmtPrice $o.TotalGrossCents}} Ft
+                    Rendelés #{{$o.ID.Hex}} &middot; {{$o.Status}} &middot; {{fmtMoney $o.TotalGrossCents $o.Currency}}
                 </button>
             </h2>
             <div id="c{{$i}}" class="accordion-collapse collapse {{if eq $i 0}}show{{end}}" data-bs-parent="#ordersAcc">
@@ -18,7 +18,7 @@
                     <div class="small text-muted mb-2">Szállítás: {{$o.ShippingMethod}} / Fizetés: {{$o.PaymentMethod}}</div>
                     <ul class="mb-0">
                         {{range $o.Items}}
-                        <li>{{.ProductName}} &times; {{.Quantity}} — {{fmtPrice .TotalGrossPriceCents}} Ft</li>
+                        <li>{{.ProductName}} &times; {{.Quantity}} — {{fmtMoney .TotalGrossPriceCents .Currency}}</li>
                         {{end}}
                     </ul>
                 </div>

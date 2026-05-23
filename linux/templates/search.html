@@ -140,7 +140,7 @@
                                 <p class="text-muted small mb-2">SKU: {{.SKU}}</p>
                                 <p class="mb-2">{{truncate .Description 140}}</p>
                                 <div class="mt-auto d-flex justify-content-between align-items-center">
-                                    <strong>{{fmtPrice .GrossPriceCents}} Ft</strong>
+                                    <strong>{{fmtMoney .GrossPriceCents .CurrencyCode}}</strong>
                                     <a href="/webshop/product/{{.Slug}}" class="btn btn-sm btn-outline-primary">Részletek</a>
                                 </div>
                             </div>

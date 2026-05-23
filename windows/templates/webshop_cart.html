@@ -24,8 +24,8 @@
                             <button class="btn btn-sm btn-outline-primary" type="submit">OK</button>
                         </form>
                     </td>
-                    <td>{{fmtPrice .NetCents}} Ft</td>
-                    <td><strong>{{fmtPrice .GrossCents}} Ft</strong></td>
+                    <td>{{fmtMoney .NetCents .Currency}}</td>
+                    <td><strong>{{fmtMoney .GrossCents .Currency}}</strong></td>
                     <td>
                         <form method="POST" action="/webshop/cart">
                             <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
@@ -43,8 +43,8 @@
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <h2 class="h5">Összesítés</h2>
-            <div>Nettó összesen: <strong>{{fmtPrice .CartNetCents}} Ft</strong></div>
-            <div>Bruttó összesen: <strong>{{fmtPrice .CartGrossCents}} Ft</strong></div>
+            <div>Nettó összesen: <strong>{{fmtMoney .CartNetCents .CartCurrency}}</strong></div>
+            <div>Bruttó összesen: <strong>{{fmtMoney .CartGrossCents .CartCurrency}}</strong></div>
             <hr>
             <form method="POST" action="/webshop/checkout" class="row g-3">
                 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">

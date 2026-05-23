@@ -82,13 +82,24 @@
         <input class="form-control" id="variant_display_order" name="variant_display_order" type="number" step="1" value="{{if .Product}}{{.Product.VariantDisplayOrder}}{{else}}0{{end}}">
     </div>
 
+    <div class="col-12"><hr><h2 class="h6">{{t .Lang "ws.prod_pricing"}}</h2></div>
     <div class="col-md-3">
-        <label class="form-label fw-semibold" for="net_price_cents">{{t .Lang "ws.prod_net"}}</label>
-        <input class="form-control" id="net_price_cents" name="net_price_cents" type="number" min="0" step="1" value="{{if .Product}}{{.Product.NetPriceCents}}{{else}}0{{end}}">
+        <label class="form-label fw-semibold" for="currency">{{t .Lang "ws.prod_currency"}}</label>
+        {{$currency := "HUF"}}{{if .Product}}{{$currency = .Product.CurrencyCode}}{{end}}
+        <select class="form-select" id="currency" name="currency">
+            <option value="HUF" {{if eq $currency "HUF"}}selected{{end}}>HUF - Forint</option>
+            <option value="EUR" {{if eq $currency "EUR"}}selected{{end}}>EUR - Euro</option>
+            <option value="USD" {{if eq $currency "USD"}}selected{{end}}>USD - Dollar</option>
+            <option value="GBP" {{if eq $currency "GBP"}}selected{{end}}>GBP - Pound</option>
+        </select>
     </div>
     <div class="col-md-3">
-        <label class="form-label fw-semibold" for="gross_price_cents">{{t .Lang "ws.prod_gross"}}</label>
-        <input class="form-control" id="gross_price_cents" name="gross_price_cents" type="number" min="0" step="1" value="{{if .Product}}{{.Product.GrossPriceCents}}{{else}}0{{end}}">
+        <label class="form-label fw-semibold" for="net_price_amount">{{t .Lang "ws.prod_net"}}</label>
+        <input class="form-control" id="net_price_amount" name="net_price_amount" type="number" min="0" step="0.01" value="{{if .Product}}{{.Product.NetPriceAmount}}{{else}}0{{end}}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold" for="gross_price_amount">{{t .Lang "ws.prod_gross"}}</label>
+        <input class="form-control" id="gross_price_amount" name="gross_price_amount" type="number" min="0" step="0.01" value="{{if .Product}}{{.Product.GrossPriceAmount}}{{else}}0{{end}}">
     </div>
     <div class="col-md-2">
         <label class="form-label fw-semibold" for="vat_percent">{{t .Lang "ws.prod_vat"}}</label>
@@ -103,8 +114,8 @@
         <input class="form-control" id="unit_name" name="unit_name" value="{{if .Product}}{{.Product.UnitName}}{{end}}">
     </div>
     <div class="col-md-3">
-        <label class="form-label fw-semibold" for="unit_price_gross_cents">{{t .Lang "ws.prod_unit_price"}}</label>
-        <input class="form-control" id="unit_price_gross_cents" name="unit_price_gross_cents" type="number" min="0" step="1" value="{{if .Product}}{{.Product.UnitPriceGrossCents}}{{else}}0{{end}}">
+        <label class="form-label fw-semibold" for="unit_price_gross_amount">{{t .Lang "ws.prod_unit_price"}}</label>
+        <input class="form-control" id="unit_price_gross_amount" name="unit_price_gross_amount" type="number" min="0" step="0.01" value="{{if .Product}}{{.Product.UnitPriceGrossAmount}}{{else}}0{{end}}">
     </div>
     <div class="col-md-3">
         <label class="form-label fw-semibold" for="weight_grams">{{t .Lang "ws.prod_weight"}}</label>

@@ -41,7 +41,7 @@
                             <span class="badge text-bg-light">{{.VariantStatusLabel}}</span>
                             {{if .VariantOptionValue}}<div class="small text-muted">{{.VariantOptionName}}: {{.VariantOptionValue}}</div>{{end}}
                         </td>
-                        <td class="text-end">{{fmtPrice .GrossPriceCents}} Ft</td>
+                        <td class="text-end">{{fmtMoney .GrossPriceCents .CurrencyCode}}</td>
                         <td class="text-center">{{if .Active}}<span class="badge text-bg-success">{{t $.Lang "common.active"}}</span>{{else}}<span class="badge text-bg-secondary">{{t $.Lang "common.inactive"}}</span>{{end}}</td>
                         <td class="text-end">
                             <div class="btn-group btn-group-sm">

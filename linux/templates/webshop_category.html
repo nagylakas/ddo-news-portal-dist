@@ -21,7 +21,7 @@
                     <p class="mb-2">{{truncate .Product.Description 120}}</p>
                     <div class="mt-auto d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>{{fmtPrice .Product.GrossPriceCents}} Ft</strong>
+                            <strong>{{fmtMoney .Product.GrossPriceCents .Product.CurrencyCode}}</strong>
                             {{if .PriceDiffers}}<div class="small text-muted">Több változat, eltérő árak</div>{{end}}
                         </div>
                         <a href="/webshop/product/{{.Product.Slug}}" class="btn btn-sm btn-outline-primary">Részletek</a>

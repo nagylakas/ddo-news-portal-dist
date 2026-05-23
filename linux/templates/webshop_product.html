@@ -22,10 +22,10 @@
             <p class="text-muted mb-2">SKU: {{.Product.SKU}}</p>
             <p>{{.Product.Description}}</p>
             <div class="mb-3">
-                <div><strong>Bruttó ár:</strong> {{fmtPrice .Product.GrossPriceCents}} Ft</div>
-                <div><strong>Nettó ár:</strong> {{fmtPrice .Product.NetPriceCents}} Ft</div>
+                <div><strong>Bruttó ár:</strong> {{fmtMoney .Product.GrossPriceCents .Product.CurrencyCode}}</div>
+                <div><strong>Nettó ár:</strong> {{fmtMoney .Product.NetPriceCents .Product.CurrencyCode}}</div>
                 <div><strong>ÁFA:</strong> {{.Product.VATPercent}}%</div>
-                <div><strong>Egység:</strong> {{.Product.UnitQuantity}} {{.Product.UnitName}} ({{fmtPrice .Product.UnitPriceGrossCents}} Ft / egység)</div>
+                <div><strong>Egység:</strong> {{.Product.UnitQuantity}} {{.Product.UnitName}} ({{fmtMoney .Product.UnitPriceGrossCents .Product.CurrencyCode}} / egység)</div>
                 <div><strong>Súly:</strong> {{.Product.WeightGrams}} g</div>
                 <div><strong>Méret:</strong> {{.Product.LengthCM}} × {{.Product.WidthCM}} × {{.Product.HeightCM}} cm</div>
             </div>
@@ -36,7 +36,7 @@
                     {{range .VariantGroup.Variants}}
                     <a class="btn btn-sm {{if .Selected}}btn-primary{{else}}btn-outline-secondary{{end}} {{if not .Active}}disabled{{end}}" href="/webshop/product/{{.Product.Slug}}">
                         <span class="fw-semibold">{{.Value}}</span>
-                        <span class="ms-1">{{fmtPrice .GrossCents}} Ft</span>
+                        <span class="ms-1">{{fmtMoney .GrossCents .Product.CurrencyCode}}</span>
                         {{if .InStock}}<span class="badge text-bg-success ms-1">Készleten</span>{{else}}<span class="badge text-bg-secondary ms-1">Elfogyott</span>{{end}}
                     </a>
                     {{end}}
