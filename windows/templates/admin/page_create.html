@@ -1,0 +1,228 @@
+{{define "admin/page_create"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4 py-3">
+    <div class="d-flex align-items-center mb-3">
+        <a href="/admin/pages" class="btn btn-outline-secondary me-3">
+            <i class="bi bi-arrow-left"></i> {{t .Lang "common.back"}}
+        </a>
+        <h2 class="mb-0">{{t .Lang "page.create_title"}}</h2>
+    </div>
+
+    {{if .ErrorMessage}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{.ErrorMessage}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {{end}}
+
+    {{template "admin/page_form" dict "Lang" .Lang "Page" nil "ParentOptions" .ParentOptions "Layouts" .Layouts "BannerSlots" .BannerSlots "Categories" .Categories "URLPrefix" .URLPrefix "Action" "/admin/pages/create" "IsEdit" false}}
+</div>
+{{template "admin-footer" .}}
+{{end}}
+
+{{define "admin/page_form"}}
+<form action="{{.Action}}" method="POST" class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="title" class="form-label fw-semibold">{{t .Lang "page.field_title"}} <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="title" name="title" required
+                           value="{{if .Page}}{{.Page.Title}}{{end}}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="summary" class="form-label fw-semibold">{{t .Lang "page.field_summary"}}</label>
+                    <textarea class="form-control" id="summary" name="summary" rows="2">{{if .Page}}{{.Page.Summary}}{{end}}</textarea>
+                    <div class="form-text">{{t .Lang "page.summary_hint"}}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{t .Lang "page.field_content"}} <span class="text-danger">*</span></label>
+                    <div class="md-toolbar mb-1 d-flex gap-1 flex-wrap align-items-center">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('content','**','**')" title="{{t .Lang "article.md_bold"}}"><b>B</b></button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary fst-italic" onclick="mdWrap('content','*','*')" title="{{t .Lang "article.md_italic"}}">I</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','## ')" title="{{t .Lang "article.md_h2"}}">H2</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','### ')" title="{{t .Lang "article.md_h3"}}">H3</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','- ')" title="{{t .Lang "article.md_list"}}">&#8226;</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdInsertLink('content')" title="{{t .Lang "article.md_link"}}">&#128279;</button>
+                        <span class="text-muted">|</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('article')">{{t .Lang "page.block_article"}}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('youtube')">{{t .Lang "page.block_youtube"}}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('map')">{{t .Lang "page.block_map"}}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('button')">{{t .Lang "page.block_button"}}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('gallery')">{{t .Lang "page.block_gallery"}}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('banner')">{{t .Lang "page.block_banner"}}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('articles')">{{t .Lang "page.block_articles"}}</button>
+                        <div class="ms-auto">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btn-preview-page" onclick="togglePreview('content','md-preview-page','btn-preview-page')">&#128065; {{t .Lang "common.preview"}}</button>
+                        </div>
+                    </div>
+                    <div class="md-editor-wrap">
+                        <textarea class="form-control font-monospace" id="content" name="content" rows="22" required
+                                  oninput="livePreview('content','md-preview-page')">{{if .Page}}{{.Page.Content}}{{end}}</textarea>
+                        <div id="md-preview-page" class="md-preview d-none article-content border rounded p-3 bg-white"></div>
+                    </div>
+                    <div class="form-text">{{t .Lang "page.content_hint"}}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3"><i class="bi bi-search me-2"></i>{{t .Lang "page.seo_section"}}</h5>
+                <div class="mb-3">
+                    <label for="seo_title" class="form-label">{{t .Lang "page.field_seo_title"}}</label>
+                    <input type="text" class="form-control" id="seo_title" name="seo_title"
+                           value="{{if .Page}}{{.Page.SEOTitle}}{{end}}">
+                </div>
+                <div class="mb-3">
+                    <label for="seo_description" class="form-label">{{t .Lang "page.field_seo_description"}}</label>
+                    <textarea class="form-control" id="seo_description" name="seo_description" rows="2">{{if .Page}}{{.Page.SEODescription}}{{end}}</textarea>
+                </div>
+                <div class="mb-0">
+                    <label for="og_image" class="form-label">{{t .Lang "page.field_og_image"}}</label>
+                    <input type="text" class="form-control" id="og_image" name="og_image"
+                           value="{{if .Page}}{{.Page.OGImage}}{{end}}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3"><i class="bi bi-gear me-2"></i>{{t .Lang "page.settings_section"}}</h5>
+
+                <div class="mb-3">
+                    <label for="parent_id" class="form-label">{{t .Lang "page.field_parent"}}</label>
+                    <select class="form-select" id="parent_id" name="parent_id">
+                        <option value="">{{t .Lang "page.parent_none"}}</option>
+                        {{$currentParent := ""}}
+                        {{if .Page}}{{if .Page.ParentID}}{{$currentParent = .Page.ParentID.Hex}}{{end}}{{end}}
+                        {{range .ParentOptions}}
+                        <option value="{{.ID.Hex}}" {{if eq .ID.Hex $currentParent}}selected{{end}}>{{.Path}}</option>
+                        {{end}}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="layout" class="form-label">{{t .Lang "page.field_layout"}}</label>
+                    <select class="form-select" id="layout" name="layout">
+                        {{$currentLayout := "default"}}
+                        {{if .Page}}{{$currentLayout = .Page.Layout}}{{end}}
+                        {{range .Layouts}}
+                        <option value="{{.}}" {{if eq . $currentLayout}}selected{{end}}>{{.}}</option>
+                        {{end}}
+                    </select>
+                </div>
+
+                {{if .Page}}
+                <div class="mb-3">
+                    <label for="slug" class="form-label">{{t .Lang "page.field_slug"}}</label>
+                    <input type="text" class="form-control" id="slug" name="slug" value="{{.Page.Slug}}">
+                    <div class="form-check mt-1">
+                        <input class="form-check-input" type="checkbox" id="update_slug" name="update_slug">
+                        <label class="form-check-label small" for="update_slug">{{t .Lang "page.update_slug"}}</label>
+                    </div>
+                    <div class="form-text small">{{t .Lang "page.current_url"}} <code>{{.URLPrefix}}/{{.Page.Path}}</code></div>
+                </div>
+                {{else}}
+                <div class="mb-3">
+                    <label for="slug" class="form-label">{{t .Lang "page.field_slug"}}</label>
+                    <input type="text" class="form-control" id="slug" name="slug" placeholder="{{t .Lang "page.slug_auto"}}">
+                    <div class="form-text small">{{t .Lang "page.slug_hint"}}</div>
+                </div>
+                {{end}}
+
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="published" name="published" role="switch"
+                               {{if .Page}}{{if .Page.Published}}checked{{end}}{{end}}>
+                        <label class="form-check-label fw-semibold" for="published">{{t .Lang "page.published"}}</label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="publish_at" class="form-label">{{t .Lang "page.field_publish_at"}}</label>
+                    <input type="datetime-local" class="form-control" id="publish_at" name="publish_at"
+                           value="{{if .Page}}{{if not .Page.PublishedAt.IsZero}}{{rfc3339 .Page.PublishedAt}}{{end}}{{end}}">
+                    <div class="form-text small">{{t .Lang "page.publish_at_hint"}}</div>
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="show_in_nav" name="show_in_nav" role="switch"
+                               {{if .Page}}{{if .Page.ShowInNav}}checked{{end}}{{end}}>
+                        <label class="form-check-label" for="show_in_nav">{{t .Lang "page.show_in_nav"}}</label>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <label for="menu_order" class="form-label">{{t .Lang "page.field_menu_order"}}</label>
+                    <input type="number" class="form-control" id="menu_order" name="menu_order"
+                           value="{{if .Page}}{{.Page.MenuOrder}}{{else}}0{{end}}">
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-lg me-2"></i>{{if .IsEdit}}{{t .Lang "common.save_changes"}}{{else}}{{t .Lang "page.create_btn"}}{{end}}
+            </button>
+            <a href="/admin/pages" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+        </div>
+    </div>
+</form>
+
+<!-- Page block picker modal -->
+<div class="modal fade" id="page-block-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.pageBlocksConfig = {
+    bannerSlots: [
+        {{range $i, $s := .BannerSlots}}{{if $i}},{{end}}{"id": {{js $s.ID}}, "label": {{js $s.Label}}}{{end}}
+    ],
+    categories: [
+        {{range $i, $c := .Categories}}{{if $i}},{{end}}{"name": {{js $c.Name}}, "slug": {{js $c.Slug}}}{{end}}
+    ],
+    i18n: {
+        search_articles:   "{{t .Lang "page.pick_search_articles"}}",
+        no_results:        "{{t .Lang "page.pick_no_results"}}",
+        search_error:      "{{t .Lang "page.pick_search_error"}}",
+        gallery_hint:      "{{t .Lang "page.pick_gallery_hint"}}",
+        insert_selected:   "{{t .Lang "page.pick_insert"}}",
+        loading:           "{{t .Lang "page.pick_loading"}}",
+        media_empty:       "{{t .Lang "media.pick_empty"}}",
+        block_article:     "{{t .Lang "page.block_article"}}",
+        block_gallery:     "{{t .Lang "page.block_gallery"}}",
+        block_banner:      "{{t .Lang "page.block_banner"}}",
+        block_articles:    "{{t .Lang "page.block_articles"}}",
+        banner_slot_prompt:"{{t .Lang "page.pick_banner_slot_prompt"}}",
+        no_categories:     "{{t .Lang "page.pick_no_categories"}}",
+        field_category:    "{{t .Lang "page.field_category"}}",
+        field_limit:       "{{t .Lang "page.field_limit"}}",
+        youtube_prompt:    "{{t .Lang "page.pick_youtube_prompt"}}",
+        youtube_invalid:   "{{t .Lang "page.pick_youtube_invalid"}}",
+        map_prompt:        "{{t .Lang "page.pick_map_prompt"}}",
+        map_invalid:       "{{t .Lang "page.pick_map_invalid"}}",
+        button_text_prompt:"{{t .Lang "page.pick_button_text"}}",
+        button_url_prompt: "{{t .Lang "page.pick_button_url"}}"
+    }
+};
+</script>
+<script src="/static/js/md-editor.js"></script>
+<script src="/static/js/page-blocks.js"></script>
+{{end}}

@@ -1,0 +1,33 @@
+{{define "page_landing"}}
+{{template "header" .}}
+<div class="page-landing-hero" {{if .OGImage}}style="background-image: linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)), url('{{.OGImage}}');"{{end}}>
+    <div class="container">
+        {{template "page_breadcrumb" .}}
+        <h1 class="display-5 fw-bold text-white">{{.Page.Title}}</h1>
+        {{if .Page.Summary}}<p class="lead text-white-50">{{.Page.Summary}}</p>{{end}}
+    </div>
+</div>
+<div class="container py-5">
+    <div class="page-article-content">
+        {{.ContentHTML}}
+    </div>
+    {{if .Children}}
+    <section class="page-children mt-5">
+        <div class="row g-4">
+            {{range .Children}}
+            <div class="col-md-6 col-lg-4">
+                <a class="card h-100 text-decoration-none page-child-card shadow-sm" href="{{$.URLPrefix}}/{{.Path}}">
+                    {{if .OGImage}}<img class="card-img-top" src="{{.OGImage}}" alt="{{.Title}}" loading="lazy">{{end}}
+                    <div class="card-body">
+                        <h3 class="h5 mb-2">{{.Title}}</h3>
+                        {{if .Summary}}<p class="small text-muted mb-0">{{truncate .Summary 160}}</p>{{end}}
+                    </div>
+                </a>
+            </div>
+            {{end}}
+        </div>
+    </section>
+    {{end}}
+</div>
+{{template "footer" .}}
+{{end}}

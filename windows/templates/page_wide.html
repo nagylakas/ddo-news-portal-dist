@@ -1,0 +1,18 @@
+{{define "page_wide"}}
+{{template "header" .}}
+<div class="container-fluid px-0 py-0">
+    <div class="px-4 px-lg-5 pt-4">
+        {{template "page_breadcrumb" .}}
+    </div>
+    <article class="page-article page-article-wide">
+        <header class="px-4 px-lg-5 mb-4">
+            <h1 class="page-article-title">{{.Page.Title}}</h1>
+            {{if .Page.Summary}}<p class="lead text-muted">{{.Page.Summary}}</p>{{end}}
+        </header>
+        <div class="page-article-content page-article-content-wide px-0">
+            {{.ContentHTML}}
+        </div>
+    </article>
+</div>
+{{template "footer" .}}
+{{end}}

@@ -1,0 +1,27 @@
+{{define "admin/page_edit"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4 py-3">
+    <div class="d-flex align-items-center mb-3">
+        <a href="/admin/pages" class="btn btn-outline-secondary me-3">
+            <i class="bi bi-arrow-left"></i> {{t .Lang "common.back"}}
+        </a>
+        <h2 class="mb-0">{{t .Lang "page.edit_title"}}</h2>
+        {{if .Page}}
+        <a href="{{.URLPrefix}}/{{.Page.Path}}" target="_blank" class="btn btn-outline-secondary ms-auto">
+            <i class="bi bi-box-arrow-up-right"></i> {{t .Lang "page.view_public"}}
+        </a>
+        {{end}}
+    </div>
+
+    {{if .ErrorMessage}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{.ErrorMessage}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {{end}}
+
+    {{template "admin/page_form" dict "Lang" .Lang "Page" .Page "ParentOptions" .ParentOptions "Layouts" .Layouts "BannerSlots" .BannerSlots "Categories" .Categories "URLPrefix" .URLPrefix "Action" (printf "/admin/pages/edit/%s" .Page.ID.Hex) "IsEdit" true}}
+</div>
+
+{{template "admin-footer" .}}
+{{end}}

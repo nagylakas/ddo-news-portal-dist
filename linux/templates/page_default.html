@@ -1,0 +1,47 @@
+{{define "page_default"}}
+{{template "header" .}}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    {{template "page_breadcrumb" .}}
+    <article class="page-article">
+        <header class="page-article-header mb-4">
+            <h1 class="page-article-title">{{.Page.Title}}</h1>
+            {{if .Page.Summary}}<p class="page-article-summary lead">{{.Page.Summary}}</p>{{end}}
+        </header>
+        <div class="page-article-content">
+            {{.ContentHTML}}
+        </div>
+        {{if .Children}}
+        <section class="page-children mt-5">
+            <h2 class="h4 mb-3">További tartalmak</h2>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                {{range .Children}}
+                <div class="col">
+                    <a class="card h-100 text-decoration-none page-child-card" href="{{$.URLPrefix}}/{{.Path}}">
+                        <div class="card-body">
+                            <h3 class="h6 mb-2">{{.Title}}</h3>
+                            {{if .Summary}}<p class="small text-muted mb-0">{{truncate .Summary 140}}</p>{{end}}
+                        </div>
+                    </a>
+                </div>
+                {{end}}
+            </div>
+        </section>
+        {{end}}
+    </article>
+</div>
+{{template "footer" .}}
+{{end}}
+
+{{define "page_breadcrumb"}}
+{{if or .Breadcrumb .Page.ParentID}}
+<nav class="art-breadcrumb mb-3" aria-label="breadcrumb">
+    <a href="/">KEZDŐLAP</a>
+    {{range .Breadcrumb}}
+    <span class="art-bc-sep">›</span>
+    <a href="{{$.URLPrefix}}/{{.Path}}">{{upper .Title}}</a>
+    {{end}}
+    <span class="art-bc-sep">›</span>
+    <span>{{upper .Page.Title}}</span>
+</nav>
+{{end}}
+{{end}}

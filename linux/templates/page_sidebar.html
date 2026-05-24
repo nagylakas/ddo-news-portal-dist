@@ -1,0 +1,44 @@
+{{define "page_sidebar"}}
+{{template "header" .}}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    {{template "page_breadcrumb" .}}
+    <div class="row g-4">
+        <aside class="col-lg-3">
+            <nav class="page-sidebar-nav sticky-lg-top" style="top: 1rem;">
+                {{if .Breadcrumb}}
+                <h6 class="text-uppercase text-muted small mb-2">{{(index .Breadcrumb 0).Title}}</h6>
+                {{end}}
+                <ul class="list-unstyled">
+                    {{range .Siblings}}
+                    <li>
+                        <a class="d-block py-2 px-3 rounded text-decoration-none {{if eq .ID $.Page.ID}}bg-primary text-white{{else}}text-dark page-sidebar-link{{end}}"
+                           href="{{$.URLPrefix}}/{{.Path}}">{{.Title}}</a>
+                    </li>
+                    {{end}}
+                </ul>
+                {{if .Children}}
+                <hr>
+                <h6 class="text-uppercase text-muted small mb-2">Aloldalak</h6>
+                <ul class="list-unstyled">
+                    {{range .Children}}
+                    <li><a class="d-block py-2 px-3 rounded text-decoration-none text-dark page-sidebar-link" href="{{$.URLPrefix}}/{{.Path}}">{{.Title}}</a></li>
+                    {{end}}
+                </ul>
+                {{end}}
+            </nav>
+        </aside>
+        <main class="col-lg-9">
+            <article class="page-article">
+                <header class="mb-4">
+                    <h1 class="page-article-title">{{.Page.Title}}</h1>
+                    {{if .Page.Summary}}<p class="lead text-muted">{{.Page.Summary}}</p>{{end}}
+                </header>
+                <div class="page-article-content">
+                    {{.ContentHTML}}
+                </div>
+            </article>
+        </main>
+    </div>
+</div>
+{{template "footer" .}}
+{{end}}
