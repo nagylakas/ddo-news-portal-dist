@@ -78,33 +78,33 @@
             <div class="tab-pane fade" id="tab-schedule">
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_from"}} <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_from"}} <span class="text-danger">*</span> {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_from")}}</label>
                         <input type="datetime-local" name="active_from" class="form-control" required>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_until"}} <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_until"}} <span class="text-danger">*</span> {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_until")}}</label>
                         <input type="datetime-local" name="active_until" class="form-control" required>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_priority"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_priority"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_priority")}}</label>
                         <input type="number" name="priority" class="form-control" value="0" min="0" max="100">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_weight"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_weight"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_weight")}}</label>
                         <input type="number" name="weight" class="form-control" value="1" min="1">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_daily_impr_limit"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_daily_impr_limit"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_daily_impr_limit")}}</label>
                         <input type="number" name="daily_impression_limit" class="form-control" min="0">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_daily_click_limit"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_daily_click_limit"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_daily_click_limit")}}</label>
                         <input type="number" name="daily_click_limit" class="form-control" min="0">
                     </div>
                     <div class="col-12">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" name="active" id="active" checked>
-                            <label class="form-check-label fw-semibold" for="active">{{t .Lang "banner.field_active"}}</label>
+                            <label class="form-check-label fw-semibold" for="active">{{t .Lang "banner.field_active"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_active")}}</label>
                         </div>
                     </div>
                 </div>
@@ -113,23 +113,23 @@
             <div class="tab-pane fade" id="tab-targeting">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_categories"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_categories"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_target_categories")}}</label>
                         <input name="target_categories" class="form-control" list="banner_categories" placeholder="Tech, Gaming">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_tags"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_tags"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_target_tags")}}</label>
                         <input name="target_tags" class="form-control" placeholder="review, ai">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_authors"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_authors"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_target_authors")}}</label>
                         <input name="target_authors" class="form-control" list="banner_authors">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_devices"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_devices"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_target_devices")}}</label>
                         <input name="target_devices" class="form-control" placeholder="desktop, mobile">
                     </div>
                     <div class="col-12">
-                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_urls"}}</label>
+                        <label class="form-label fw-semibold">{{t .Lang "banner.field_target_urls"}} {{template "admin/banner-help" dict "Text" (t .Lang "banner.help_target_urls")}}</label>
                         <input name="target_url_patterns" class="form-control" placeholder="/article/*">
                     </div>
                     <div class="col-12"><div class="form-text">{{t .Lang "banner.targeting_hint"}}</div></div>
@@ -146,6 +146,10 @@
 <datalist id="banner_authors">{{range .Authors}}<option value="{{.Name}}">{{end}}</datalist>
 {{template "admin/banner-picker-script" .}}
 {{template "admin-footer" .}}
+{{end}}
+
+{{define "admin/banner-help"}}
+<i class="bi bi-question-circle text-muted ms-1" tabindex="0" role="button" data-bs-toggle="tooltip" data-bs-placement="top" title="{{.Text}}"></i>
 {{end}}
 
 {{define "admin/banner-picker-script"}}
@@ -166,4 +170,7 @@ function uploadBannerImage(){ document.getElementById('banner_file_input').click
 function doUploadBannerImage(input){ if(!input.files||!input.files[0]) return; var status=document.getElementById('banner_upload_status'); status.textContent='...'; var fd=new FormData(); fd.append('image', input.files[0]); fd.append('category','banner'); input.value=''; fetch('/admin/media/upload?json=1',{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(data){ if(data.error){status.textContent=window._bannerI18n.uploadError;return;} selectBannerImage(data.url); status.textContent=window._bannerI18n.uploadDone; }).catch(function(){ status.textContent=window._bannerI18n.uploadError; }); }
 </script>
 {{end}}
+<script>
+document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) { new bootstrap.Tooltip(el); });
+</script>
 {{end}}
