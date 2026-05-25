@@ -95,6 +95,11 @@ window._avatarI18n = {
     uploadError: '{{t .Lang "media.upload_error_label"}}',
 };
 
+function escHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 function secureAvatarURL(u) {
     if (!u) return u;
     if (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('/')) return u;
@@ -110,14 +115,14 @@ function openAvatarPicker() {
             var items = (data && data.all) ? data.all : [];
             var grid = document.getElementById('avatar_picker_grid');
             if (items.length === 0) {
-                grid.innerHTML = '<div class="col-12 text-center text-muted py-4">' + window._avatarI18n.pickEmpty + '</div>';
+                grid.innerHTML = '<div class="col-12 text-center text-muted py-4">' + escHTML(window._avatarI18n.pickEmpty) + '</div>';
                 return;
             }
             grid.innerHTML = items.map(function(item) {
                 var url = secureAvatarURL(item.url);
                 var lbl = item.title || item.filename || '';
-                var safeUrl = url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-                var safeLabel = lbl.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+                var safeUrl = escHTML(url);
+                var safeLabel = escHTML(lbl);
                 return '<div class="col-6 col-sm-4 col-md-3 col-lg-2">' +
                     '<div class="card h-100 border-0 shadow-sm picker-item" style="cursor:pointer" data-url="' + safeUrl + '">' +
                     '<img src="' + safeUrl + '" class="card-img-top" style="height:80px;object-fit:cover;pointer-events:none" loading="lazy">' +
@@ -127,7 +132,7 @@ function openAvatarPicker() {
         })
         .catch(function() {
             document.getElementById('avatar_picker_grid').innerHTML =
-                '<div class="col-12 text-center text-danger py-4">' + window._avatarI18n.uploadError + '</div>';
+                '<div class="col-12 text-center text-danger py-4">' + escHTML(window._avatarI18n.uploadError) + '</div>';
         });
 }
 

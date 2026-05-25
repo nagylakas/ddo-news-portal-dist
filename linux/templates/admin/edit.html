@@ -260,6 +260,10 @@ window._articleID = '{{.Article.ID.Hex}}';
 document.getElementById('pick_label').textContent = window._mediaI18n.pickLabel;
 document.getElementById('upload_label').textContent = window._mediaI18n.uploadLabel;
 document.getElementById('import_label').textContent = window._mediaI18n.importLabel;
+function escHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function secureMediaURL(u) {
     if (!u || u.startsWith('http://') || u.startsWith('https://') || u.startsWith('/')) return u;
     return 'https://' + u;
@@ -277,12 +281,12 @@ document.getElementById('image_url').addEventListener('input', updateImportBtn);
 updateImportBtn();
 function renderPickerGrid(items, label) {
     if (!items || items.length === 0) return '';
-    return '<div class="col-12 mt-2 mb-1"><h6 class="text-muted small fw-semibold text-uppercase">' + label + '</h6></div>' +
+    return '<div class="col-12 mt-2 mb-1"><h6 class="text-muted small fw-semibold text-uppercase">' + escHTML(label) + '</h6></div>' +
         items.map(function(item) {
             var url = secureMediaURL(item.url);
             var lbl = item.title || item.filename || '';
-            var safeUrl = url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-            var safeLabel = lbl.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+            var safeUrl = escHTML(url);
+            var safeLabel = escHTML(lbl);
             return '<div class="col-6 col-md-3 col-lg-2">' +
                 '<div class="card h-100 picker-item" style="cursor:pointer" data-url="' + safeUrl + '">' +
                 '<img src="' + safeUrl + '" class="card-img-top" style="height:80px;object-fit:cover;pointer-events:none" alt="">' +
@@ -302,7 +306,7 @@ function openMediaPicker() {
             var articleItems = data.article || [];
             var allItems = data.all || [];
             if (articleItems.length === 0 && allItems.length === 0) {
-                grid.innerHTML = '<div class="col-12"><p class="text-muted">' + window._mediaI18n.pickEmpty + '</p></div>';
+                grid.innerHTML = '<div class="col-12"><p class="text-muted">' + escHTML(window._mediaI18n.pickEmpty) + '</p></div>';
                 return;
             }
             var html = renderPickerGrid(articleItems, window._mediaI18n.sectionArticle);
@@ -311,12 +315,12 @@ function openMediaPicker() {
             }
             html += renderPickerGrid(allItems, window._mediaI18n.sectionAll);
             if (!html) {
-                html = '<div class="col-12"><p class="text-muted">' + window._mediaI18n.pickEmpty + '</p></div>';
+                html = '<div class="col-12"><p class="text-muted">' + escHTML(window._mediaI18n.pickEmpty) + '</p></div>';
             }
             grid.innerHTML = html;
         })
         .catch(function() {
-            grid.innerHTML = '<div class="col-12"><p class="text-muted">' + window._mediaI18n.pickEmpty + '</p></div>';
+            grid.innerHTML = '<div class="col-12"><p class="text-muted">' + escHTML(window._mediaI18n.pickEmpty) + '</p></div>';
         });
     modal.show();
 }
