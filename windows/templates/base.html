@@ -233,6 +233,7 @@
         <div class="footer-bottom">
             <div class="footer-inner">
                 <span class="footer-copy">&copy; 2025{{if gt (currentYear) 2025}}-{{currentYear}}{{end}} {{.SiteNameLong}} &mdash; A megbízható hírforrás.</span>
+                <span class="footer-utility">
                 {{if contactEmailToken}}
                 <a class="footer-contact js-contact-email" href="#" data-email-token="{{contactEmailToken}}" rel="nofollow" aria-label="Kapcsolat">
                     <i class="bi bi-envelope-at"></i>
@@ -246,6 +247,7 @@
                     <span>Cookie beállítások</span>
                 </button>
                 {{end}}
+                </span>
                 <span class="footer-built">
                     A Diffusi csoport tagja.
                     <img src="/static/img/diffusi/diffusi_white_footer.png" alt="Diffusi" style="height:20px; vertical-align:middle; margin-left:8px;">
