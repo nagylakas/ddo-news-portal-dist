@@ -2542,3 +2542,115 @@ body:not(.admin-body) .btn-outline-primary:hover {
         border-bottom: 1px solid #f1f3f5;
     }
 }
+/* Cookie consent */
+.cookie-consent {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 1080;
+    padding: 1rem;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0), rgba(15, 23, 42, 0.35));
+}
+
+.cookie-consent-card {
+    width: min(960px, 100%);
+    margin: 0 auto;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+}
+
+.cookie-consent-copy {
+    color: #1f2937;
+}
+
+.cookie-consent-copy h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.cookie-consent-copy p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.cookie-provider-list {
+    display: grid;
+    gap: 0.65rem;
+    margin-top: 0.85rem;
+}
+
+.cookie-provider-option {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    padding: 0.7rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.cookie-provider-option input {
+    flex: 0 0 auto;
+    margin-top: 0.2rem;
+}
+
+.cookie-provider-option strong {
+    display: block;
+    font-size: 0.94rem;
+}
+
+.cookie-provider-option small {
+    display: block;
+    margin-top: 0.15rem;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+.cookie-consent-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    min-width: 250px;
+}
+
+.footer-cookie-link {
+    border: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: inherit;
+    background: transparent;
+    opacity: 0.85;
+}
+
+.footer-cookie-link:hover,
+.footer-cookie-link:focus {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+@media (max-width: 767.98px) {
+    .cookie-consent-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .cookie-consent-actions {
+        min-width: 0;
+        justify-content: stretch;
+    }
+
+    .cookie-consent-actions .btn {
+        flex: 1 1 100%;
+    }
+}

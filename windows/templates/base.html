@@ -240,6 +240,12 @@
                     <span class="footer-contact-address">E-mail megjelenítése</span>
                 </a>
                 {{end}}
+                {{if or (metaPixelEnabled) (googleAnalyticsEnabled)}}
+                <button type="button" class="footer-cookie-link js-cookie-settings">
+                    <i class="bi bi-cookie"></i>
+                    <span>Cookie beállítások</span>
+                </button>
+                {{end}}
                 <span class="footer-built">
                     A Diffusi csoport tagja.
                     <img src="/static/img/diffusi/diffusi_white_footer.png" alt="Diffusi" style="height:20px; vertical-align:middle; margin-left:8px;">
@@ -247,6 +253,46 @@
             </div>
         </div>
     </footer>
+    {{if or (metaPixelEnabled) (googleAnalyticsEnabled)}}
+    <div class="cookie-consent" id="cookieConsent" hidden>
+        <div class="cookie-consent-card" role="dialog" aria-live="polite" aria-labelledby="cookieConsentTitle">
+            <div class="cookie-consent-copy">
+                <h2 id="cookieConsentTitle">Cookie beállítások</h2>
+                <p class="js-cookie-consent-message">A szükséges cookie-k mellett csak az általad kiválasztott mérési szolgáltatásokat indítjuk el.</p>
+                <div class="cookie-provider-list">
+                    {{if metaPixelEnabled}}
+                    <label class="cookie-provider-option">
+                        <input class="form-check-input js-cookie-provider" type="checkbox" value="metaPixel">
+                        <span>
+                            <strong>Meta Pixel</strong>
+                            <small>Facebook/Instagram hirdetésmérés és remarketing.</small>
+                        </span>
+                    </label>
+                    {{end}}
+                    {{if googleAnalyticsEnabled}}
+                    <label class="cookie-provider-option">
+                        <input class="form-check-input js-cookie-provider" type="checkbox" value="googleAnalytics">
+                        <span>
+                            <strong>Google Analytics</strong>
+                            <small>Látogatottsági statisztika és oldalhasználati mérés.</small>
+                        </span>
+                    </label>
+                    {{end}}
+                </div>
+            </div>
+            <div class="cookie-consent-actions">
+                <button type="button" class="btn btn-primary js-cookie-save">Beállítások mentése</button>
+                <button type="button" class="btn btn-outline-secondary js-cookie-reject">Összes elutasítása</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.ddoConsentConfig = {
+            metaPixelId: '{{metaPixelID}}',
+            googleAnalyticsId: '{{googleAnalyticsID}}'
+        };
+    </script>
+    {{end}}
     <!-- Bootstrap 5.3 JS Bundle (local-first, CDN fallback) -->
     <script src="/static/vendor/bootstrap@5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>

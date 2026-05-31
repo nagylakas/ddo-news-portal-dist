@@ -171,7 +171,256 @@ document.addEventListener('DOMContentLoaded', function() {
             progressBar.style.width = scrolled + '%';
         });
     }
+
+    initCookieConsent();
 });
+
+// Consent-gated measurement loaders. Third-party scripts are not requested until the visitor grants per-provider consent.
+function initCookieConsent() {
+    const config = window.ddoConsentConfig || {};
+    const metaPixelId = String(config.metaPixelId || '').trim();
+    const googleAnalyticsId = String(config.googleAnalyticsId || '').trim();
+    const availableProviders = {
+        metaPixel: metaPixelId !== '',
+        googleAnalytics: googleAnalyticsId !== ''
+    };
+    if (!availableProviders.metaPixel && !availableProviders.googleAnalytics) {
+        return;
+    }
+
+    const storageKey = 'ddo_cookie_consent_v1';
+    const banner = document.getElementById('cookieConsent');
+    const saveButtons = document.querySelectorAll('.js-cookie-save');
+    const rejectButtons = document.querySelectorAll('.js-cookie-reject');
+    const settingsButtons = document.querySelectorAll('.js-cookie-settings');
+    const providerInputs = document.querySelectorAll('.js-cookie-provider');
+    const message = banner ? banner.querySelector('.js-cookie-consent-message') : null;
+
+    function readConsent() {
+        try {
+            const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
+            if (!stored) {
+                return null;
+            }
+            return {
+                necessary: true,
+                metaPixel: stored.metaPixel === true || (stored.marketing === true && stored.metaPixel !== false),
+                googleAnalytics: stored.googleAnalytics === true,
+                updatedAt: stored.updatedAt || ''
+            };
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function writeConsent(consent) {
+        const normalized = {
+            necessary: true,
+            metaPixel: availableProviders.metaPixel && consent.metaPixel === true,
+            googleAnalytics: availableProviders.googleAnalytics && consent.googleAnalytics === true,
+            updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem(storageKey, JSON.stringify(normalized));
+        return normalized;
+    }
+
+    function currentFormConsent() {
+        const consent = {
+            metaPixel: false,
+            googleAnalytics: false
+        };
+        providerInputs.forEach(function(input) {
+            if (input.value === 'metaPixel') {
+                consent.metaPixel = input.checked;
+            } else if (input.value === 'googleAnalytics') {
+                consent.googleAnalytics = input.checked;
+            }
+        });
+        return consent;
+    }
+
+    function applyConsent(consent) {
+        if (availableProviders.metaPixel) {
+            if (consent.metaPixel) {
+                loadMetaPixel(metaPixelId);
+            } else {
+                revokeMetaPixel();
+            }
+        }
+        if (availableProviders.googleAnalytics) {
+            if (consent.googleAnalytics) {
+                loadGoogleAnalytics(googleAnalyticsId);
+            } else {
+                revokeGoogleAnalytics();
+            }
+        }
+    }
+
+    function showBanner() {
+        updateBannerState();
+        if (banner) {
+            banner.hidden = false;
+        }
+    }
+
+    function hideBanner() {
+        if (banner) {
+            banner.hidden = true;
+        }
+    }
+
+    function saveSelectedConsent() {
+        const consent = writeConsent(currentFormConsent());
+        updateBannerState(consent);
+        hideBanner();
+        applyConsent(consent);
+    }
+
+    function rejectAllConsent() {
+        const consent = writeConsent({
+            metaPixel: false,
+            googleAnalytics: false
+        });
+        updateBannerState(consent);
+        hideBanner();
+        applyConsent(consent);
+    }
+
+    function updateBannerState(consentOverride) {
+        const consent = consentOverride || readConsent() || {
+            metaPixel: false,
+            googleAnalytics: false
+        };
+        providerInputs.forEach(function(input) {
+            if (input.value === 'metaPixel') {
+                input.checked = availableProviders.metaPixel && consent.metaPixel === true;
+            } else if (input.value === 'googleAnalytics') {
+                input.checked = availableProviders.googleAnalytics && consent.googleAnalytics === true;
+            }
+        });
+        const selectedCount = (consent.metaPixel ? 1 : 0) + (consent.googleAnalytics ? 1 : 0);
+        if (message) {
+            message.textContent = selectedCount > 0
+                ? 'A kijelölt mérési szolgáltatások jelenleg engedélyezettek. Itt bármikor módosíthatod vagy visszavonhatod a hozzájárulást.'
+                : 'A szükséges cookie-k mellett csak az általad kiválasztott mérési szolgáltatásokat indítjuk el.';
+        }
+        rejectButtons.forEach(function(button) {
+            button.textContent = selectedCount > 0 ? 'Összes hozzájárulás visszavonása' : 'Összes elutasítása';
+        });
+    }
+
+    saveButtons.forEach(function(button) {
+        button.addEventListener('click', saveSelectedConsent);
+    });
+    rejectButtons.forEach(function(button) {
+        button.addEventListener('click', rejectAllConsent);
+    });
+    settingsButtons.forEach(function(button) {
+        button.addEventListener('click', showBanner);
+    });
+
+    window.ddoConsent = {
+        open: showBanner,
+        save: saveSelectedConsent,
+        rejectAll: rejectAllConsent,
+        get: readConsent
+    };
+
+    const consent = readConsent();
+    if (consent) {
+        applyConsent(consent);
+    } else {
+        showBanner();
+    }
+}
+
+function loadMetaPixel(pixelId) {
+    if (window.ddoMetaPixelLoaded) {
+        return;
+    }
+    window.ddoMetaPixelLoaded = true;
+
+    runAfterLoadIdle(function() {
+        /* eslint-disable */
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window,document,'script',
+		'https://connect.facebook.net/hu_HU/fbevents.js');
+		/* eslint-enable */
+		fbq('init', pixelId);
+		fbq('consent', 'grant');
+        fbq('track', 'PageView');
+    });
+}
+
+function revokeMetaPixel() {
+    if (typeof window.fbq === 'function') {
+        try {
+            window.fbq('consent', 'revoke');
+        } catch (_) {}
+    }
+}
+
+function loadGoogleAnalytics(measurementId) {
+    if (window.ddoGoogleAnalyticsLoaded) {
+        grantGoogleAnalytics();
+        return;
+    }
+    window.ddoGoogleAnalyticsLoaded = true;
+
+    runAfterLoadIdle(function() {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function() {
+            window.dataLayer.push(arguments);
+        };
+        grantGoogleAnalytics();
+
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(measurementId);
+        document.head.appendChild(script);
+
+        window.gtag('js', new Date());
+        window.gtag('config', measurementId, {
+            anonymize_ip: true
+        });
+    });
+}
+
+function grantGoogleAnalytics() {
+    if (typeof window.gtag === 'function') {
+        window.gtag('consent', 'update', {
+            analytics_storage: 'granted'
+        });
+    }
+}
+
+function revokeGoogleAnalytics() {
+    if (typeof window.gtag === 'function') {
+        window.gtag('consent', 'update', {
+            analytics_storage: 'denied'
+        });
+    }
+}
+
+function runAfterLoadIdle(callback) {
+    function idle() {
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(callback, { timeout: 2000 });
+            return;
+        }
+        window.setTimeout(callback, 1);
+    }
+    if (document.readyState === 'complete') {
+        idle();
+    } else {
+        window.addEventListener('load', idle, { once: true });
+    }
+}
 
 // Utility functions
 function isValidUrl(string) {
