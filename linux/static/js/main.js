@@ -189,9 +189,11 @@ function initCookieConsent() {
     }
 
     const storageKey = 'ddo_cookie_consent_v1';
+    const consentVersion = 2;
     const banner = document.getElementById('cookieConsent');
+    const acceptAllButtons = document.querySelectorAll('.js-cookie-accept-all');
+    const googleOnlyButtons = document.querySelectorAll('.js-cookie-google-only');
     const saveButtons = document.querySelectorAll('.js-cookie-save');
-    const rejectButtons = document.querySelectorAll('.js-cookie-reject');
     const settingsButtons = document.querySelectorAll('.js-cookie-settings');
     const providerInputs = document.querySelectorAll('.js-cookie-provider');
     const message = banner ? banner.querySelector('.js-cookie-consent-message') : null;
@@ -202,9 +204,13 @@ function initCookieConsent() {
             if (!stored) {
                 return null;
             }
+            if (stored.version !== consentVersion) {
+                return null;
+            }
             return {
+                version: consentVersion,
                 necessary: true,
-                metaPixel: stored.metaPixel === true || (stored.marketing === true && stored.metaPixel !== false),
+                metaPixel: stored.metaPixel === true,
                 googleAnalytics: stored.googleAnalytics === true,
                 updatedAt: stored.updatedAt || ''
             };
@@ -215,6 +221,7 @@ function initCookieConsent() {
 
     function writeConsent(consent) {
         const normalized = {
+            version: consentVersion,
             necessary: true,
             metaPixel: availableProviders.metaPixel && consent.metaPixel === true,
             googleAnalytics: availableProviders.googleAnalytics && consent.googleAnalytics === true,
@@ -276,10 +283,20 @@ function initCookieConsent() {
         applyConsent(consent);
     }
 
-    function rejectAllConsent() {
+    function acceptAllConsent() {
+        const consent = writeConsent({
+            metaPixel: availableProviders.metaPixel,
+            googleAnalytics: availableProviders.googleAnalytics
+        });
+        updateBannerState(consent);
+        hideBanner();
+        applyConsent(consent);
+    }
+
+    function acceptGoogleAnalyticsOnly() {
         const consent = writeConsent({
             metaPixel: false,
-            googleAnalytics: false
+            googleAnalytics: availableProviders.googleAnalytics
         });
         updateBannerState(consent);
         hideBanner();
@@ -304,16 +321,16 @@ function initCookieConsent() {
                 ? 'A kijelölt mérési szolgáltatások jelenleg engedélyezettek. Itt bármikor módosíthatod vagy visszavonhatod a hozzájárulást.'
                 : 'A szükséges cookie-k mellett csak az általad kiválasztott mérési szolgáltatásokat indítjuk el.';
         }
-        rejectButtons.forEach(function(button) {
-            button.textContent = selectedCount > 0 ? 'Összes hozzájárulás visszavonása' : 'Összes elutasítása';
-        });
     }
 
+    acceptAllButtons.forEach(function(button) {
+        button.addEventListener('click', acceptAllConsent);
+    });
+    googleOnlyButtons.forEach(function(button) {
+        button.addEventListener('click', acceptGoogleAnalyticsOnly);
+    });
     saveButtons.forEach(function(button) {
         button.addEventListener('click', saveSelectedConsent);
-    });
-    rejectButtons.forEach(function(button) {
-        button.addEventListener('click', rejectAllConsent);
     });
     settingsButtons.forEach(function(button) {
         button.addEventListener('click', showBanner);
@@ -322,7 +339,8 @@ function initCookieConsent() {
     window.ddoConsent = {
         open: showBanner,
         save: saveSelectedConsent,
-        rejectAll: rejectAllConsent,
+        acceptAll: acceptAllConsent,
+        acceptGoogleAnalyticsOnly: acceptGoogleAnalyticsOnly,
         get: readConsent
     };
 

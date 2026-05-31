@@ -2631,10 +2631,16 @@ body:not(.admin-body) .btn-outline-primary:hover {
 
 .cookie-consent-actions {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: 0.5rem;
-    justify-content: flex-end;
-    min-width: 250px;
+    justify-content: center;
+    min-width: 230px;
+}
+
+.cookie-consent-actions .btn {
+    width: 100%;
+    white-space: normal;
 }
 
 .footer-cookie-link {

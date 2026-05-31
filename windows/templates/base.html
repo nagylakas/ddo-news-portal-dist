@@ -283,8 +283,11 @@
                 </div>
             </div>
             <div class="cookie-consent-actions">
-                <button type="button" class="btn btn-primary js-cookie-save">Beállítások mentése</button>
-                <button type="button" class="btn btn-outline-secondary js-cookie-reject">Összes elutasítása</button>
+                <button type="button" class="btn btn-success js-cookie-accept-all">Összes elfogadása</button>
+                {{if and (metaPixelEnabled) (googleAnalyticsEnabled)}}
+                <button type="button" class="btn btn-danger js-cookie-google-only">Csak Google Analytics</button>
+                {{end}}
+                <button type="button" class="btn btn-primary js-cookie-save">Kijelöltek mentése</button>
             </div>
         </div>
     </div>
