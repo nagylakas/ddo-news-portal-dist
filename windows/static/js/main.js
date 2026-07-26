@@ -194,6 +194,7 @@ function initCookieConsent() {
     const consentVersion = 3;
     const consentCookieName = 'ddo_cookie_consent_v1';
     const vemetricVisitorCookieName = 'ddo_vemetric_visitor';
+    const googleAnalyticsCookieName = 'ddo_google_analytics_ids';
     const banner = document.getElementById('cookieConsent');
     const acceptAllButtons = document.querySelectorAll('.js-cookie-accept-all');
     const googleOnlyButtons = document.querySelectorAll('.js-cookie-google-only');
@@ -238,6 +239,9 @@ function initCookieConsent() {
         if (!normalized.vemetric) {
             deleteCookie(vemetricVisitorCookieName);
         }
+        if (!normalized.googleAnalytics) {
+            deleteCookie(googleAnalyticsCookieName);
+        }
         return normalized;
     }
 
@@ -252,6 +256,7 @@ function initCookieConsent() {
     function writeConsentCookie(consent) {
         document.cookie = consentCookieName + '=' + encodeURIComponent(JSON.stringify({
             version: consentVersion,
+            googleAnalytics: consent.googleAnalytics === true,
             vemetric: consent.vemetric === true,
             updatedAt: consent.updatedAt
         })) + cookieAttributes(31536000);
@@ -490,6 +495,7 @@ function revokeMetaPixel() {
 function loadGoogleAnalytics(measurementId) {
     if (window.ddoGoogleAnalyticsLoaded) {
         grantGoogleAnalytics();
+        storeGoogleAnalyticsIdentifiers(measurementId);
         return;
     }
     window.ddoGoogleAnalyticsLoaded = true;
@@ -510,6 +516,34 @@ function loadGoogleAnalytics(measurementId) {
         window.gtag('config', measurementId, {
             anonymize_ip: true
         });
+        storeGoogleAnalyticsIdentifiers(measurementId);
+    });
+}
+
+function storeGoogleAnalyticsIdentifiers(measurementId) {
+    if (typeof window.gtag !== 'function') {
+        return;
+    }
+    const ids = { client_id: '', session_id: '' };
+    let pending = 2;
+    function done() {
+        pending -= 1;
+        if (pending !== 0 || !ids.client_id) {
+            return;
+        }
+        let attributes = '; Path=/; SameSite=Lax; Max-Age=1800';
+        if (window.location.protocol === 'https:') {
+            attributes += '; Secure';
+        }
+        document.cookie = 'ddo_google_analytics_ids=' + encodeURIComponent(JSON.stringify(ids)) + attributes;
+    }
+    window.gtag('get', measurementId, 'client_id', function(clientId) {
+        ids.client_id = clientId ? String(clientId) : '';
+        done();
+    });
+    window.gtag('get', measurementId, 'session_id', function(sessionId) {
+        ids.session_id = sessionId ? String(sessionId) : '';
+        done();
     });
 }
 
@@ -522,6 +556,7 @@ function grantGoogleAnalytics() {
 }
 
 function revokeGoogleAnalytics() {
+    document.cookie = 'ddo_google_analytics_ids=; Path=/; SameSite=Lax; Max-Age=0' + (window.location.protocol === 'https:' ? '; Secure' : '');
     if (typeof window.gtag === 'function') {
         window.gtag('consent', 'update', {
             analytics_storage: 'denied'
