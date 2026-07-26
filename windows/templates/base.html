@@ -241,7 +241,7 @@
                     <span class="footer-contact-address">E-mail megjelenítése</span>
                 </a>
                 {{end}}
-                {{if or (metaPixelEnabled) (googleAnalyticsEnabled)}}
+                {{if or (metaPixelEnabled) (googleAnalyticsEnabled) (vemetricEnabled)}}
                 <button type="button" class="footer-cookie-link js-cookie-settings">
                     <i class="bi bi-cookie"></i>
                     <span>Cookie beállítások</span>
@@ -255,7 +255,7 @@
             </div>
         </div>
     </footer>
-    {{if or (metaPixelEnabled) (googleAnalyticsEnabled)}}
+    {{if or (metaPixelEnabled) (googleAnalyticsEnabled) (vemetricEnabled)}}
     <div class="cookie-consent" id="cookieConsent" hidden>
         <div class="cookie-consent-card" role="dialog" aria-live="polite" aria-labelledby="cookieConsentTitle">
             <div class="cookie-consent-copy">
@@ -280,6 +280,15 @@
                         </span>
                     </label>
                     {{end}}
+                    {{if vemetricEnabled}}
+                    <label class="cookie-provider-option">
+                        <input class="form-check-input js-cookie-provider" type="checkbox" value="vemetric">
+                        <span>
+                            <strong>Vemetric</strong>
+                            <small>Látogatottsági és termékanalitika.</small>
+                        </span>
+                    </label>
+                    {{end}}
                 </div>
             </div>
             <div class="cookie-consent-actions">
@@ -294,7 +303,8 @@
     <script>
         window.ddoConsentConfig = {
             metaPixelId: '{{metaPixelID}}',
-            googleAnalyticsId: '{{googleAnalyticsID}}'
+            googleAnalyticsId: '{{googleAnalyticsID}}',
+            vemetricToken: '{{vemetricToken}}'
         };
     </script>
     {{end}}

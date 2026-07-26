@@ -180,16 +180,20 @@ function initCookieConsent() {
     const config = window.ddoConsentConfig || {};
     const metaPixelId = String(config.metaPixelId || '').trim();
     const googleAnalyticsId = String(config.googleAnalyticsId || '').trim();
+    const vemetricToken = String(config.vemetricToken || '').trim();
     const availableProviders = {
         metaPixel: metaPixelId !== '',
-        googleAnalytics: googleAnalyticsId !== ''
+        googleAnalytics: googleAnalyticsId !== '',
+        vemetric: vemetricToken !== ''
     };
-    if (!availableProviders.metaPixel && !availableProviders.googleAnalytics) {
+    if (!availableProviders.metaPixel && !availableProviders.googleAnalytics && !availableProviders.vemetric) {
         return;
     }
 
     const storageKey = 'ddo_cookie_consent_v1';
-    const consentVersion = 2;
+    const consentVersion = 3;
+    const consentCookieName = 'ddo_cookie_consent_v1';
+    const vemetricVisitorCookieName = 'ddo_vemetric_visitor';
     const banner = document.getElementById('cookieConsent');
     const acceptAllButtons = document.querySelectorAll('.js-cookie-accept-all');
     const googleOnlyButtons = document.querySelectorAll('.js-cookie-google-only');
@@ -212,6 +216,7 @@ function initCookieConsent() {
                 necessary: true,
                 metaPixel: stored.metaPixel === true,
                 googleAnalytics: stored.googleAnalytics === true,
+                vemetric: stored.vemetric === true,
                 updatedAt: stored.updatedAt || ''
             };
         } catch (_) {
@@ -225,22 +230,72 @@ function initCookieConsent() {
             necessary: true,
             metaPixel: availableProviders.metaPixel && consent.metaPixel === true,
             googleAnalytics: availableProviders.googleAnalytics && consent.googleAnalytics === true,
+            vemetric: availableProviders.vemetric && consent.vemetric === true,
             updatedAt: new Date().toISOString()
         };
         localStorage.setItem(storageKey, JSON.stringify(normalized));
+        writeConsentCookie(normalized);
+        if (!normalized.vemetric) {
+            deleteCookie(vemetricVisitorCookieName);
+        }
         return normalized;
+    }
+
+    function cookieAttributes(maxAge) {
+        let attributes = '; Path=/; SameSite=Lax; Max-Age=' + maxAge;
+        if (window.location.protocol === 'https:') {
+            attributes += '; Secure';
+        }
+        return attributes;
+    }
+
+    function writeConsentCookie(consent) {
+        document.cookie = consentCookieName + '=' + encodeURIComponent(JSON.stringify({
+            version: consentVersion,
+            vemetric: consent.vemetric === true,
+            updatedAt: consent.updatedAt
+        })) + cookieAttributes(31536000);
+    }
+
+    function deleteCookie(name) {
+        document.cookie = name + '=; Path=/; SameSite=Lax; Max-Age=0' + (window.location.protocol === 'https:' ? '; Secure' : '');
+    }
+
+    function ensureVemetricVisitorID() {
+        const existing = document.cookie.split('; ').find(function(cookie) {
+            return cookie.indexOf(vemetricVisitorCookieName + '=') === 0;
+        });
+        if (existing) {
+            return decodeURIComponent(existing.substring(vemetricVisitorCookieName.length + 1));
+        }
+        const bytes = new Uint8Array(16);
+        if (window.crypto && window.crypto.getRandomValues) {
+            window.crypto.getRandomValues(bytes);
+        } else {
+            for (let i = 0; i < bytes.length; i++) {
+                bytes[i] = Math.floor(Math.random() * 256);
+            }
+        }
+        const visitorID = Array.prototype.map.call(bytes, function(byte) {
+            return byte.toString(16).padStart(2, '0');
+        }).join('');
+        document.cookie = vemetricVisitorCookieName + '=' + encodeURIComponent(visitorID) + cookieAttributes(31536000);
+        return visitorID;
     }
 
     function currentFormConsent() {
         const consent = {
             metaPixel: false,
-            googleAnalytics: false
+            googleAnalytics: false,
+            vemetric: false
         };
         providerInputs.forEach(function(input) {
             if (input.value === 'metaPixel') {
                 consent.metaPixel = input.checked;
             } else if (input.value === 'googleAnalytics') {
                 consent.googleAnalytics = input.checked;
+            } else if (input.value === 'vemetric') {
+                consent.vemetric = input.checked;
             }
         });
         return consent;
@@ -259,6 +314,14 @@ function initCookieConsent() {
                 loadGoogleAnalytics(googleAnalyticsId);
             } else {
                 revokeGoogleAnalytics();
+            }
+        }
+        if (availableProviders.vemetric) {
+            if (consent.vemetric) {
+                ensureVemetricVisitorID();
+                loadVemetric(vemetricToken);
+            } else {
+                revokeVemetric();
             }
         }
     }
@@ -286,7 +349,8 @@ function initCookieConsent() {
     function acceptAllConsent() {
         const consent = writeConsent({
             metaPixel: availableProviders.metaPixel,
-            googleAnalytics: availableProviders.googleAnalytics
+            googleAnalytics: availableProviders.googleAnalytics,
+            vemetric: availableProviders.vemetric
         });
         updateBannerState(consent);
         hideBanner();
@@ -296,7 +360,8 @@ function initCookieConsent() {
     function acceptGoogleAnalyticsOnly() {
         const consent = writeConsent({
             metaPixel: false,
-            googleAnalytics: availableProviders.googleAnalytics
+            googleAnalytics: availableProviders.googleAnalytics,
+            vemetric: false
         });
         updateBannerState(consent);
         hideBanner();
@@ -306,16 +371,19 @@ function initCookieConsent() {
     function updateBannerState(consentOverride) {
         const consent = consentOverride || readConsent() || {
             metaPixel: false,
-            googleAnalytics: false
+            googleAnalytics: false,
+            vemetric: false
         };
         providerInputs.forEach(function(input) {
             if (input.value === 'metaPixel') {
                 input.checked = availableProviders.metaPixel && consent.metaPixel === true;
             } else if (input.value === 'googleAnalytics') {
                 input.checked = availableProviders.googleAnalytics && consent.googleAnalytics === true;
+            } else if (input.value === 'vemetric') {
+                input.checked = availableProviders.vemetric && consent.vemetric === true;
             }
         });
-        const selectedCount = (consent.metaPixel ? 1 : 0) + (consent.googleAnalytics ? 1 : 0);
+        const selectedCount = (consent.metaPixel ? 1 : 0) + (consent.googleAnalytics ? 1 : 0) + (consent.vemetric ? 1 : 0);
         if (message) {
             message.textContent = selectedCount > 0
                 ? 'A kijelölt mérési szolgáltatások jelenleg engedélyezettek. Itt bármikor módosíthatod vagy visszavonhatod a hozzájárulást.'
@@ -346,10 +414,46 @@ function initCookieConsent() {
 
     const consent = readConsent();
     if (consent) {
+        writeConsentCookie(consent);
         applyConsent(consent);
     } else {
         showBanner();
     }
+}
+
+function loadVemetric(token) {
+    if (window.ddoVemetricLoaded) {
+        return;
+    }
+    window.ddoVemetricLoaded = true;
+
+    runAfterLoadIdle(function() {
+        window.vmtrcq = window.vmtrcq || [];
+        window.vmtrc = window.vmtrc || function() {
+            window.vmtrcq.push(Array.prototype.slice.call(arguments));
+        };
+        const script = document.createElement('script');
+        script.defer = true;
+        script.src = 'https://cdn.vemetric.com/main.js';
+        script.id = 'vmtrc-scr';
+        script.setAttribute('data-token', token);
+        document.head.appendChild(script);
+    });
+}
+
+function revokeVemetric() {
+    const script = document.getElementById('vmtrc-scr');
+    if (script) {
+        script.remove();
+    }
+    deleteCookieForVemetric();
+    if (window.ddoVemetricLoaded) {
+        window.location.reload();
+    }
+}
+
+function deleteCookieForVemetric() {
+    document.cookie = 'ddo_vemetric_visitor=; Path=/; SameSite=Lax; Max-Age=0' + (window.location.protocol === 'https:' ? '; Secure' : '');
 }
 
 function loadMetaPixel(pixelId) {
