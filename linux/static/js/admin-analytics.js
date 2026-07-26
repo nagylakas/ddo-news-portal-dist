@@ -475,6 +475,7 @@
     /* ------------------------------------------------------------------ */
 
     function kpiValue(summary, metric) {
+        summary = summary || {};
         switch (metric) {
             case 'visitors': return summary.visitors || 0;
             case 'views': return summary.views || 0;

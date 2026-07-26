@@ -10,6 +10,14 @@
                     <a href="#auth"       class="list-group-item list-group-item-action py-1 px-2">Authentication</a>
                     <a href="#version"    class="list-group-item list-group-item-action py-1 px-2">Version</a>
                     <a href="#stats"      class="list-group-item list-group-item-action py-1 px-2">Site Statistics</a>
+                    <a href="#analytics"  class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Analytics</a>
+                    <a href="#an-params"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Query parameters</a>
+                    <a href="#an-report"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Full report</a>
+                    <a href="#an-summary"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Summary</a>
+                    <a href="#an-timeseries" class="list-group-item list-group-item-action py-1 px-2 ms-2">Time series</a>
+                    <a href="#an-breakdowns" class="list-group-item list-group-item-action py-1 px-2 ms-2">Breakdowns</a>
+                    <a href="#an-heatmap"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Heatmap</a>
+                    <a href="#an-realtime"   class="list-group-item list-group-item-action py-1 px-2 ms-2">Realtime</a>
                     <a href="#articles"   class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Articles</a>
                     <a href="#art-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
                     <a href="#art-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
@@ -117,6 +125,296 @@ Content-Type: application/json
                 </p>
                 <p class="mb-1"><strong>curl:</strong></p>
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/stats</code></pre>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- ANALYTICS                                               -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <section id="analytics" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-graph-up-arrow me-2"></i>Analytics
+                </h3>
+                <p class="text-muted">
+                    The complete data set behind the <a href="/admin/analytics">Analytics dashboard</a> — cookie-free,
+                    first-party traffic measurement stored in your own database. All endpoints are <code>GET</code>,
+                    require authentication and return JSON.
+                </p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics</code></td><td>Full report (every section at once)</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/summary</code></td><td>Headline KPIs</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/timeseries</code></td><td>Views / visitors / sessions over time</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/breakdowns</code></td><td>Every dimension table</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/breakdowns/{dimension}</code></td><td>A single dimension table</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/heatmap</code></td><td>Weekday × hour matrix</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/realtime</code></td><td>Traffic in the last N minutes</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-light border py-2 small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    If the built-in analytics is switched off (<code>ANALYTICS_ENABLED=false</code>) or the database is
+                    unavailable, every endpoint answers <code>503</code>.
+                </div>
+            </section>
+
+            <!-- Query parameters -->
+            <section id="an-params" class="mb-5 ps-3">
+                <h5>Query parameters</h5>
+                <p class="small text-muted">The period and filters are interpreted identically by every endpoint.</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>range</code></td><td>string</td><td><code>7d</code></td><td><code>today</code>, <code>yesterday</code>, <code>24h</code>, <code>7d</code>, <code>28d</code>, <code>30d</code>, <code>90d</code>, <code>mtd</code>, <code>ytd</code>, <code>12mo</code>, <code>custom</code></td></tr>
+                            <tr><td><code>from</code></td><td>date</td><td>—</td><td><code>YYYY-MM-DD</code>, with <code>range=custom</code></td></tr>
+                            <tr><td><code>to</code></td><td>date</td><td>—</td><td><code>YYYY-MM-DD</code>, inclusive</td></tr>
+                            <tr><td><code>granularity</code></td><td>string</td><td>auto</td><td><code>hour</code>, <code>day</code> or <code>month</code> — overrides the bucket size</td></tr>
+                            <tr><td><code>compare</code></td><td>boolean</td><td><code>true</code></td><td><code>false</code> skips the previous-period aggregations</td></tr>
+                            <tr><td><code>limit</code></td><td>integer</td><td><code>15</code></td><td>Rows per breakdown table, max <code>500</code></td></tr>
+                            <tr><td><code>minutes</code></td><td>integer</td><td><code>30</code></td><td>Realtime endpoint only, max <code>180</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Filters</strong> — any combination, all exact matches:</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Parameter</th><th>Values</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>page_type</code></td><td><code>home</code>, <code>article</code>, <code>category</code>, <code>author</code>, <code>tag</code>, <code>search</code>, <code>page</code>, <code>forum</code>, <code>marketplace</code>, <code>webshop</code>, <code>other</code></td></tr>
+                            <tr><td><code>path</code></td><td>Exact URL path, e.g. <code>/article/rtx-5090-teszt</code></td></tr>
+                            <tr><td><code>channel</code></td><td><code>direct</code>, <code>organic</code>, <code>social</code>, <code>referral</code>, <code>campaign</code>, <code>internal</code>, <code>ai</code></td></tr>
+                            <tr><td><code>device</code></td><td><code>desktop</code>, <code>mobile</code>, <code>tablet</code></td></tr>
+                            <tr><td><code>country</code></td><td>ISO 3166-1 alpha-2 code, e.g. <code>HU</code></td></tr>
+                            <tr><td><code>ref_host</code></td><td>Referrer host, e.g. <code>google.hu</code></td></tr>
+                            <tr><td><code>category</code></td><td>Category name</td></tr>
+                            <tr><td><code>author</code></td><td>Author name</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-muted mb-0">
+                    A filter applies to <em>every</em> section of the response: summary, time series, breakdowns and heatmap.
+                    An unknown <code>range</code> silently falls back to <code>7d</code>.
+                </p>
+            </section>
+
+            <!-- Full report -->
+            <section id="an-report" class="mb-5 ps-3">
+                <h5>Full report</h5>
+                <p class="small text-muted">
+                    Everything in one request: summary, previous period, time series, all breakdowns and the heatmap.
+                    This is the most expensive endpoint — use the section endpoints when you need only one part.
+                </p>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics?range=28d&amp;channel=organic&amp;limit=20</code></pre>
+                <p class="mb-1"><strong>Response (abridged):</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range": {
+    "key":           "28d",
+    "from":          "2026-06-29T00:00:00+02:00",
+    "to":            "2026-07-27T00:00:00+02:00",
+    "previous_from": "2026-06-01T00:00:00+02:00",
+    "previous_to":   "2026-06-29T00:00:00+02:00",
+    "granularity":   "day",
+    "timezone":      "Europe/Budapest"
+  },
+  "filter":  { "channel": "organic" },
+  "summary": { &lt;summary object&gt; },
+  "previous":{ &lt;summary object&gt; },
+  "series":         [ { "bucket": "2026-06-29", "views": 2612, "visitors": 1620, "sessions": 1854 } ],
+  "previous_series":[ { "bucket": "2026-06-01", "views": 2280, "visitors": 1410, "sessions": 1602 } ],
+  "breakdowns":     { "pages": [...], "channels": [...], "referrers": [...], ... },
+  "heatmap":        [ { "weekday": 2, "hour": 9, "views": 187 } ]
+}</code></pre>
+                <div class="alert alert-light border py-2 small">
+                    <i class="bi bi-lightbulb me-1"></i>
+                    Sections that were not requested are <strong>absent</strong> from the JSON rather than empty.
+                    <code>range</code> and <code>filter</code> are always present. With <code>compare=false</code> the
+                    <code>previous</code>, <code>previous_series</code>, <code>range.previous_from</code> and
+                    <code>range.previous_to</code> fields are omitted.
+                </div>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/analytics?range=28d"</code></pre>
+            </section>
+
+            <!-- Summary -->
+            <section id="an-summary" class="mb-5 ps-3">
+                <h5>Summary</h5>
+                <p class="small text-muted">The headline KPIs plus the same numbers for the previous period. Fastest endpoint.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/summary?range=today&amp;compare=false</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range":   { "key": "today", "granularity": "hour", "timezone": "Europe/Budapest", ... },
+  "filter":  {},
+  "summary": {
+    "views":             1204,
+    "visitors":          812,
+    "sessions":          903,
+    "views_per_session": 1.3333,
+    "avg_engagement_ms": 88000,
+    "bounce_rate":       44.2,
+    "engagement_rate":   55.8,
+    "outbound":          31
+  }
+}</code></pre>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>views</code></td><td>integer</td><td>Page views</td></tr>
+                            <tr><td><code>visitors</code></td><td>integer</td><td>Unique visitors (see the note below)</td></tr>
+                            <tr><td><code>sessions</code></td><td>integer</td><td>Visits; 30 minutes of inactivity starts a new one</td></tr>
+                            <tr><td><code>views_per_session</code></td><td>float</td><td><code>views / sessions</code></td></tr>
+                            <tr><td><code>avg_engagement_ms</code></td><td>integer</td><td>Average time actually spent on the page, in milliseconds</td></tr>
+                            <tr><td><code>bounce_rate</code></td><td>float</td><td>Percentage of single-page sessions without engagement</td></tr>
+                            <tr><td><code>engagement_rate</code></td><td>float</td><td>Percentage of sessions longer than 10s or scrolled past 50%</td></tr>
+                            <tr><td><code>outbound</code></td><td>integer</td><td>Outbound link clicks and downloads</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    <strong>Reading <code>visitors</code>:</strong> the visitor identifier is a hash salted with a key that
+                    is regenerated every day, so the same person receives a new identifier each day. Over a multi-day range
+                    <code>visitors</code> is therefore the <em>sum of daily uniques</em>, not the true unique count for the
+                    period. This is the price of consent-free, cookie-less measurement; <code>sessions</code> and
+                    <code>views</code> are exact.
+                </div>
+            </section>
+
+            <!-- Time series -->
+            <section id="an-timeseries" class="mb-5 ps-3">
+                <h5>Time series</h5>
+                <p class="small text-muted">
+                    Bucket size is chosen automatically (<code>hour</code> up to 48 hours, <code>day</code> up to 120 days,
+                    <code>month</code> above that) and can be overridden with <code>granularity</code>.
+                </p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Granularity</th><th>Bucket format</th><th>Example</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>hour</code></td><td><code>YYYY-MM-DDTHH</code></td><td><code>2026-07-27T14</code></td></tr>
+                            <tr><td><code>day</code></td><td><code>YYYY-MM-DD</code></td><td><code>2026-07-27</code></td></tr>
+                            <tr><td><code>month</code></td><td><code>YYYY-MM</code></td><td><code>2026-07</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/timeseries?range=90d&amp;granularity=month&amp;compare=false</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range":  { "key": "90d", "granularity": "month", "timezone": "Europe/Budapest", ... },
+  "filter": {},
+  "series": [
+    { "bucket": "2026-05", "views": 41200, "visitors": 25600, "sessions": 29100 },
+    { "bucket": "2026-06", "views": 44870, "visitors": 27340, "sessions": 31020 }
+  ]
+}</code></pre>
+                <p class="small text-muted mb-0">
+                    Buckets are in the <code>ANALYTICS_TIMEZONE</code> local time, and <strong>only buckets with traffic
+                    are returned</strong> — fill the gaps with zeroes client-side if you draw a continuous chart.
+                </p>
+            </section>
+
+            <!-- Breakdowns -->
+            <section id="an-breakdowns" class="mb-5 ps-3">
+                <h5>Breakdowns</h5>
+                <p class="small text-muted">
+                    Without a dimension every table is returned at once; with one, only that table.
+                </p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Dimension</th><th>Contents</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>pages</code></td><td>Most viewed pages (<code>key</code> = path, <code>label</code> = page title)</td></tr>
+                            <tr><td><code>entry_pages</code></td><td>Landing pages — first page of each session</td></tr>
+                            <tr><td><code>exit_pages</code></td><td>Exit pages — last page of each session</td></tr>
+                            <tr><td><code>channels</code></td><td>GA4-style default channel grouping</td></tr>
+                            <tr><td><code>referrers</code></td><td>Referrer hosts (<code>label</code> = recognised brand name)</td></tr>
+                            <tr><td><code>utm_sources</code>, <code>utm_mediums</code>, <code>utm_campaigns</code></td><td>Campaign parameters</td></tr>
+                            <tr><td><code>devices</code>, <code>browsers</code>, <code>os</code></td><td>Technology</td></tr>
+                            <tr><td><code>countries</code>, <code>languages</code></td><td>Geography (country needs a CDN country header)</td></tr>
+                            <tr><td><code>page_types</code>, <code>categories</code>, <code>authors</code></td><td>Editorial performance</td></tr>
+                            <tr><td><code>outbound</code></td><td>Outbound links and downloads (<code>key</code> = target URL)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Row object:</strong></p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>key</code></td><td>string</td><td>Raw dimension value — pass it back as a filter</td></tr>
+                            <tr><td><code>label</code></td><td>string</td><td>Display name when one exists, otherwise empty</td></tr>
+                            <tr><td><code>views</code></td><td>integer</td><td>Page views</td></tr>
+                            <tr><td><code>visitors</code></td><td>integer</td><td>Unique visitors — <strong>session count</strong> for entry/exit pages</td></tr>
+                            <tr><td><code>avg_engagement_ms</code></td><td>integer</td><td>Average time on page in milliseconds</td></tr>
+                            <tr><td><code>bounce_rate</code></td><td>float</td><td>Percentage; only meaningful for <code>entry_pages</code> and <code>exit_pages</code>, <code>0</code> elsewhere</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/breakdowns/referrers?range=7d&amp;limit=5</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range":     { "key": "7d", "granularity": "day", "timezone": "Europe/Budapest", ... },
+  "filter":    {},
+  "dimension": "referrers",
+  "rows": [
+    { "key": "google.hu",    "label": "Google",   "views": 6120, "visitors": 4284, "avg_engagement_ms": 100000, "bounce_rate": 0 },
+    { "key": "facebook.com", "label": "Facebook", "views": 2410, "visitors": 1687, "avg_engagement_ms": 62000,  "bounce_rate": 0 },
+    { "key": "chatgpt.com",  "label": "ChatGPT",  "views": 410,  "visitors": 287,  "avg_engagement_ms": 154000, "bounce_rate": 0 }
+  ]
+}</code></pre>
+                <p class="mb-1"><strong>How did people find one specific article?</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/analytics/breakdowns/channels?range=7d&amp;path=/article/rtx-5090-teszt"</code></pre>
+                <p class="small text-muted mb-0">An unknown dimension name returns <code>404</code> listing the valid names.</p>
+            </section>
+
+            <!-- Heatmap -->
+            <section id="an-heatmap" class="mb-5 ps-3">
+                <h5>Heatmap</h5>
+                <p class="small text-muted">Traffic by weekday and hour. Only non-zero cells are returned.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/heatmap?range=90d</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range":   { "key": "90d", "timezone": "Europe/Budapest", ... },
+  "filter":  {},
+  "heatmap": [
+    { "weekday": 2, "hour": 9,  "views": 187 },
+    { "weekday": 2, "hour": 10, "views": 204 }
+  ]
+}</code></pre>
+                <div class="table-responsive mb-0">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>weekday</code></td><td><code>1</code> = Sunday … <code>7</code> = Saturday (MongoDB <code>$dayOfWeek</code> convention)</td></tr>
+                            <tr><td><code>hour</code></td><td><code>0</code>–<code>23</code> in the <code>ANALYTICS_TIMEZONE</code> local time</td></tr>
+                            <tr><td><code>views</code></td><td>Page views in that weekday + hour cell</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Realtime -->
+            <section id="an-realtime" class="mb-5 ps-3">
+                <h5>Realtime</h5>
+                <p class="small text-muted">
+                    Traffic over the last <code>minutes</code> minutes (default 30, max 180). Period and filter
+                    parameters do <strong>not</strong> apply to this endpoint.
+                </p>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/realtime?minutes=5</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "minutes":         30,
+  "active_visitors": 47,
+  "views":           312,
+  "per_minute":    [ { "bucket": "2026-07-27T18:41", "views": 9, "visitors": 7, "sessions": 0 } ],
+  "top_pages":     [ { "key": "/article/rtx-5090-teszt", "label": "RTX 5090 teszt", "views": 18, "visitors": 12, ... } ],
+  "top_channels":  [ { "key": "organic", "label": "organic", "views": 22, "visitors": 15, ... } ],
+  "top_countries": [ { "key": "HU", "label": "HU", "views": 41, "visitors": 28, ... } ],
+  "devices":       [ { "key": "mobile", "label": "mobile", "views": 28, "visitors": 19, ... } ]
+}</code></pre>
+                <p class="small text-muted mb-0">
+                    <code>per_minute[].bucket</code> is a <strong>UTC</strong> timestamp in <code>YYYY-MM-DDTHH:MM</code> form,
+                    unlike the other endpoints which bucket in local time.
+                </p>
             </section>
 
             <!-- ═══════════════════════════════════════════════════════ -->
