@@ -11,7 +11,10 @@
             <i class="bi bi-speedometer2 me-2 text-primary"></i>{{t .Lang "dash.title"}}
         </h4>
         <div class="d-flex flex-wrap gap-2">
-            <a href="/admin/articles" class="btn btn-primary btn-sm">
+            <a href="/admin/analytics" class="btn btn-primary btn-sm">
+                <i class="bi bi-graph-up-arrow me-1"></i>{{t .Lang "dash.open_analytics"}}
+            </a>
+            <a href="/admin/articles" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-file-earmark-text me-1"></i>{{t .Lang "dash.manage_articles"}}
             </a>
             <a href="/admin/categories" class="btn btn-outline-secondary btn-sm">
@@ -242,6 +245,24 @@
                     {{end}}
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Analytics call-to-action -->
+    <div class="card border-0 shadow-sm mb-4 bg-primary bg-opacity-10">
+        <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-primary bg-opacity-25 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                    <i class="bi bi-graph-up-arrow text-primary fs-5"></i>
+                </div>
+                <div>
+                    <div class="fw-semibold">{{t .Lang "dash.analytics_cta_title"}}</div>
+                    <div class="text-muted small">{{t .Lang "dash.analytics_cta_body"}}</div>
+                </div>
+            </div>
+            <a href="/admin/analytics" class="btn btn-primary btn-sm text-nowrap">
+                <i class="bi bi-arrow-right me-1"></i>{{t .Lang "dash.open_analytics"}}
+            </a>
         </div>
     </div>
 

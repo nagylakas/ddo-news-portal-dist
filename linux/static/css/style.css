@@ -2675,3 +2675,460 @@ body:not(.admin-body) .btn-outline-primary:hover {
         flex: 1 1 100%;
     }
 }
+
+/* ===== ADMIN ANALYTICS DASHBOARD ===== */
+#analyticsRoot {
+    --an-c1: #2563eb;
+    --an-c2: #14b8a6;
+    --an-c3: #f59e0b;
+    --an-c4: #a855f7;
+    --an-c5: #ef4444;
+    --an-line: var(--bs-primary, #0d6efd);
+    --an-grid: rgba(0, 0, 0, .07);
+    --an-muted: #6c757d;
+}
+
+#analyticsRoot.is-loading {
+    opacity: .75;
+    transition: opacity .15s ease;
+}
+
+.an-loading {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    z-index: 1080;
+    display: flex;
+    align-items: center;
+    padding: .5rem .9rem;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 .25rem 1rem rgba(0, 0, 0, .12);
+}
+
+/* --- Charts --- */
+.an-chart {
+    position: relative;
+    width: 100%;
+}
+
+.an-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.an-chart-sm .an-svg {
+    height: 54px;
+}
+
+.an-grid {
+    stroke: var(--an-grid);
+    stroke-width: 1;
+}
+
+.an-axis {
+    fill: var(--an-muted);
+    font-size: 11px;
+    font-family: inherit;
+}
+
+.an-line {
+    fill: none;
+    stroke: var(--an-line);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.an-line-prev {
+    fill: none;
+    stroke: var(--an-muted);
+    stroke-width: 1.75;
+    stroke-dasharray: 5 4;
+    opacity: .6;
+}
+
+.an-area {
+    fill: var(--an-line);
+    opacity: .1;
+}
+
+.an-hit {
+    fill: transparent;
+}
+
+.an-cursor {
+    stroke: var(--an-line);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+    opacity: .6;
+}
+
+.an-dot {
+    fill: #fff;
+    stroke: var(--an-line);
+    stroke-width: 2.5;
+}
+
+.an-rt-bar {
+    fill: var(--an-line);
+    opacity: .75;
+}
+
+.an-tooltip {
+    position: absolute;
+    top: .5rem;
+    transform: translateX(-50%);
+    min-width: 130px;
+    padding: .5rem .65rem;
+    border-radius: .5rem;
+    background: rgba(33, 37, 41, .95);
+    color: #fff;
+    font-size: .78rem;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.an-tt-title {
+    font-weight: 600;
+    margin-bottom: .25rem;
+}
+
+.an-tt-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.an-tt-prev {
+    opacity: .7;
+}
+
+.an-legend {
+    font-size: .78rem;
+    color: var(--an-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+.an-legend-dot {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--an-line);
+    display: inline-block;
+}
+
+.an-legend-prev .an-legend-dot {
+    background: repeating-linear-gradient(90deg, var(--an-muted) 0 4px, transparent 4px 7px);
+}
+
+/* --- KPI cards --- */
+.an-kpi {
+    cursor: default;
+    transition: box-shadow .15s ease, transform .15s ease;
+}
+
+#anKpis [data-metric="visitors"] .an-kpi,
+#anKpis [data-metric="views"] .an-kpi,
+#anKpis [data-metric="sessions"] .an-kpi {
+    cursor: pointer;
+}
+
+.an-kpi.is-selected {
+    box-shadow: 0 0 0 2px var(--an-line) !important;
+}
+
+.an-delta {
+    font-size: .72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.an-delta.is-up {
+    color: #198754;
+}
+
+.an-delta.is-down {
+    color: #dc3545;
+}
+
+.an-delta.is-flat {
+    color: var(--an-muted);
+}
+
+.an-spark {
+    height: 34px;
+}
+
+.an-spark-svg {
+    display: block;
+    width: 100%;
+    height: 34px;
+}
+
+.an-spark-line {
+    fill: none;
+    stroke: var(--an-line);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+}
+
+.an-spark-area {
+    fill: var(--an-line);
+    opacity: .12;
+}
+
+/* --- Realtime --- */
+.an-pulse {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #198754;
+    box-shadow: 0 0 0 0 rgba(25, 135, 84, .6);
+    animation: anPulse 2s infinite;
+    flex-shrink: 0;
+}
+
+@keyframes anPulse {
+    70% { box-shadow: 0 0 0 12px rgba(25, 135, 84, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .an-pulse { animation: none; }
+}
+
+/* --- Bar lists --- */
+.an-barlist {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.an-bar,
+.an-bar-head {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 72px 72px;
+    align-items: center;
+    gap: .5rem;
+    padding: .35rem .5rem;
+    border-radius: .35rem;
+    font-size: .85rem;
+    overflow: hidden;
+}
+
+.an-barlist:not(.an-barlist-compact) .an-bar,
+.an-barlist:not(.an-barlist-compact) .an-bar-head {
+    grid-template-columns: 1fr 72px 72px 90px;
+}
+
+.an-bar-head {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--an-muted);
+    padding-bottom: .15rem;
+}
+
+.an-bar-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--an-line);
+    opacity: .12;
+    border-radius: .35rem;
+}
+
+.an-bar.is-clickable {
+    cursor: pointer;
+}
+
+.an-bar.is-clickable:hover .an-bar-fill {
+    opacity: .22;
+}
+
+.an-bar-name {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.an-bar-name em {
+    display: block;
+    font-style: normal;
+    font-size: .72rem;
+    color: var(--an-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.an-bar-col {
+    position: relative;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.an-bar-col-wide {
+    color: var(--an-muted);
+}
+
+.an-empty {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--an-muted);
+    font-size: .85rem;
+}
+
+.an-empty-sm {
+    padding: .75rem 0;
+}
+
+/* --- Donut --- */
+.an-donut-svg {
+    display: block;
+    width: 100%;
+    max-width: 170px;
+    margin: 0 auto;
+}
+
+.an-donut-seg {
+    fill: none;
+    stroke-width: 16;
+    transform: rotate(-90deg);
+    transform-origin: 70px 70px;
+}
+
+.an-donut-value {
+    font-size: 20px;
+    font-weight: 700;
+    fill: currentColor;
+}
+
+.an-donut-label {
+    font-size: 11px;
+    fill: var(--an-muted);
+}
+
+/* --- Heatmap --- */
+.an-heat-grid {
+    display: grid;
+    grid-template-columns: 34px repeat(24, minmax(0, 1fr));
+    gap: 2px;
+    min-width: 520px;
+}
+
+.an-heatmap {
+    overflow-x: auto;
+}
+
+.an-heat-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--an-grid);
+}
+
+.an-heat-l1 { background: rgba(37, 99, 235, .25); }
+.an-heat-l2 { background: rgba(37, 99, 235, .45); }
+.an-heat-l3 { background: rgba(37, 99, 235, .68); }
+.an-heat-l4 { background: rgba(37, 99, 235, .92); }
+
+.an-heat-day,
+.an-heat-hour,
+.an-heat-corner {
+    font-size: .65rem;
+    color: var(--an-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.an-heat-day {
+    justify-content: flex-end;
+    padding-right: .35rem;
+}
+
+/* --- Tabs + chips --- */
+.an-tabs {
+    display: inline-flex;
+    gap: .15rem;
+    flex-wrap: wrap;
+}
+
+.an-tab {
+    border: 0;
+    background: transparent;
+    color: var(--an-muted);
+    font-size: .76rem;
+    font-weight: 500;
+    padding: .2rem .5rem;
+    border-radius: .3rem;
+}
+
+.an-tab:hover {
+    background: rgba(0, 0, 0, .04);
+}
+
+.an-tab.active {
+    background: var(--an-line);
+    color: #fff;
+}
+
+.an-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .78rem;
+    padding: .2rem .35rem .2rem .6rem;
+    border-radius: 999px;
+    background: rgba(13, 110, 253, .1);
+    color: var(--bs-body-color);
+}
+
+.an-chip button {
+    border: 0;
+    background: transparent;
+    line-height: 1;
+    font-size: 1rem;
+    color: var(--an-muted);
+    padding: 0 .25rem;
+}
+
+/* Analytics: narrow screens — the period picker and KPI headers must wrap
+   instead of pushing their card out of the viewport. */
+@media (max-width: 991.98px) {
+    #anRangeGroup {
+        flex-wrap: wrap;
+        gap: .25rem;
+    }
+
+    #anRangeGroup > .btn {
+        border-radius: .25rem !important;
+    }
+}
+
+#anKpis .card-body > .d-flex {
+    flex-wrap: wrap;
+    gap: .15rem;
+}
+
+@media (max-width: 575.98px) {
+    #anKpis .card-body {
+        padding: .75rem;
+    }
+
+    .an-bar,
+    .an-bar-head {
+        font-size: .78rem;
+        grid-template-columns: 1fr 56px 56px !important;
+    }
+
+    .an-bar-col-wide {
+        display: none;
+    }
+}
