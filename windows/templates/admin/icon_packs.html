@@ -4,12 +4,10 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <h4 class="mb-1 fw-bold"><i class="bi bi-palette me-2 text-primary"></i>{{t .Lang "nav.icon_packs"}}</h4>
-            <p class="text-muted mb-0">Töltsön le új szín és ikoncsomagokat az oldalra, és szabja testre vele jobban
-                oldalát.</p>
+            <p class="text-muted mb-0">{{t .Lang "iconpacks.intro"}}</p>
         </div>
         <form method="POST" action="/admin/icon-packs/refresh">
-            <button class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise me-1"></i>Katalógus
-                frissítése</button>
+            <button class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise me-1"></i>{{t .Lang "iconpacks.refresh"}}</button>
         </form>
     </div>
 
@@ -34,29 +32,29 @@
                     {{if .Description}}<p class="text-muted small flex-grow-1">{{.Description}}</p>{{else}}<div
                         class="flex-grow-1"></div>{{end}}
                     <div class="small mb-3">
-                        <div>Elérhető: <strong>v{{.Version}}</strong></div>
-                        {{if .Installed}}<div>Telepítve: <strong>v{{.InstalledVersion}}</strong></div>{{else}}<div
-                            class="text-muted">Nincs telepítve</div>{{end}}
-                        {{if .UpdateAvailable}}<span class="badge text-bg-warning mt-1">Frissítés elérhető</span>{{end}}
-                        {{if .Active}}<span class="badge text-bg-success mt-1">Aktív</span>{{end}}
+                        <div>{{t $.Lang "iconpacks.available"}}: <strong>v{{.Version}}</strong></div>
+                        {{if .Installed}}<div>{{t $.Lang "iconpacks.installed"}}: <strong>v{{.InstalledVersion}}</strong></div>{{else}}<div
+                            class="text-muted">{{t $.Lang "iconpacks.not_installed"}}</div>{{end}}
+                        {{if .UpdateAvailable}}<span class="badge text-bg-warning mt-1">{{t $.Lang "iconpacks.update_available"}}</span>{{end}}
+                        {{if .Active}}<span class="badge text-bg-success mt-1">{{t $.Lang "iconpacks.active"}}</span>{{end}}
                     </div>
                     <div class="d-flex gap-2">
                         {{if not .Installed}}
                         <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id"
                                 value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button
-                                class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>Telepítés</button>
+                                class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>{{t $.Lang "iconpacks.install"}}</button>
                         </form>
                         {{else if .UpdateAvailable}}
                         <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id"
                                 value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button
-                                class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>Frissítés</button>
+                                class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>{{t $.Lang "iconpacks.update"}}</button>
                         </form>
                         {{end}}
                         {{if .Installed}}
                         <form method="POST" action="/admin/icon-packs/activate" class="icon-pack-activate-form"><input type="hidden" name="id"
                                 value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button
                                 class="btn btn-outline-success btn-sm" {{if .Active}}disabled{{end}}><i
-                                    class="bi bi-check2-circle me-1"></i>Aktiválás</button></form>
+                                    class="bi bi-check2-circle me-1"></i>{{t $.Lang "iconpacks.activate"}}</button></form>
                         {{end}}
                     </div>
                 </div>
@@ -66,8 +64,7 @@
     </div>
     {{else}}
     <div class="card border-0 shadow-sm">
-        <div class="card-body text-center py-5 text-muted"><i class="bi bi-cloud-arrow-down fs-1 d-block mb-3"></i>Még
-            nincs letöltött katalógus. Frissítsd a központi katalógust.</div>
+        <div class="card-body text-center py-5 text-muted"><i class="bi bi-cloud-arrow-down fs-1 d-block mb-3"></i>{{t .Lang "iconpacks.empty"}}</div>
     </div>
     {{end}}
 </div>

@@ -102,17 +102,11 @@
                     {{range .NavMenu}}
                     {{if navMenuItemVisible .}}
                     {{if eq .Kind "categories"}}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            {{.Label}}
-                        </a>
-                        <ul class="dropdown-menu">
-                            {{range $.Categories}}
-                            <li><a class="dropdown-item" href="/category/{{lower .}}">{{.}}</a></li>
-                            {{end}}
-                        </ul>
-                    </li>
+                    {{if eq (categoryMenuLayout) "searchable-mega"}}
+                    {{template "category-menu/searchable-mega" dict "Label" .Label "Categories" $.Categories}}
+                    {{else}}
+                    {{template "category-menu/classic" dict "Label" .Label "Categories" $.Categories}}
+                    {{end}}
                     {{else if eq .Kind "webshop-categories"}}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="/webshop" role="button" data-bs-toggle="dropdown"
@@ -315,6 +309,7 @@
     </script>
     <!-- Custom JS -->
     <script src="/static/js/main.js"></script>
+    <script src="/static/js/category-menu.js"></script>
     <!-- First-party analytics beacon (cookie-free engagement measurement) -->
     <script src="/static/js/analytics-beacon.js" defer></script>
 

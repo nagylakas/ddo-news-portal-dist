@@ -33,6 +33,35 @@
 
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                        <div>
+                            <h5 class="mb-1 fw-semibold"><i class="bi bi-menu-button-wide me-2 text-primary"></i>{{t .Lang "settings.category_menu_layout_title"}}</h5>
+                            <p class="text-muted mb-0" style="font-size:.95rem;">{{t .Lang "settings.category_menu_layout_text"}}</p>
+                        </div>
+                        <form action="/admin/settings/category-menu-layout" method="POST" class="d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-start" style="min-width:min(100%, 430px);">
+                            <select class="form-select form-select-sm" name="category_menu_layout" aria-label="{{t .Lang "settings.category_menu_layout_title"}}">
+                                {{range .CategoryMenuLayouts}}
+                                <option value="{{.ID}}" {{if eq $.CategoryMenuLayout .ID}}selected{{end}}>{{t $.Lang .NameKey}}</option>
+                                {{end}}
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm text-nowrap"><i class="bi bi-save me-1"></i>{{t .Lang "settings.category_menu_layout_save"}}</button>
+                        </form>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        {{range .CategoryMenuLayouts}}
+                        <div class="col-md-6">
+                            <div class="small {{if eq $.CategoryMenuLayout .ID}}text-primary fw-semibold{{else}}text-muted{{end}}">
+                                {{t $.Lang .NameKey}} — <span class="fw-normal">{{t $.Lang .DescriptionKey}}</span>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                    <div class="small text-warning mt-3"><i class="bi bi-arrow-clockwise me-1"></i>{{t .Lang "settings.category_menu_layout_restart"}}</div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
                         <div>
                             <h5 class="mb-1 fw-semibold"><i class="bi bi-cloud-arrow-down me-2 text-primary"></i>{{t .Lang "settings.update_title"}}</h5>
@@ -121,6 +150,7 @@
                             </thead>
                             <tbody>
                                 {{range .Entries}}
+                                {{if not .Hidden}}
                                 <tr>
                                     <td>
                                         <code class="d-flex align-items-center gap-1">
@@ -148,6 +178,7 @@
                                         {{end}}
                                     </td>
                                 </tr>
+                                {{end}}
                                 {{end}}
                             </tbody>
                         </table>

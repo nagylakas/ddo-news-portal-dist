@@ -1,0 +1,22 @@
+{{define "category-menu/searchable-mega"}}
+<li class="nav-item dropdown category-mega-dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        {{.Label}}
+    </a>
+    <div class="dropdown-menu category-mega-menu">
+        <div class="category-mega-search p-3 border-bottom">
+            <label class="visually-hidden" for="categoryMenuSearch">Kategória keresése</label>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input id="categoryMenuSearch" class="form-control" type="search" placeholder="Kategória keresése..." autocomplete="off" data-category-menu-search>
+            </div>
+        </div>
+        <ul class="category-mega-list" data-category-menu-list>
+            {{range .Categories}}
+            <li data-category-menu-item data-category-menu-name="{{.}}"><a class="dropdown-item" href="/category/{{lower .}}">{{.}}</a></li>
+            {{end}}
+        </ul>
+        <p class="category-mega-empty px-3 py-4 mb-0 text-center text-muted" data-category-menu-empty hidden>Nincs találat.</p>
+    </div>
+</li>
+{{end}}
