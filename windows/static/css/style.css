@@ -97,7 +97,13 @@ main {
     border: 1px solid #dee2e6;
     border-radius: 0.5rem;
     padding: 1rem;
+    cursor: pointer;
     transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.category-layout-preview:has(input:focus-visible) {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .category-layout-preview.is-selected {
@@ -150,6 +156,25 @@ main {
 
 .menu-preview-mega span {
     margin: 0;
+}
+
+.integration-settings-group {
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.integration-settings-group:first-of-type {
+    padding-top: 0;
+}
+
+.integration-settings-group:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.integration-settings-group h6 {
+    margin-bottom: 1rem;
+    font-weight: 700;
 }
 
 @media (max-width: 991.98px) {

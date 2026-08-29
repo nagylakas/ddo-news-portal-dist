@@ -24,12 +24,13 @@
             </div>
             {{end}}
 
-            <div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
-                <i class="bi bi-exclamation-triangle-fill mt-1 flex-shrink-0"></i>
-                <div>
-                    {{t .Lang "settings.warning"}}
-                </div>
-            </div>
+            <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+				<i class="bi bi-exclamation-triangle-fill mt-1 flex-shrink-0"></i>
+				<div>
+					<strong>{{t .Lang "settings.advanced_danger_title"}}</strong><br>
+					{{t .Lang "settings.advanced_danger_text"}}
+				</div>
+			</div>
 
             {{if .OIDCRegisterAvailable}}
             <div class="card border-0 shadow-sm mb-4">
