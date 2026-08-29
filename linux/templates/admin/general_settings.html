@@ -1,8 +1,6 @@
 {{define "admin/general-settings"}}
 {{template "admin-header" .}}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-xl-10">
+<div class="container-fluid py-4">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div>
                     <h4 class="mb-1 fw-bold"><i class="bi bi-gear-wide-connected me-2 text-primary"></i>{{t .Lang "settings.general_title"}}</h4>
@@ -92,8 +90,6 @@
                 <div class="d-flex justify-content-end gap-2 mb-5"><a href="/admin" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a><button type="submit" class="btn btn-primary" id="generalSaveBtn"><i class="bi bi-save me-2"></i>{{t .Lang "settings.general_save_restart"}}</button></div>
             </form>
             {{if .S3PolicyFixAvailable}}<form action="/admin/s3/fix-policy" method="POST" id="s3-policy-form"><input type="hidden" name="return" value="/admin/general-settings"></form>{{end}}
-        </div>
-    </div>
 </div>
 
 <div id="restartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;"><div style="background:#fff;border-radius:12px;padding:2.5rem 3rem;text-align:center;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);"><div class="spinner-border text-warning mb-3"><span class="visually-hidden">{{t .Lang "settings.loading"}}</span></div><h5 class="mb-2 fw-bold" id="restartOverlayTitle"></h5><p class="text-muted mb-3" id="restartOverlayText"></p><div id="restartStatus" class="text-muted small"></div></div></div>
