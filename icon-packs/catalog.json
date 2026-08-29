@@ -8,7 +8,7 @@
                          "primary_color":  "#00ff00",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-itlife-1.0.0.zip",
-                         "sha256":  "6f48991b780b44c38e194ffa10336480dd345fd2d33246b0f046e1db1502fca3"
+                         "sha256":  "3f72a2327cfe87e11493a38200b4b4450b350fb06682996bb5451e341200b84a"
                      },
                      {
                          "id":  "hardverlife",
@@ -17,7 +17,7 @@
                          "primary_color":  "#2cffdb",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-hardverlife-1.0.0.zip",
-                         "sha256":  "7f0a369d99913c3ef005ac7d6074aadba64cffb75d33d06cc9c48f7824ca577c"
+                         "sha256":  "7d3ac4673d2b4a24e950a1b9b6880a6f8bea708de5125d784deda4baa55b27fc"
                      },
                      {
                          "id":  "moddinglife",
@@ -26,7 +26,7 @@
                          "primary_color":  "#FF006C",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-moddinglife-1.0.0.zip",
-                         "sha256":  "4966f8b8ce0f32d2ae4d5f4056fe113e0d867bc192b7780796ece3d8009ba803"
+                         "sha256":  "25ac0c236c10b0b7a3482e77b2246e546c83082b8e3d3ec00bb1ca5a258a58d4"
                      },
                      {
                          "id":  "fakultativ",
@@ -35,7 +35,7 @@
                          "primary_color":  "#eb5822",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-fakultativ-1.0.0.zip",
-                         "sha256":  "a4feb460d0cc6617780fc74ee45423ab7f76631224775825d3157f505dc41329"
+                         "sha256":  "944fd988d771d4d5785f4a501ff1b1970e7968f58e4870abd8344caff75bc5aa"
                      },
                      {
                          "id":  "realfluencer",
@@ -44,7 +44,7 @@
                          "primary_color":  "#000000",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-realfluencer-1.0.0.zip",
-                         "sha256":  "577d163397c47b2cde4bb9205a1f76088062f18db5c63e3d057711599b43f1bd"
+                         "sha256":  "199e3f233f3ce06eacad00deaef3cf0e6085df98318fbf6c41442270ca1dca08"
                      },
                      {
                          "id":  "mobilelife",
@@ -53,7 +53,7 @@
                          "primary_color":  "#ff073a",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-mobilelife-1.0.0.zip",
-                         "sha256":  "3f7ffb6d780cbee98abe23c101dd91352d5db9b1596dad9d4c858aa88cbf6673"
+                         "sha256":  "8a0cf7ba8df769c5ecc997a9320767aab13f1465cd7141bd4ef22489de5948ec"
                      },
                      {
                          "id":  "walletone",
@@ -62,7 +62,7 @@
                          "primary_color":  "#ff0056",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-walletone-1.0.0.zip",
-                         "sha256":  "89b786697687a68e0d9ba65b8d518a355d5c158c42742ffcc58cdc9ce34bfed2"
+                         "sha256":  "a359d89d1d25a82018b833d7432c3c27057e43bfffdcfb2ac754b89e4310263e"
                      },
                      {
                          "id":  "gamerlife",
@@ -71,7 +71,7 @@
                          "primary_color":  "#00ff01",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-gamerlife-1.0.0.zip",
-                         "sha256":  "efd6c394b52a3984b193af69d5f0ed54b4437561931fcdb2f8e0a74d1e8cc712"
+                         "sha256":  "224793a06dc502b1d900d4487063f92bff7804973e3f50b983cefda0c0753af2"
                      },
                      {
                          "id":  "streamlife",
@@ -80,7 +80,7 @@
                          "primary_color":  "#1f54c5",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-streamlife-1.0.0.zip",
-                         "sha256":  "c513d0f01e1dc9ac7826efd0270b68891181aba65b58196274940c426cc4c2d9"
+                         "sha256":  "f2abd5d435fbd81e86038223a2ea895cdd107fcd8d077920ebb5479b8d20ba58"
                      },
                      {
                          "id":  "brothers",
@@ -89,7 +89,7 @@
                          "primary_color":  "#ff3900",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-brothers-1.0.0.zip",
-                         "sha256":  "f9ab9a1dcaf4185689d4ec6ea3555febe06018cb4c76595de39fff4ab860924a"
+                         "sha256":  "21d3fe05225f724347f32ba8ddaf0e593f34ba5b2ad557e9af9f03581756bfe0"
                      },
                      {
                          "id":  "connectedhome",
@@ -98,7 +98,7 @@
                          "primary_color":  "#00ff72",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-connectedhome-1.0.0.zip",
-                         "sha256":  "44eb292b63e295184433a657e1df62745487ef540d5f1bba28c80343fe9bc062"
+                         "sha256":  "d1ef108f547ce0e5719bedecf24ea5d21aebe96d9b31112167702c7274d6e781"
                      },
                      {
                          "id":  "hublife",
@@ -107,7 +107,7 @@
                          "primary_color":  "#00fcde",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-hublife-1.0.0.zip",
-                         "sha256":  "50ebcd840365321445b1d226b472553947991fcfc0d886c357d9fd75b55bbe93"
+                         "sha256":  "25fa805b1258c23f05f93b317970bb7da41492b852a86a398829ba80f0f355cb"
                      },
                      {
                          "id":  "spacelife",
@@ -116,7 +116,7 @@
                          "primary_color":  "#0215d3",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-spacelife-1.0.0.zip",
-                         "sha256":  "c6ce406b31b6d7eed29ff41e3103e81730d7e99f6e24b0e26c3bc9359279e28c"
+                         "sha256":  "4ab381d239b5bec64a688c8946833c768434caa7ab9574a21fc118f9aaaeefe6"
                      },
                      {
                          "id":  "driveandride",
@@ -125,7 +125,7 @@
                          "primary_color":  "#ff0002",
                          "min_app_version":  "0.4.8",
                          "asset":  "icon-pack-driveandride-1.0.0.zip",
-                         "sha256":  "3afdde0fa69636481948145e7781edeb3a7122ac08650fdd85ac4786c0b96d59"
+                         "sha256":  "63912849ea51fe1459a70d78f3af564d209753f73b8262013bfe28279ef066ad"
                      }
                  ]
 }
