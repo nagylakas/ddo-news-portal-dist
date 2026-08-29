@@ -1,0 +1,57 @@
+{{define "admin/icon-packs"}}
+{{template "admin-header" .}}
+<div class="container-xl">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h4 class="mb-1 fw-bold"><i class="bi bi-palette me-2 text-primary"></i>{{t .Lang "nav.icon_packs"}}</h4>
+            <p class="text-muted mb-0">Verziózott logó-, ikon- és színcsomagok a központi katalógusból.</p>
+        </div>
+        <form method="POST" action="/admin/icon-packs/refresh">
+            <button class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise me-1"></i>Katalógus frissítése</button>
+        </form>
+    </div>
+
+    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+    {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+
+    {{if .Packs}}
+    <div class="row g-4">
+        {{range .Packs}}
+        <div class="col-sm-6 col-xl-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                        <div>
+                            <h5 class="mb-1">{{.Name}}</h5>
+                            <code>{{.ID}}</code>
+                        </div>
+                        <span class="rounded-circle border" style="width:2rem;height:2rem;background:{{.PrimaryColor}};display:inline-block" title="{{.PrimaryColor}}"></span>
+                    </div>
+                    {{if .Description}}<p class="text-muted small flex-grow-1">{{.Description}}</p>{{else}}<div class="flex-grow-1"></div>{{end}}
+                    <div class="small mb-3">
+                        <div>Elérhető: <strong>v{{.Version}}</strong></div>
+                        {{if .Installed}}<div>Telepítve: <strong>v{{.InstalledVersion}}</strong></div>{{else}}<div class="text-muted">Nincs telepítve</div>{{end}}
+                        {{if .UpdateAvailable}}<span class="badge text-bg-warning mt-1">Frissítés elérhető</span>{{end}}
+                        {{if .Active}}<span class="badge text-bg-success mt-1">Aktív</span>{{end}}
+                    </div>
+                    <div class="d-flex gap-2">
+                        {{if not .Installed}}
+                        <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>Telepítés</button></form>
+                        {{else if .UpdateAvailable}}
+                        <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>Frissítés</button></form>
+                        {{end}}
+                        {{if .Installed}}
+                        <form method="POST" action="/admin/icon-packs/activate"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-outline-success btn-sm" {{if .Active}}disabled{{end}}><i class="bi bi-check2-circle me-1"></i>Aktiválás</button></form>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="card border-0 shadow-sm"><div class="card-body text-center py-5 text-muted"><i class="bi bi-cloud-arrow-down fs-1 d-block mb-3"></i>Még nincs letöltött katalógus. Frissítsd a központi katalógust.</div></div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}
