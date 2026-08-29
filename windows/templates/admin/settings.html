@@ -4,7 +4,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-9">
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-sliders me-2 text-primary"></i>{{t .Lang "settings.title"}}</h4>
+                <h4 class="mb-0 fw-bold"><i class="bi bi-sliders me-2 text-primary"></i>{{t .Lang "settings.advanced_title"}}</h4>
                 <button type="button" class="btn btn-warning btn-sm" id="restartBtn" onclick="triggerRestart()">
                     <i class="bi bi-arrow-clockwise me-1"></i>{{t .Lang "settings.restart_btn"}}
                 </button>
@@ -31,59 +31,6 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-4">
-                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                        <div>
-                            <h5 class="mb-1 fw-semibold"><i class="bi bi-menu-button-wide me-2 text-primary"></i>{{t .Lang "settings.category_menu_layout_title"}}</h5>
-                            <p class="text-muted mb-0" style="font-size:.95rem;">{{t .Lang "settings.category_menu_layout_text"}}</p>
-                        </div>
-                        <form action="/admin/settings/category-menu-layout" method="POST" class="d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-start" style="min-width:min(100%, 430px);">
-                            <select class="form-select form-select-sm" name="category_menu_layout" aria-label="{{t .Lang "settings.category_menu_layout_title"}}">
-                                {{range .CategoryMenuLayouts}}
-                                <option value="{{.ID}}" {{if eq $.CategoryMenuLayout .ID}}selected{{end}}>{{t $.Lang .NameKey}}</option>
-                                {{end}}
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-sm text-nowrap"><i class="bi bi-save me-1"></i>{{t .Lang "settings.category_menu_layout_save"}}</button>
-                        </form>
-                    </div>
-                    <div class="row g-2 mt-2">
-                        {{range .CategoryMenuLayouts}}
-                        <div class="col-md-6">
-                            <div class="small {{if eq $.CategoryMenuLayout .ID}}text-primary fw-semibold{{else}}text-muted{{end}}">
-                                {{t $.Lang .NameKey}} — <span class="fw-normal">{{t $.Lang .DescriptionKey}}</span>
-                            </div>
-                        </div>
-                        {{end}}
-                    </div>
-                    <div class="small text-warning mt-3"><i class="bi bi-arrow-clockwise me-1"></i>{{t .Lang "settings.category_menu_layout_restart"}}</div>
-                </div>
-            </div>
-
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-4">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
-                        <div>
-                            <h5 class="mb-1 fw-semibold"><i class="bi bi-cloud-arrow-down me-2 text-primary"></i>{{t .Lang "settings.update_title"}}</h5>
-                            <div class="d-flex flex-wrap gap-2 mb-2">
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{t .Lang "settings.current_version"}}: v{{.CurrentVersion}}</span>
-                                <span class="badge {{if .LatestVersion}}{{if .UpdateAvailable}}bg-success-subtle text-success border border-success-subtle{{else}}bg-light text-secondary border{{end}}{{else}}bg-light text-secondary border{{end}}">
-                                    {{t .Lang "settings.latest_version"}}: {{if .LatestVersion}}v{{.LatestVersion}}{{else}}—{{end}}
-                                </span>
-                            </div>
-                            <div class="text-muted" style="font-size:.95rem;">
-                                {{if .UpdateError}}{{.UpdateError}}{{else}}{{.UpdateStatusText}}{{end}}
-                            </div>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-success btn-sm" id="updateBtn" onclick="triggerSelfUpdate()" {{if or (not .UpdateEnabled) (not .UpdateAvailable)}}disabled{{end}}>
-                                <i class="bi bi-download me-1"></i>{{t .Lang "settings.update_btn"}}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {{if .OIDCRegisterAvailable}}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -107,27 +54,6 @@
                             <input type="password" class="form-control form-control-sm" name="admin_key" placeholder="{{t .Lang "settings.oidc_admin_key_ph"}}" autocomplete="off" required>
                             <button type="submit" class="btn btn-primary btn-sm text-nowrap">
                                 <i class="bi bi-plus-circle me-1"></i>{{t .Lang "settings.oidc_register_btn"}}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            {{end}}
-
-            {{if .S3PolicyFixAvailable}}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-4">
-                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                        <div>
-                            <h5 class="mb-1 fw-semibold"><i class="bi bi-cloud-check me-2 text-primary"></i>{{t .Lang "settings.s3_policy_title"}}</h5>
-                            <div class="text-muted mb-2" style="font-size:.95rem;">
-                                {{.S3PolicyStatusText}}
-                            </div>
-                            <span class="badge bg-light text-secondary border">{{t .Lang "settings.s3_policy_scope"}}: {{.S3PolicyBaseURL}}</span>
-                        </div>
-                        <form action="/admin/s3/fix-policy" method="POST">
-                            <button type="submit" class="btn btn-primary btn-sm text-nowrap">
-                                <i class="bi bi-shield-check me-1"></i>{{t .Lang "settings.s3_policy_btn"}}
                             </button>
                         </form>
                     </div>

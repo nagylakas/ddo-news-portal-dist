@@ -33,7 +33,7 @@
                         class="flex-grow-1"></div>{{end}}
                     <div class="small mb-3">
                         <div>{{t $.Lang "iconpacks.available"}}: <strong>v{{.Version}}</strong></div>
-                        {{if .Installed}}<div>{{t $.Lang "iconpacks.installed"}}: <strong>v{{.InstalledVersion}}</strong></div>{{else}}<div
+                        {{if .Installed}}<div>{{t $.Lang "iconpacks.installed"}}: {{if .LegacyInstalled}}<strong>{{t $.Lang "iconpacks.legacy"}}</strong>{{else}}<strong>v{{.InstalledVersion}}</strong>{{end}}</div>{{else}}<div
                             class="text-muted">{{t $.Lang "iconpacks.not_installed"}}</div>{{end}}
                         {{if .UpdateAvailable}}<span class="badge text-bg-warning mt-1">{{t $.Lang "iconpacks.update_available"}}</span>{{end}}
                         {{if .Active}}<span class="badge text-bg-success mt-1">{{t $.Lang "iconpacks.active"}}</span>{{end}}
@@ -50,7 +50,7 @@
                                 class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>{{t $.Lang "iconpacks.update"}}</button>
                         </form>
                         {{end}}
-                        {{if .Installed}}
+                        {{if .CatalogInstalled}}
                         <form method="POST" action="/admin/icon-packs/activate" class="icon-pack-activate-form"><input type="hidden" name="id"
                                 value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button
                                 class="btn btn-outline-success btn-sm" {{if .Active}}disabled{{end}}><i
