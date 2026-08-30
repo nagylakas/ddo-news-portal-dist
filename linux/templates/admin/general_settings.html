@@ -20,6 +20,8 @@
                             <span class="badge {{if .LatestVersion}}{{if .UpdateAvailable}}bg-success-subtle text-success border border-success-subtle{{else}}bg-light text-secondary border{{end}}{{else}}bg-light text-secondary border{{end}}">{{t .Lang "settings.latest_version"}}: {{if .LatestVersion}}v{{.LatestVersion}}{{else}}—{{end}}</span>
                         </div>
                         <div class="text-muted small">{{if .UpdateError}}{{.UpdateError}}{{else}}{{.UpdateStatusText}}{{end}}</div>
+						<div class="form-check form-switch mt-3"><input class="form-check-input" type="checkbox" role="switch" id="auto_update_enabled" name="auto_update_enabled" value="true" form="general-settings-form" {{if .Values.AutoUpdateEnabled}}checked{{end}}><label class="form-check-label" for="auto_update_enabled">{{t .Lang "settings.auto_update_enabled"}}</label><div class="form-text">{{t .Lang "settings.auto_update_help"}}</div></div>
+						{{if .LastAutoUpdateCheck}}<div class="text-muted small mt-2"><i class="bi bi-moon-stars me-1"></i>{{t .Lang "settings.auto_update_last"}}: {{formatDateTime .LastAutoUpdateCheck}}{{if .LastAutoUpdateResult}} — {{.LastAutoUpdateResult}}{{end}}</div>{{end}}
                     </div>
                     <button type="button" class="btn btn-success btn-sm" id="updateBtn" onclick="triggerSelfUpdate()" {{if or (not .UpdateEnabled) (not .UpdateAvailable)}}disabled{{end}}><i class="bi bi-download me-1"></i>{{t .Lang "settings.update_btn"}}</button>
                 </div>
