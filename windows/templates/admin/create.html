@@ -86,6 +86,28 @@
                                 <div class="form-text">{{t .Lang "article.image_hint"}}</div>
                             </div>
 
+                            <!-- AI disclosures -->
+                            <div class="col-12">
+                                <fieldset class="ai-disclosure-fieldset">
+                                    <legend class="form-label fw-semibold">{{t .Lang "article.ai_content_label"}}{{if .AIDisclosureRequired}} <span class="text-danger">*</span>{{end}}</legend>
+                                    <div class="ai-disclosure-options" role="radiogroup" aria-label="{{t .Lang "article.ai_content_label"}}">
+                                        <input class="btn-check" type="radio" name="ai_content_disclosure" id="ai_content_none" value="none" {{if .AIDisclosureRequired}}required{{end}}><label class="btn btn-outline-secondary" for="ai_content_none" data-bs-toggle="tooltip" title="{{t .Lang "article.ai_content_none_hint"}}"><i class="bi bi-person-check"></i><span>{{t .Lang "article.ai_content_none"}}</span></label>
+                                        <input class="btn-check" type="radio" name="ai_content_disclosure" id="ai_content_assisted" value="assisted"><label class="btn btn-outline-secondary" for="ai_content_assisted" data-bs-toggle="tooltip" title="{{t .Lang "article.ai_content_assisted_hint"}}"><i class="bi bi-robot"></i><span>{{t .Lang "article.ai_content_assisted"}}</span></label>
+                                        <input class="btn-check" type="radio" name="ai_content_disclosure" id="ai_content_generated" value="generated"><label class="btn btn-outline-secondary" for="ai_content_generated" data-bs-toggle="tooltip" title="{{t .Lang "article.ai_content_generated_hint"}}"><i class="bi bi-robot"></i><span>{{t .Lang "article.ai_content_generated"}}</span></label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col-12">
+                                <fieldset class="ai-disclosure-fieldset" id="ai_image_group">
+                                    <legend class="form-label fw-semibold">{{t .Lang "article.ai_image_label"}} <span class="text-danger d-none" id="ai_image_required_mark">*</span></legend>
+                                    <div class="ai-disclosure-options" role="radiogroup" aria-label="{{t .Lang "article.ai_image_label"}}">
+                                        <input class="btn-check" type="radio" name="ai_image_disclosure" id="ai_image_unmodified" value="unmodified"><label class="btn btn-outline-secondary" for="ai_image_unmodified" data-bs-toggle="tooltip" title="{{t .Lang "article.ai_image_unmodified_hint"}}"><i class="bi bi-image"></i><span>{{t .Lang "article.ai_image_unmodified"}}</span></label>
+                                        <input class="btn-check" type="radio" name="ai_image_disclosure" id="ai_image_modified" value="modified"><label class="btn btn-outline-secondary" for="ai_image_modified" data-bs-toggle="tooltip" title="{{t .Lang "article.ai_image_modified_hint"}}"><i class="bi bi-magic"></i><span>{{t .Lang "article.ai_image_modified"}}</span></label>
+                                        <input class="btn-check" type="radio" name="ai_image_disclosure" id="ai_image_generated" value="generated"><label class="btn btn-outline-secondary" for="ai_image_generated" data-bs-toggle="tooltip" title="{{t .Lang "article.ai_image_generated_hint"}}"><i class="bi bi-robot"></i><span>{{t .Lang "article.ai_image_generated"}}</span></label>
+                                    </div>
+                                </fieldset>
+                            </div>
+
                             <!-- Summary -->
                             <div class="col-12">
                                 <label for="summary" class="form-label fw-semibold">{{t .Lang "article.field_summary"}} <span class="text-danger">*</span></label>
@@ -251,6 +273,22 @@ function doUploadToMedia(input) {
 }
 </script>
 {{end}}
+<script>
+(function () {
+    var imageInput = document.getElementById('image_url');
+    var imageChoices = document.querySelectorAll('input[name="ai_image_disclosure"]');
+    var requiredMark = document.getElementById('ai_image_required_mark');
+    var requiredAfterCutoff = {{if .AIDisclosureRequired}}true{{else}}false{{end}};
+    function refreshImageDisclosureRequirement() {
+        var required = requiredAfterCutoff && imageInput && imageInput.value.trim() !== '';
+        imageChoices.forEach(function (choice, index) { choice.required = required && index === 0; });
+        if (requiredMark) requiredMark.classList.toggle('d-none', !required);
+        if (!imageInput.value.trim()) imageChoices.forEach(function (choice) { choice.checked = false; });
+    }
+    if (imageInput) imageInput.addEventListener('input', refreshImageDisclosureRequirement);
+    refreshImageDisclosureRequirement();
+}());
+</script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="/static/js/md-editor.js"></script>
 {{template "admin-footer" .}}

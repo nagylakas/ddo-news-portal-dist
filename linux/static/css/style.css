@@ -1538,6 +1538,39 @@ footer a:hover {
     letter-spacing: 0.03em;
 }
 
+.art-ai-disclosure {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.art-ai-disclosure:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+.ai-disclosure-tooltip .tooltip-inner {
+    white-space: pre-line;
+    text-align: left;
+}
+
+.ai-disclosure-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.ai-disclosure-options .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .875rem;
+}
+
 .art-hero-avatar {
     font-size: 1.5rem;
     color: #fff;

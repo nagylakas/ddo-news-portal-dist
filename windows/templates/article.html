@@ -69,6 +69,12 @@
                 {{if .AuthorAvatarURL}}<img src="{{secureURL .AuthorAvatarURL}}" alt="{{.Article.Author}}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">{{else}}<i class="bi bi-person-circle"></i>{{end}}
             </span>
             <a href="/author/{{authorSlug .Article.Author}}" class="art-hero-author">Szerző: {{.Article.Author}}</a>
+            {{if .AIDisclosureTooltip}}
+            <span class="art-hero-dot">•</span>
+            <button type="button" class="art-ai-disclosure" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" data-bs-custom-class="ai-disclosure-tooltip" data-bs-title="{{.AIDisclosureTooltip}}" aria-label="{{.AIDisclosureTooltip}}">
+                <i class="bi bi-robot" aria-hidden="true"></i>
+            </button>
+            {{end}}
             <span class="art-hero-dot">•</span>
             <span>{{formatDateTime .Article.PublishedAt}}</span>
             <span class="art-hero-dot">•</span>
