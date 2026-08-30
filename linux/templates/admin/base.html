@@ -107,6 +107,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/admin/general-settings"><i class="bi bi-gear-wide-connected me-2"></i>{{t .Lang "nav.general_settings"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/users"><i class="bi bi-person-gear me-2"></i>{{t .Lang "nav.users"}}</a></li>
+                            <li><a class="dropdown-item" href="/admin/audit"><i class="bi bi-shield-lock me-2"></i>{{t .Lang "nav.audit"}}<span id="auditNavBadge" class="badge bg-danger ms-2 d-none"></span></a></li>
                             <li><a class="dropdown-item" href="/admin/icon-packs"><i class="bi bi-palette me-2"></i>{{t .Lang "nav.icon_packs"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/plugins"><i class="bi bi-puzzle me-2"></i>{{t .Lang "nav.plugins"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/backups"><i class="bi bi-database-check me-2"></i>{{t .Lang "nav.backups"}}</a></li>
@@ -188,6 +189,29 @@
     </script>
     <!-- Custom JS -->
     <script src="/static/js/main.js?v={{assetVersion}}"></script>
+    <!-- Audit alert badge (unacknowledged security alerts, 60s poll, silent on failure) -->
+    <script>
+    (function () {
+        var badge = document.getElementById('auditNavBadge');
+        if (!badge) { return; }
+        function refresh() {
+            fetch('/admin/audit/alerts/badge', { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (data) {
+                    if (!data) { return; }
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : String(data.count);
+                        badge.classList.remove('d-none');
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                })
+                .catch(function () {});
+        }
+        refresh();
+        setInterval(refresh, 60000);
+    })();
+    </script>
 </body>
 
 </html>

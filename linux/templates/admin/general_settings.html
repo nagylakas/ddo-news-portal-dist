@@ -112,6 +112,32 @@
                     </div>
                 </div></div>
 
+                <div class="card border-0 shadow-sm mb-4"><div class="card-body p-4">
+                    <h5 class="mb-4 fw-semibold"><i class="bi bi-shield-lock me-2 text-primary"></i>{{t .Lang "settings.audit_card_title"}}</h5>
+                    <div class="vstack gap-3">
+                        <div>
+                            <label class="form-label" for="audit_retention_days">{{t .Lang "settings.audit_retention"}}</label>
+                            <input type="number" min="0" class="form-control" id="audit_retention_days" name="audit_retention_days" value="{{.Values.AuditRetentionDays}}" style="max-width:200px">
+                            <div class="form-text">{{t .Lang "settings.audit_retention_help"}}</div>
+                        </div>
+                        <div>
+                            <label class="form-label" for="audit_alert_webhook_url">{{t .Lang "settings.audit_webhook"}}</label>
+                            <input type="url" class="form-control font-monospace" id="audit_alert_webhook_url" name="audit_alert_webhook_url" value="{{.Values.AuditAlertWebhookURL}}" placeholder="https://hooks.example.com/...">
+                            <div class="form-text">{{t .Lang "settings.audit_webhook_help"}}</div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="audit_pushover_token">{{t .Lang "settings.audit_pushover_token"}}</label>
+                                <input type="password" autocomplete="off" class="form-control font-monospace" id="audit_pushover_token" name="audit_pushover_token" value="{{.Values.AuditPushoverToken}}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="audit_pushover_user">{{t .Lang "settings.audit_pushover_user"}}</label>
+                                <input type="password" autocomplete="off" class="form-control font-monospace" id="audit_pushover_user" name="audit_pushover_user" value="{{.Values.AuditPushoverUser}}">
+                            </div>
+                        </div>
+                    </div>
+                </div></div>
+
                 {{if .S3PolicyFixAvailable}}<div class="card border-warning shadow-sm mb-4"><div class="card-body p-4 d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3"><div><h5 class="mb-1 fw-semibold"><i class="bi bi-cloud-check me-2 text-warning"></i>{{t .Lang "settings.s3_policy_title"}}</h5><div class="text-muted mb-2">{{.S3PolicyStatusText}}</div><span class="badge bg-light text-secondary border">{{t .Lang "settings.s3_policy_scope"}}: {{.S3PolicyBaseURL}}</span></div><button type="submit" form="s3-policy-form" class="btn btn-warning btn-sm text-nowrap"><i class="bi bi-shield-check me-1"></i>{{t .Lang "settings.s3_policy_btn"}}</button></div></div>{{end}}
 
                 <div class="d-flex justify-content-end gap-2 mb-5"><a href="/admin" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a><button type="submit" class="btn btn-primary" id="generalSaveBtn"><i class="bi bi-save me-2"></i>{{t .Lang "settings.general_save_restart"}}</button></div>

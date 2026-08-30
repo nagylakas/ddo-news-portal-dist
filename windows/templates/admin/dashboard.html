@@ -187,6 +187,62 @@
         </div>
     </div>
 
+    {{if .AuditEnabled}}
+    <!-- Security widget -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:48px;height:48px;">
+                        <i class="bi bi-shield-exclamation text-danger fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{t .Lang "dash.failed_logins_24h"}}</div>
+                        <div class="fw-bold fs-3 lh-1">{{.FailedLogins24h}}</div>
+                    </div>
+                    <div class="ms-auto text-end">
+                        <div class="text-muted small">{{t .Lang "dash.open_alerts"}}</div>
+                        <div class="fw-bold fs-3 lh-1 {{if gt .UnackedAlerts 0}}text-danger{{end}}">{{.UnackedAlerts}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pb-0 d-flex align-items-center">
+                    <span class="text-muted small fw-semibold">
+                        <i class="bi bi-shield-lock me-1 text-primary"></i>{{t .Lang "dash.recent_events"}}
+                    </span>
+                    <a href="/admin/audit" class="btn btn-outline-primary btn-sm ms-auto">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>{{t .Lang "dash.audit_link"}}
+                    </a>
+                </div>
+                <div class="card-body pt-2">
+                    {{if .RecentSecurityEvents}}
+                    <ul class="list-unstyled mb-0">
+                        {{range .RecentSecurityEvents}}
+                        <li class="d-flex align-items-center gap-2 py-1 border-bottom" style="font-size:.85rem;">
+                            <span class="text-muted text-nowrap small">{{formatDateTime .TS}}</span>
+                            {{if eq .Severity "critical"}}<span class="badge bg-danger">{{.Severity}}</span>
+                            {{else}}<span class="badge bg-warning text-dark">{{.Severity}}</span>{{end}}
+                            <code class="small">{{.Action}}</code>
+                            <span class="text-truncate">{{if .ActorEmail}}{{.ActorEmail}}{{else}}{{.ActorType}}{{end}}{{if .TargetLabel}} — {{.TargetLabel}}{{end}}</span>
+                            {{if eq .Outcome "failure"}}<i class="bi bi-x-circle text-danger ms-auto"></i>
+                            {{else if eq .Outcome "denied"}}<i class="bi bi-slash-circle text-warning ms-auto"></i>
+                            {{else}}<i class="bi bi-check-circle text-success ms-auto"></i>{{end}}
+                        </li>
+                        {{end}}
+                    </ul>
+                    {{else}}
+                    <p class="text-muted mb-0" style="font-size:.85rem;">{{t .Lang "dash.no_data"}}</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+    {{end}}
+
     <!-- Top articles row -->
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-4">

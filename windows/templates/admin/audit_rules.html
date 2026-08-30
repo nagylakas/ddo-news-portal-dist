@@ -1,0 +1,78 @@
+{{define "admin/audit_rules"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-page-header" dict "Title" (t .Lang "audit.rules_title") "Icon" "sliders2" "Subtitle" (t .Lang "audit.rules_intro") "Actions" (list (dict "URL" "/admin/audit" "Label" (t .Lang "audit.title") "Icon" "shield-lock" "Class" "btn-outline-secondary btn-sm") (dict "URL" "/admin/audit/alerts" "Label" (t .Lang "audit.alerts_title") "Icon" "bell" "Class" "btn-outline-secondary btn-sm"))}}
+
+    {{template "admin-flash" .}}
+
+    {{if not .Enabled}}
+    <div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "audit.disabled"}}</div>
+    {{else}}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th></th>
+                        <th class="text-center">{{t .Lang "audit.rule_enabled"}}</th>
+                        <th class="text-center">{{t .Lang "audit.rule_threshold"}}</th>
+                        <th class="text-center">{{t .Lang "audit.rule_window"}}</th>
+                        <th class="text-center">{{t .Lang "audit.rule_cooldown"}}</th>
+                        <th>{{t .Lang "audit.rule_channels"}}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Rules}}
+                    <tr>
+                        <td>
+                            <form id="ruleform_{{.Key}}" action="/admin/audit/rules/edit/{{.Key}}" method="POST"></form>
+                            <div class="fw-semibold">{{t $.Lang (printf "audit.rule.%s" .Key)}}</div>
+                            <div class="text-muted small"><code>{{.Key}}</code> · {{t $.Lang (printf "audit.rule_kind_%s" .Kind)}}</div>
+                        </td>
+                        <td class="text-center">
+                            <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" name="enabled" form="ruleform_{{.Key}}" {{if .Config.Enabled}}checked{{end}}>
+                            </div>
+                        </td>
+                        <td class="text-center" style="width:110px">
+                            {{if .HasBurst}}
+                            <input type="number" class="form-control form-control-sm text-center" name="threshold" form="ruleform_{{.Key}}" value="{{.Config.Threshold}}" min="1" max="1000">
+                            {{else}}<span class="text-muted">—</span>{{end}}
+                        </td>
+                        <td class="text-center" style="width:110px">
+                            {{if .HasBurst}}
+                            <input type="number" class="form-control form-control-sm text-center" name="window" form="ruleform_{{.Key}}" value="{{.Config.WindowMinutes}}" min="1" max="1440">
+                            {{else}}<span class="text-muted">—</span>{{end}}
+                        </td>
+                        <td class="text-center" style="width:110px">
+                            <input type="number" class="form-control form-control-sm text-center" name="cooldown" form="ruleform_{{.Key}}" value="{{.Config.CooldownMinutes}}" min="0" max="10080">
+                        </td>
+                        <td class="text-nowrap">
+                            {{$channels := .Config.Channels}}
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="channel_webhook" form="ruleform_{{.Key}}" id="wh_{{.Key}}"
+                                       {{range $channels}}{{if eq . "webhook"}}checked{{end}}{{end}}>
+                                <label class="form-check-label small" for="wh_{{.Key}}">webhook</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="channel_pushover" form="ruleform_{{.Key}}" id="po_{{.Key}}"
+                                       {{range $channels}}{{if eq . "pushover"}}checked{{end}}{{end}}>
+                                <label class="form-check-label small" for="po_{{.Key}}">Pushover</label>
+                            </div>
+                        </td>
+                        <td class="text-end">
+                            <button type="submit" form="ruleform_{{.Key}}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-save me-1"></i>{{t $.Lang "audit.rule_save"}}
+                            </button>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}
