@@ -1,0 +1,85 @@
+{{define "admin/admin_user_edit"}}
+{{template "admin-header" .}}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-4">
+                <a href="/admin/users" class="btn btn-outline-secondary me-3">
+                    <i class="bi bi-arrow-left"></i> {{t .Lang "common.back"}}
+                </a>
+                <h2 class="mb-0">{{t .Lang "adminuser.edit_title"}}</h2>
+            </div>
+
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{.ErrorMessage}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{end}}
+
+            {{if .User}}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form action="/admin/users/edit/{{.User.ID.Hex}}" method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold">{{t .Lang "adminuser.field_name"}} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{.User.Name}}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-semibold">{{t .Lang "adminuser.field_email"}} <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{.User.Email}}" required autocomplete="off">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-semibold">{{t .Lang "adminuser.field_password"}}</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   minlength="12" autocomplete="new-password">
+                            <div class="form-text">{{t .Lang "adminuser.password_hint_edit"}} {{t .Lang "adminuser.password_hint_create"}}</div>
+                        </div>
+
+                        {{$isSelf := eq (.User.ID.Hex) .CurrentAdminID}}
+                        <div class="mb-4 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="active" name="active"
+                                   {{if .User.Active}}checked{{end}} {{if $isSelf}}disabled{{end}}>
+                            <label class="form-check-label fw-semibold" for="active">{{t .Lang "adminuser.field_active"}}</label>
+                            <div class="form-text">
+                                {{if $isSelf}}{{t .Lang "adminuser.self_active_hint"}}{{else}}{{t .Lang "adminuser.active_hint"}}{{end}}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/admin/users" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>{{t .Lang "common.save"}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{if ne (.User.ID.Hex) .CurrentAdminID}}
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "common.danger_zone"}}
+                    </h5>
+                    <p class="card-text text-muted">
+                        {{t .Lang "adminuser.danger_text"}}
+                    </p>
+                    <form action="/admin/users/delete/{{.User.ID.Hex}}" method="POST">
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm(this.dataset.confirm)"
+                                data-confirm="{{t .Lang "adminuser.confirm_delete2"}}">
+                            <i class="bi bi-trash me-2"></i>{{t .Lang "adminuser.delete_btn"}}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {{end}}
+            {{end}}
+        </div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}
