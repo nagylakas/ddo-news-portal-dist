@@ -524,6 +524,9 @@ Content-Type: application/json
                             <tr><td><code>category_id</code></td><td>string</td><td></td><td>ObjectID of an existing category.</td></tr>
                             <tr><td><code>tags</code></td><td>string[]</td><td></td><td>Tag list.</td></tr>
                             <tr><td><code>image_url</code></td><td>string</td><td></td><td>Featured image URL. If S3 is configured, external URLs are auto-imported to the media library.</td></tr>
+							<tr><td><code>seo_title</code></td><td>string</td><td></td><td>Optional SEO title (maximum 70 characters). When omitted, <code>title</code> is used.</td></tr>
+							<tr><td><code>meta_description</code></td><td>string</td><td></td><td>Optional meta description (maximum 160 characters). When omitted, <code>summary</code> is used.</td></tr>
+							<tr><td><code>image_alt_text</code></td><td>string</td><td></td><td>Optional featured-image alternative text (maximum 150 characters). When omitted, <code>title</code> is used.</td></tr>
 							<tr><td><code>ai_content_disclosure</code></td><td>string</td><td>Yes</td><td>AI declaration for the article content: <code>none</code>, <code>assisted</code>, or <code>generated</code>. For backward compatibility only, omitted values are stored as <code>none</code>.</td></tr>
 							<tr><td><code>ai_image_disclosure</code></td><td>string</td><td>Yes, if image_url is set</td><td>AI declaration for the featured image: <code>unmodified</code>, <code>modified</code>, or <code>generated</code>. For backward compatibility only, an omitted value is stored as <code>unmodified</code> when <code>image_url</code> is set.</td></tr>
                             <tr><td><code>published</code></td><td>bool</td><td></td><td>Publish immediately (default: <code>false</code>).</td></tr>

@@ -1,5 +1,6 @@
 {{define "author"}}
 {{template "header" .}}
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":{{js .Category}},"url":"{{.CanonicalURL}}","mainEntity":{"@type":"ItemList","itemListElement":[{{range $i,$article := .Articles}}{{if $i}},{{end}}{"@type":"ListItem","position":{{add $i 1}},"url":"{{siteURL}}/article/{{$article.Slug}}","name":{{js $article.EffectiveSEOTitle}}}{{end}}]}}</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -30,6 +31,7 @@
             <h1 class="listing-hero-title mb-0">{{.Category}}</h1>
         </div>
         <p class="listing-hero-sub">{{.Category}} által írt cikkek</p>
+        {{if .AuthorBio}}<p class="mb-0 text-white-50">{{.AuthorBio}}</p>{{end}}
     </div>
 </div>
 

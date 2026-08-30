@@ -1,5 +1,6 @@
 {{define "category"}}
 {{template "header" .}}
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":{{js .Category}},"url":"{{.CanonicalURL}}","mainEntity":{"@type":"ItemList","itemListElement":[{{range $i,$article := .Articles}}{{if $i}},{{end}}{"@type":"ListItem","position":{{add $i 1}},"url":"{{siteURL}}/article/{{$article.Slug}}","name":{{js $article.EffectiveSEOTitle}}}{{end}}]}}</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

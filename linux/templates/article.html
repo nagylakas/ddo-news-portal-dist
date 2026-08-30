@@ -15,8 +15,8 @@
 {
   "@context": "https://schema.org",
   "@type": "NewsArticle",
-  "headline": {{js .Article.Title}},
-  "description": {{js (truncate .Article.Summary 200)}},
+  "headline": {{js .Article.EffectiveSEOTitle}},
+  "description": {{js (truncate .Article.EffectiveMetaDescription 160)}},
   "url": "{{siteURL}}/article/{{.Article.Slug}}",
   {{if .Article.ImageURL}}"image": ["{{.Article.ImageURL}}"],{{end}}
   "datePublished": "{{rfc3339 .Article.PublishedAt}}",
@@ -28,10 +28,10 @@
   },
   "publisher": {
     "@type": "Organization",
-    "name": {{js .SiteNameLong}},
+    "name": {{js (publisherName)}},
     "logo": {
       "@type": "ImageObject",
-      "url": "{{siteURL}}/static/img/logo/{{.IconPack}}.png"
+      "url": "{{publisherLogoURL}}"
     }
   },
   "articleSection": {{js .Article.Category}}
@@ -41,7 +41,7 @@
 <!-- ===== ARTICLE HERO ===== -->
 <div class="art-hero">
     {{if .Article.ImageURL}}
-    <img src="{{.Article.ImageURL}}" class="art-hero-img" alt="{{.Article.Title}}">
+    <img src="{{.Article.ImageURL}}" class="art-hero-img" alt="{{.Article.EffectiveImageAltText}}">
     {{else}}
     <div class="art-hero-img art-hero-placeholder"></div>
     {{end}}

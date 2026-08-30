@@ -1,6 +1,6 @@
 {{define "header"}}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="hu" data-bs-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -28,6 +28,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="{{.SiteNameShort}}">
+    <meta name="robots" content="max-image-preview:large">
+    {{if googleSiteVerification}}<meta name="google-site-verification" content="{{googleSiteVerification}}">{{end}}
+    {{if bingSiteVerification}}<meta name="msvalidate.01" content="{{bingSiteVerification}}">{{end}}
     <!-- Bootstrap 5.3 CSS (local-first, CDN fallback) -->
     <link id="bs-css" href="/static/vendor/bootstrap@5.3.2/css/bootstrap.min.css?v={{assetVersion}}" rel="stylesheet">
     <script>
@@ -46,9 +49,11 @@
     {{if .RSSURL}}<link rel="alternate" type="application/rss+xml" title="{{.SiteNameLong}} RSS" href="{{.RSSURL}}">{{end}}
     <!-- SEO: meta description -->
     {{if .Article}}
-    <meta name="description" content="{{truncate .Article.Summary 160}}">
+    <meta name="description" content="{{truncate .Article.EffectiveMetaDescription 160}}">
     {{else if .MetaDescription}}
     <meta name="description" content="{{.MetaDescription}}">
+    {{else if seoDefaultMetaDescription}}
+    <meta name="description" content="{{seoDefaultMetaDescription}}">
     {{end}}
     <!-- SEO: canonical URL -->
     {{if .Article}}
@@ -61,10 +66,10 @@
     <meta property="og:locale" content="hu_HU">
     {{if .Article}}
     <meta property="og:type" content="article">
-    <meta property="og:title" content="{{.Article.Title}}">
-    <meta property="og:description" content="{{truncate .Article.Summary 200}}">
+    <meta property="og:title" content="{{.Article.EffectiveSEOTitle}}">
+    <meta property="og:description" content="{{truncate .Article.EffectiveMetaDescription 200}}">
     <meta property="og:url" content="{{siteURL}}/article/{{.Article.Slug}}">
-    {{if .Article.ImageURL}}<meta property="og:image" content="{{.Article.ImageURL}}">{{end}}
+    {{if .Article.ImageURL}}<meta property="og:image" content="{{.Article.ImageURL}}">{{else if seoDefaultShareImageURL}}<meta property="og:image" content="{{seoDefaultShareImageURL}}">{{end}}
     <meta property="article:published_time" content="{{rfc3339 .Article.PublishedAt}}">
     <meta property="article:modified_time" content="{{rfc3339 .Article.UpdatedAt}}">
     <meta property="article:author" content="{{.Article.Author}}">
@@ -72,18 +77,21 @@
     {{range .Article.Tags}}<meta property="article:tag" content="{{.}}">
     {{end}}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{.Article.Title}}">
-    <meta name="twitter:description" content="{{truncate .Article.Summary 200}}">
-    {{if .Article.ImageURL}}<meta name="twitter:image" content="{{.Article.ImageURL}}">{{end}}
+    <meta name="twitter:title" content="{{.Article.EffectiveSEOTitle}}">
+    <meta name="twitter:description" content="{{truncate .Article.EffectiveMetaDescription 200}}">
+    {{if .Article.ImageURL}}<meta name="twitter:image" content="{{.Article.ImageURL}}">{{else if seoDefaultShareImageURL}}<meta name="twitter:image" content="{{seoDefaultShareImageURL}}">{{end}}
     {{else}}
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{.Title}}">
     {{if .MetaDescription}}<meta property="og:description" content="{{.MetaDescription}}">{{end}}
     {{if .CanonicalURL}}<meta property="og:url" content="{{.CanonicalURL}}">{{end}}
+    {{if seoDefaultShareImageURL}}<meta property="og:image" content="{{seoDefaultShareImageURL}}">{{end}}
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{.Title}}">
     {{if .MetaDescription}}<meta name="twitter:description" content="{{.MetaDescription}}">{{end}}
+    {{if seoDefaultShareImageURL}}<meta name="twitter:image" content="{{seoDefaultShareImageURL}}">{{end}}
     {{end}}
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"{{siteURL}}/#organization","name":{{js (publisherName)}},"url":"{{siteURL}}/","logo":{"@type":"ImageObject","url":"{{publisherLogoURL}}"},"sameAs":[{{range $i,$url := publisherSameAs}}{{if $i}},{{end}}{{js $url}}{{end}}]},{"@type":"WebSite","@id":"{{siteURL}}/#website","url":"{{siteURL}}/","name":{{js .SiteNameLong}},"publisher":{"@id":"{{siteURL}}/#organization"},"potentialAction":{"@type":"SearchAction","target":"{{siteURL}}/search?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
 </head>
 
 <body>

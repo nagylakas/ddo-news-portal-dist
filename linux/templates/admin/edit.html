@@ -120,6 +120,7 @@
                             </div>
 
                             <!-- Summary -->
+                            <div class="col-12"><div class="card bg-light border-0"><div class="card-body"><h6 class="mb-3"><i class="bi bi-search me-2"></i>SEO</h6><div class="vstack gap-2"><div><div class="d-flex justify-content-between"><label class="form-label" for="seo_title">SEO cím</label><small data-character-count="seo_title">0 / 70</small></div><input class="form-control" id="seo_title" name="seo_title" maxlength="70" value="{{.Article.SEOTitle}}"></div><div><div class="d-flex justify-content-between"><label class="form-label" for="meta_description">Meta leírás</label><small data-character-count="meta_description">0 / 160</small></div><textarea class="form-control" id="meta_description" name="meta_description" maxlength="160" rows="2">{{.Article.MetaDescription}}</textarea></div><div><div class="d-flex justify-content-between"><label class="form-label" for="image_alt_text">Indexkép alternatív szövege</label><small data-character-count="image_alt_text">0 / 150</small></div><input class="form-control" id="image_alt_text" name="image_alt_text" maxlength="150" value="{{.Article.ImageAltText}}"><div class="form-text">Discoverhez legalább 1200 px széles, releváns indexkép javasolt.</div></div></div></div></div></div>
                             <div class="col-12">
                                 <label for="summary" class="form-label fw-semibold">{{t .Lang "article.field_summary"}} <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="summary" name="summary" rows="3" required>{{.Article.Summary}}</textarea>
@@ -442,6 +443,8 @@ function importCurrentURL() {
     refreshImageDisclosureRequirement();
 }());
 </script>
+<script>(function(){['seo_title','meta_description','image_alt_text'].forEach(function(id){var input=document.getElementById(id),counter=document.querySelector('[data-character-count="'+id+'"]');if(!input||!counter)return;function update(){counter.textContent=Array.from(input.value).length+' / '+input.maxLength;}input.addEventListener('input',update);update();});}());</script>
+<script>(function(){var input=document.getElementById('image_url');if(!input)return;function show(message){var old=document.getElementById('seo-image-warning');if(old)old.remove();var note=document.createElement('div');note.id='seo-image-warning';note.className='form-text text-warning';note.innerHTML='<i class="bi bi-exclamation-triangle me-1"></i>'+message;input.closest('.mb-3, .col-12, .col-md-6, div').appendChild(note);}function check(){var old=document.getElementById('seo-image-warning');if(old)old.remove();var url=input.value.trim();if(!url)return;var image=new Image();image.onload=function(){if(!image.naturalWidth||image.naturalWidth<1200)show('A Discoverhez legalább 1200 px széles indexkép javasolt.');};image.onerror=function(){show('A kép szélessége nem ellenőrizhető. A Discoverhez legalább 1200 px széles indexkép javasolt.');};image.src=url;}input.addEventListener('change',check);input.addEventListener('blur',check);check();}());</script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="/static/js/md-editor.js"></script>
 {{template "admin-footer" .}}
