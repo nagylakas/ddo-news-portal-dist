@@ -1,7 +1,7 @@
 {
-  "version": "0.5.65",
-  "source_commit": "6bb5c2b",
-  "build_time_utc": "2026-08-30T17:18:06Z",
+  "version": "0.5.66",
+  "source_commit": "c63bc21",
+  "build_time_utc": "2026-08-30T17:24:38Z",
   "linux_archive": "linux.tar.gz",
   "artifacts": [
     {
