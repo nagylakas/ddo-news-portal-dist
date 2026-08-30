@@ -91,7 +91,7 @@
     {{if .MetaDescription}}<meta name="twitter:description" content="{{.MetaDescription}}">{{end}}
     {{if seoDefaultShareImageURL}}<meta name="twitter:image" content="{{seoDefaultShareImageURL}}">{{end}}
     {{end}}
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"{{siteURL}}/#organization","name":{{js (publisherName)}},"url":"{{siteURL}}/","logo":{"@type":"ImageObject","url":"{{publisherLogoURL}}"},"sameAs":[{{range $i,$url := publisherSameAs}}{{if $i}},{{end}}{{js $url}}{{end}}]},{"@type":"WebSite","@id":"{{siteURL}}/#website","url":"{{siteURL}}/","name":{{js .SiteNameLong}},"publisher":{"@id":"{{siteURL}}/#organization"},"potentialAction":{"@type":"SearchAction","target":"{{siteURL}}/search?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"{{siteURL}}/#organization","name":{{js (publisherName)}},"url":"{{siteURL}}/","logo":{"@type":"ImageObject","url":"{{publisherLogoURL}}"},"sameAs":[{{range $i,$url := publisherSameAs}}{{if $i}},{{end}}{{js $url}}{{end}}]{{if publisherTopics}},"knowsAbout":[{{range $i,$topic := publisherTopics}}{{if $i}},{{end}}{{js $topic}}{{end}}]{{end}}},{"@type":"WebSite","@id":"{{siteURL}}/#website","url":"{{siteURL}}/","name":{{js .SiteNameLong}},"publisher":{"@id":"{{siteURL}}/#organization"},"potentialAction":{"@type":"SearchAction","target":"{{siteURL}}/search?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
 </head>
 
 <body>

@@ -177,6 +177,79 @@ main {
     font-weight: 700;
 }
 
+/* Reusable admin tag/topic editor. */
+.admin-tag-input__surface {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem;
+    min-height: calc(2.25rem + 2px);
+    padding: .35rem .45rem;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    background: #fff;
+    cursor: text;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.admin-tag-input__surface:focus-within {
+    border-color: rgba(var(--bs-primary-rgb), .65);
+    box-shadow: 0 0 0 .25rem rgba(var(--bs-primary-rgb), .18);
+}
+
+.admin-tag-input__chips {
+    display: contents;
+}
+
+.admin-tag-input__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    max-width: 100%;
+    padding: .27rem .35rem .27rem .55rem;
+    border: 1px solid rgba(var(--bs-primary-rgb), .28);
+    border-radius: 999px;
+    background: rgba(var(--bs-primary-rgb), .1);
+    color: var(--bs-primary);
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.admin-tag-input__remove {
+    display: inline-grid;
+    place-items: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.admin-tag-input__remove:hover,
+.admin-tag-input__remove:focus-visible {
+    background: rgba(var(--bs-primary-rgb), .2);
+}
+
+.admin-tag-input__entry {
+    flex: 1 1 12rem;
+    min-width: 8rem;
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    background: transparent;
+    color: inherit;
+    padding: .2rem;
+}
+
+.admin-tag-input__entry:disabled {
+    min-width: 0;
+}
+
 @media (max-width: 991.98px) {
     .category-mega-menu {
         width: 100%;

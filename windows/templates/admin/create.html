@@ -62,7 +62,7 @@
                             <!-- Tags -->
                             <div class="col-12">
                                 <label for="tags" class="form-label fw-semibold">{{t .Lang "article.field_tags"}}</label>
-                                <input type="text" class="form-control" id="tags" name="tags" placeholder="{{t .Lang "article.tags_hint"}}">
+                                {{template "admin-tag-input" dict "ID" "tags" "Name" "tags" "Value" "" "Label" (t .Lang "article.field_tags") "Placeholder" (t .Lang "article.tags_input_placeholder") "MaxItems" 0}}
                                 <div class="form-text">{{t .Lang "article.tags_hint"}}</div>
                             </div>
 

@@ -95,6 +95,106 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Reusable chip inputs for editorial tags and publisher topics. The hidden
+    // field keeps the existing comma-separated server-side form contract.
+    document.querySelectorAll('[data-tag-input]').forEach(function(root) {
+        const hidden = root.querySelector('input[type="hidden"]');
+        const chips = root.querySelector('.admin-tag-input__chips');
+        const entry = root.querySelector('.admin-tag-input__entry');
+        const maxItems = Number(root.getAttribute('data-max-items')) || 0;
+        const counter = hidden ? document.querySelector('[data-character-count="' + hidden.id + '"]') : null;
+        if (!hidden || !chips || !entry) return;
+
+        let values = splitValues(hidden.value);
+
+        function splitValues(raw) {
+            const seen = new Set();
+            return String(raw || '').split(/[\n\r,]+/).map(function(value) {
+                return value.trim();
+            }).filter(function(value) {
+                const key = value.toLocaleLowerCase();
+                if (!value || seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+        }
+
+        function updateCounter() {
+            if (!counter) return;
+            const max = (counter.textContent.match(/\d+\s*$/) || [])[0];
+            counter.textContent = Array.from(hidden.value).length + (max ? ' / ' + max : '');
+        }
+
+        function sync() {
+            hidden.value = values.join(', ');
+            updateCounter();
+            hidden.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        function remove(index) {
+            values.splice(index, 1);
+            render();
+        }
+
+        function render() {
+            chips.replaceChildren();
+            values.forEach(function(value, index) {
+                const chip = document.createElement('span');
+                chip.className = 'admin-tag-input__chip';
+                chip.textContent = value;
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'admin-tag-input__remove';
+                removeButton.setAttribute('aria-label', 'Remove ' + value);
+                removeButton.textContent = '×';
+                removeButton.addEventListener('click', function() { remove(index); });
+                chip.appendChild(removeButton);
+                chips.appendChild(chip);
+            });
+            entry.disabled = maxItems > 0 && values.length >= maxItems;
+            entry.placeholder = entry.disabled ? '' : entry.dataset.placeholder || entry.placeholder;
+            sync();
+        }
+
+        function add(raw) {
+            splitValues(raw).forEach(function(value) {
+                if (maxItems > 0 && values.length >= maxItems) return;
+                if (!values.some(function(existing) { return existing.toLocaleLowerCase() === value.toLocaleLowerCase(); })) {
+                    values.push(value);
+                }
+            });
+            entry.value = '';
+            render();
+        }
+
+        entry.dataset.placeholder = entry.placeholder;
+        entry.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ',' || event.key === 'Tab') {
+                if (entry.value.trim()) {
+                    event.preventDefault();
+                    add(entry.value);
+                }
+            } else if (event.key === 'Backspace' && !entry.value && values.length) {
+                values.pop();
+                render();
+            }
+        });
+        entry.addEventListener('blur', function() {
+            if (entry.value.trim()) add(entry.value);
+        });
+        entry.addEventListener('paste', function(event) {
+            const pasted = event.clipboardData ? event.clipboardData.getData('text') : '';
+            if (/[\n\r,]/.test(pasted)) {
+                event.preventDefault();
+                add(pasted);
+            }
+        });
+        root.querySelector('.admin-tag-input__surface').addEventListener('click', function() {
+            if (!entry.disabled) entry.focus();
+        });
+        render();
+    });
+
     // Search form enhancement
     const searchForm = document.querySelector('form[action="/search"]');
     if (searchForm) {
