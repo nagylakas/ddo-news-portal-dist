@@ -1571,6 +1571,25 @@ footer a:hover {
     font-size: .875rem;
 }
 
+.article-field-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .35rem .6rem;
+    margin-bottom: .35rem;
+}
+
+.ai-disclosure-options--compact {
+    gap: .25rem;
+}
+
+.ai-disclosure-options--compact .btn {
+    min-height: 26px;
+    padding: .12rem .42rem;
+    font-size: .74rem;
+    line-height: 1.2;
+}
+
 .art-hero-avatar {
     font-size: 1.5rem;
     color: #fff;
