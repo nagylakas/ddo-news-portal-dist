@@ -1028,6 +1028,29 @@ main {
     text-align: left;
 }
 
+.article-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.article-table-scroll table {
+    width: max-content;
+    min-width: 100%;
+    margin-bottom: 0;
+}
+
+.article-external-link-icon {
+    display: inline-block;
+    margin-left: 0.2em;
+    font-size: 0.78em;
+    line-height: 1;
+    text-decoration: none;
+}
+
 .article-content th,
 .article-content td {
     border: 1px solid #dee2e6;
