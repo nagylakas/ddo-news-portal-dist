@@ -1057,6 +1057,17 @@ main {
     text-decoration: none;
 }
 
+/* The compact SEO indicator in the admin article list only shows three
+   checkmarks when all three editorial SEO fields are present. */
+.admin-articles-table td[data-bs-title*="—"] > span {
+    display: none;
+}
+
+.admin-articles-table td[data-bs-title*="—"]::after {
+    content: "—";
+    color: #6c757d;
+}
+
 .article-content th,
 .article-content td {
     border: 1px solid #dee2e6;
