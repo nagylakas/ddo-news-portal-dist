@@ -947,6 +947,8 @@ main {
     color: #1a1a1a;
     text-align: justify;
     hyphens: auto;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .article-content p {
@@ -1029,6 +1031,10 @@ main {
 }
 
 .article-table-scroll {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     max-width: 100%;
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -1636,11 +1642,15 @@ footer a:hover {
     gap: 2.5rem;
     padding: 3rem 2rem 3rem;
     max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 .art-main {
     flex: 1;
     min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 

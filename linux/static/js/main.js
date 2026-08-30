@@ -160,6 +160,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Reading progress bar for article pages
     if (document.querySelector('.article-content')) {
+		// Keep wide Markdown tables inside their own horizontal scroller. This is
+		// also a defensive fallback for articles rendered before server-side table
+		// wrappers were introduced.
+		document.querySelectorAll('.article-content table').forEach(function(table) {
+			if (table.parentElement && table.parentElement.classList.contains('article-table-scroll')) return;
+			var wrapper = document.createElement('div');
+			wrapper.className = 'article-table-scroll';
+			wrapper.setAttribute('role', 'region');
+			wrapper.setAttribute('tabindex', '0');
+			wrapper.setAttribute('aria-label', 'Széles táblázat: vízszintesen görgethető');
+			table.parentNode.insertBefore(wrapper, table);
+			wrapper.appendChild(table);
+		});
         const progressBar = document.createElement('div');
         progressBar.style.cssText = 'position: fixed; top: 0; left: 0; height: 3px; background: var(--bs-primary); z-index: 9999; transition: width 0.2s;';
         document.body.appendChild(progressBar);

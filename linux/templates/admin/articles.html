@@ -1,143 +1,22 @@
 {{define "admin/articles"}}
 {{template "admin-header" .}}
-
 <div class="container-fluid px-4">
-
     {{template "admin-flash" .}}
-
     {{template "admin-page-header" dict "Title" (t .Lang "article.list_title") "Icon" "file-earmark-text" "Actions" (list (dict "URL" "/admin/create" "Label" (t .Lang "nav.new_article") "Icon" "plus-circle"))}}
-
-    <!-- Search bar -->
-    <form method="GET" action="/admin/articles" class="mb-4">
-        <div class="input-group" style="max-width:480px;">
-            <input type="text" class="form-control" name="q" value="{{.SearchQuery}}"
-                   placeholder="{{t .Lang "article.search_placeholder"}}">
-            <button class="btn btn-outline-secondary" type="submit">
-                <i class="bi bi-search me-1"></i>{{t .Lang "article.search"}}
-            </button>
-            {{if .SearchQuery}}
-            <a href="/admin/articles" class="btn btn-outline-danger" title="Clear">
-                <i class="bi bi-x-lg"></i>
-            </a>
-            {{end}}
-        </div>
-    </form>
-
-    {{if .Articles}}
-    <!-- Articles table -->
-    <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>{{t .Lang "dash.col_title"}}</th>
-                        <th>{{t .Lang "dash.col_category"}}</th>
-                        <th>{{t .Lang "dash.col_author"}}</th>
-                        <th>{{t .Lang "dash.col_status"}}</th>
-                        <th>{{t .Lang "dash.col_date"}}</th>
-                        <th class="text-end">{{t .Lang "dash.col_readers"}}</th>
-                        <th class="text-end">{{t .Lang "dash.col_actions"}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{$viewCounts := .ViewCounts}}
-                    {{$lang := .Lang}}
-                    {{range .Articles}}
-                    <tr>
-                        <td style="max-width:320px;">
-                            <div class="d-flex align-items-center gap-2">
-                                {{if .ImageURL}}
-                                <img src="{{.ImageURL}}" alt="" class="rounded" style="width:40px;height:40px;object-fit:cover;flex-shrink:0;">
-                                {{end}}
-                                <span class="fw-semibold text-truncate" style="max-width:260px;" title="{{.Title}}">{{truncate .Title 60}}</span>
-                            </div>
-                        </td>
-                        <td>
-                            {{if .Category}}
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{.Category}}</span>
-                            {{else}}
-                            <span class="text-muted">—</span>
-                            {{end}}
-                        </td>
-                        <td class="text-muted small">{{if .Author}}{{.Author}}{{else}}—{{end}}</td>
-                        <td>
-                            {{if .Published}}
-                            <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                <i class="bi bi-check-circle me-1"></i>{{t $lang "common.published"}}
-                            </span>
-                            {{else}}
-                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
-                                <i class="bi bi-pencil-square me-1"></i>{{t $lang "common.draft"}}
-                            </span>
-                            {{end}}
-                        </td>
-                        <td class="text-muted small text-nowrap">{{formatDate .PublishedAt}}</td>
-                        <td class="text-end">
-                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                <i class="bi bi-eye me-1"></i>{{index $viewCounts .ID.Hex}}
-                            </span>
-                        </td>
-                        <td class="text-end text-nowrap">
-                            <a href="/admin/edit/{{.ID.Hex}}" class="btn btn-sm btn-outline-secondary" title="{{t $lang "common.edit"}}">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form action="/admin/delete/{{.ID.Hex}}" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm(this.dataset.confirm)"
-                                        data-confirm="{{t $lang "dash.confirm_delete"}}"
-                                        title="{{t $lang "common.delete"}}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {{end}}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Pagination -->
-    {{if or .HasPrev .HasNext}}
-    <nav aria-label="Article pagination" class="mt-4">
-        <ul class="pagination justify-content-center">
-            <li class="page-item {{if not .HasPrev}}disabled{{end}}">
-                <a class="page-link" href="/admin/articles?q={{.SearchQuery}}&page={{subtract .CurrentPage 1}}">
-                    <i class="bi bi-chevron-left"></i>
-                </a>
-            </li>
-            <li class="page-item active">
-                <span class="page-link">{{.CurrentPage}} / {{.TotalPages}}</span>
-            </li>
-            <li class="page-item {{if not .HasNext}}disabled{{end}}">
-                <a class="page-link" href="/admin/articles?q={{.SearchQuery}}&page={{add .CurrentPage 1}}">
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-            </li>
-        </ul>
-    </nav>
-    {{end}}
-
-    {{else}}
-    <!-- Empty state -->
-    <div class="text-center py-5">
-        <i class="bi bi-file-earmark-text text-muted" style="font-size:4rem;"></i>
-        <h5 class="mt-3 text-muted">
-            {{if .SearchQuery}}
-            {{t .Lang "dash.no_articles"}}
-            {{else}}
-            {{t .Lang "article.no_articles"}}
-            {{end}}
-        </h5>
-        {{if not .SearchQuery}}
-        <a href="/admin/create" class="btn btn-primary mt-2">
-            <i class="bi bi-plus-circle me-1"></i>{{t .Lang "article.create_first"}}
-        </a>
-        {{end}}
-    </div>
-    {{end}}
-
+    <form method="GET" action="/admin/articles" class="card border-0 shadow-sm mb-4"><div class="card-body p-3"><div class="row g-2 align-items-end">
+        <div class="col-12 col-xl-4"><label class="form-label small mb-1" for="article-search">{{t .Lang "article.search"}}</label><div class="input-group"><input id="article-search" class="form-control" name="q" value="{{.ArticleFilter.Query}}" placeholder="{{t .Lang "article.search_placeholder"}}"><button class="btn btn-primary" type="submit"><i class="bi bi-search"></i><span class="visually-hidden">{{t .Lang "article.search"}}</span></button></div></div>
+        <div class="col-6 col-md-3 col-xl-2"><label class="form-label small mb-1">{{t .Lang "dash.col_author"}}</label><select class="form-select" name="author"><option value="">{{t .Lang "article.filter_all"}}</option>{{range .Authors}}<option value="{{.Name}}" {{if eq $.ArticleFilter.Author .Name}}selected{{end}}>{{.Name}}</option>{{end}}</select></div>
+        <div class="col-6 col-md-3 col-xl-2"><label class="form-label small mb-1">{{t .Lang "dash.col_category"}}</label><select class="form-select" name="category"><option value="">{{t .Lang "article.filter_all"}}</option>{{range .Categories}}<option value="{{.Name}}" {{if eq $.ArticleFilter.Category .Name}}selected{{end}}>{{.Name}}</option>{{end}}</select></div>
+        <div class="col-6 col-md-3 col-xl-2"><label class="form-label small mb-1">{{t .Lang "dash.col_status"}}</label><select class="form-select" name="status"><option value="all" {{if eq .ArticleFilter.Status "all"}}selected{{end}}>{{t .Lang "article.filter_all"}}</option><option value="draft" {{if eq .ArticleFilter.Status "draft"}}selected{{end}}>{{t .Lang "common.draft"}}</option><option value="published" {{if eq .ArticleFilter.Status "published"}}selected{{end}}>{{t .Lang "common.published"}}</option><option value="scheduled" {{if eq .ArticleFilter.Status "scheduled"}}selected{{end}}>{{t .Lang "article.status_scheduled"}}</option></select></div>
+        <div class="col-6 col-md-3 col-xl-2"><label class="form-label small mb-1">{{t .Lang "article.sort"}}</label><div class="input-group"><select class="form-select" name="sort"><option value="published_at" {{if eq .ArticleFilter.Sort "published_at"}}selected{{end}}>{{t .Lang "article.sort_published"}}</option><option value="updated_at" {{if eq .ArticleFilter.Sort "updated_at"}}selected{{end}}>{{t .Lang "article.sort_updated"}}</option><option value="title" {{if eq .ArticleFilter.Sort "title"}}selected{{end}}>{{t .Lang "article.sort_title"}}</option><option value="views" {{if eq .ArticleFilter.Sort "views"}}selected{{end}}>{{t .Lang "article.sort_views"}}</option></select><select class="form-select" name="dir" aria-label="{{t .Lang "article.sort_direction"}}"><option value="desc" {{if eq .ArticleFilter.Direction "desc"}}selected{{end}}>↓</option><option value="asc" {{if eq .ArticleFilter.Direction "asc"}}selected{{end}}>↑</option></select></div></div>
+        <div class="col-6 col-md-3 col-xl-2"><label class="form-label small mb-1">{{t .Lang "article.date_from"}}</label><input class="form-control" type="date" name="from" value="{{.PublishedFromText}}"></div><div class="col-6 col-md-3 col-xl-2"><label class="form-label small mb-1">{{t .Lang "article.date_to"}}</label><input class="form-control" type="date" name="to" value="{{.PublishedToText}}"></div><div class="col-12 col-md-auto ms-md-auto"><button class="btn btn-primary" type="submit"><i class="bi bi-funnel me-1"></i>{{t .Lang "article.filter_apply"}}</button><a href="/admin/articles" class="btn btn-outline-secondary ms-1"><i class="bi bi-x-lg me-1"></i>{{t .Lang "article.filter_reset"}}</a></div>
+    </div></div></form>
+    <div class="d-flex justify-content-between align-items-center mb-3"><span class="text-muted small">{{.ArticleTotal}} {{t .Lang "article.results"}}</span><span class="text-muted small">{{t .Lang "article.page_size"}}: 50</span></div>
+    {{if .Articles}}<div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover align-middle mb-0 admin-articles-table"><thead class="table-light"><tr><th>{{t .Lang "dash.col_title"}}</th><th>{{t .Lang "dash.col_author"}}</th><th>{{t .Lang "dash.col_category"}}</th><th>{{t .Lang "dash.col_status"}}</th><th>{{t .Lang "dash.col_date"}}</th><th>{{t .Lang "article.col_seo"}}</th><th>{{t .Lang "article.col_tags"}}</th><th class="text-end">{{t .Lang "dash.col_readers"}}</th><th class="text-end">{{t .Lang "dash.col_actions"}}</th></tr></thead><tbody>
+    {{$viewCounts := .ViewCounts}}{{$avatars := .ArticleAuthorAvatars}}{{$statuses := .ArticleStatuses}}{{$lang := .Lang}}
+    {{range .Articles}}<tr><td style="min-width:330px;max-width:460px"><div class="d-flex gap-2">{{if .ImageURL}}<img src="{{.ImageURL}}" alt="" class="rounded" style="width:48px;height:48px;object-fit:cover;flex-shrink:0">{{end}}<div class="overflow-hidden"><div class="fw-semibold text-truncate" title="{{.Title}}">{{.Title}}</div>{{if .Summary}}<div class="small text-muted mt-1">{{truncate .Summary 160}}</div>{{end}}</div></div></td><td style="min-width:150px">{{with index $avatars .ID.Hex}}<img src="{{.}}" alt="" class="rounded-circle me-1" style="width:26px;height:26px;object-fit:cover">{{else}}<i class="bi bi-person-circle text-muted me-1"></i>{{end}}{{if .Author}}{{.Author}}{{else}}<span class="text-muted">—</span>{{end}}</td><td>{{if .Category}}<span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{.Category}}</span>{{else}}<span class="text-muted">—</span>{{end}}</td><td>{{if eq (index $statuses .ID.Hex) "scheduled"}}<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle"><i class="bi bi-clock me-1"></i>{{t $lang "article.status_scheduled"}}</span>{{else if .Published}}<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i>{{t $lang "common.published"}}</span>{{else}}<span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-pencil-square me-1"></i>{{t $lang "common.draft"}}</span>{{end}}</td><td class="text-muted small text-nowrap">{{formatDateTime .PublishedAt}}</td><td class="text-nowrap" data-bs-toggle="tooltip" data-bs-title="SEO cím: {{if .SEOTitle}}✓{{else}}—{{end}} · Meta leírás: {{if .MetaDescription}}✓{{else}}—{{end}} · Kép alt: {{if .ImageAltText}}✓{{else}}—{{end}}"><span class="{{if .SEOTitle}}text-success{{else}}text-muted{{end}}">✓</span><span class="{{if .MetaDescription}}text-success{{else}}text-muted{{end}} ms-1">✓</span><span class="{{if .ImageAltText}}text-success{{else}}text-muted{{end}} ms-1">✓</span></td><td><span class="badge bg-secondary-subtle text-secondary border" {{if .Tags}}data-bs-toggle="tooltip" data-bs-title="{{join .Tags ", "}}"{{end}}>{{len .Tags}}</span></td><td class="text-end"><span class="badge bg-secondary-subtle text-secondary border"><i class="bi bi-eye me-1"></i>{{index $viewCounts .ID.Hex}}</span></td><td class="text-end text-nowrap"><a href="/admin/edit/{{.ID.Hex}}" class="btn btn-sm btn-outline-secondary" title="{{t $lang "common.edit"}}"><i class="bi bi-pencil"></i></a><form action="/admin/delete/{{.ID.Hex}}" method="POST" class="d-inline"><button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm(this.dataset.confirm)" data-confirm="{{t $lang "dash.confirm_delete"}}" title="{{t $lang "common.delete"}}"><i class="bi bi-trash"></i></button></form></td></tr>{{end}}
+    </tbody></table></div></div>{{if or .HasPrev .HasNext}}<nav aria-label="Article pagination" class="mt-4"><ul class="pagination justify-content-center"><li class="page-item {{if not .HasPrev}}disabled{{end}}"><a class="page-link" href="/admin/articles?{{.ArticleFilterQuery}}{{if .ArticleFilterQuery}}&amp;{{end}}page={{subtract .CurrentPage 1}}"><i class="bi bi-chevron-left"></i></a></li><li class="page-item active"><span class="page-link">{{.CurrentPage}} / {{.TotalPages}}</span></li><li class="page-item {{if not .HasNext}}disabled{{end}}"><a class="page-link" href="/admin/articles?{{.ArticleFilterQuery}}{{if .ArticleFilterQuery}}&amp;{{end}}page={{add .CurrentPage 1}}"><i class="bi bi-chevron-right"></i></a></li></ul></nav>{{end}}
+    {{else}}<div class="text-center py-5"><i class="bi bi-file-earmark-text text-muted" style="font-size:4rem"></i><h5 class="mt-3 text-muted">{{t .Lang "dash.no_articles"}}</h5><a href="/admin/articles" class="btn btn-outline-secondary mt-2">{{t .Lang "article.filter_reset"}}</a></div>{{end}}
 </div>
-
 {{template "admin-footer" .}}
 {{end}}
