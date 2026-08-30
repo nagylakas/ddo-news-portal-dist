@@ -1,0 +1,48 @@
+{{define "admin/backups"}}
+{{template "admin-header" .}}
+<div class="container-fluid py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h4 class="mb-1 fw-bold"><i class="bi bi-database-check me-2 text-primary"></i>{{t .Lang "backup.title"}}</h4>
+            <p class="text-muted mb-0">{{t .Lang "backup.subtitle"}}</p>
+        </div>
+    </div>
+
+    {{if not .Available}}
+    <div class="alert alert-danger"><i class="bi bi-database-x me-2"></i>{{t .Lang "backup.unavailable"}}</div>
+    {{else}}
+    {{if .LastError}}<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "backup.last_error"}}: {{.LastError}}</div>{{end}}
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+            <div>
+                <h5 class="fw-semibold mb-1"><i class="bi bi-save me-2 text-primary"></i>{{t .Lang "backup.manual_title"}}</h5>
+                <p class="text-muted mb-0">{{t .Lang "backup.manual_text"}}</p>
+                {{if .Manual}}<div class="small text-muted mt-2">{{t .Lang "backup.created"}}: {{formatDateTime .Manual.CreatedAt}} &middot; {{.Manual.Size}} &middot; {{t .Lang "backup.expires"}}: {{formatDateTime .Manual.ExpiresAt}}</div>{{end}}
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                {{if .Manual}}<a class="btn btn-outline-primary" href="/admin/backups/download/{{.Manual.ID}}"><i class="bi bi-download me-1"></i>{{t .Lang "backup.download"}}</a>{{end}}
+                <button class="btn btn-primary" type="button" id="createBackupBtn" onclick="createBackup()" {{if .Running}}disabled{{end}}><i class="bi bi-plus-circle me-1"></i>{{if .Running}}{{t .Lang "backup.running"}}{{else}}{{t .Lang "backup.create"}}{{end}}</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+                <div><h5 class="fw-semibold mb-1"><i class="bi bi-calendar-week me-2 text-primary"></i>{{t .Lang "backup.automatic_title"}}</h5><p class="text-muted mb-0">{{t .Lang "backup.automatic_text"}}</p></div>
+                <span class="badge bg-light text-secondary border">{{t .Lang "backup.automatic_schedule"}}</span>
+            </div>
+            {{if .Automatic}}
+            <div class="table-responsive"><table class="table table-sm table-striped align-middle mb-0"><thead><tr><th>{{t .Lang "backup.created"}}</th><th>{{t .Lang "backup.size"}}</th><th class="text-end">{{t .Lang "common.actions"}}</th></tr></thead><tbody>{{range .Automatic}}<tr><td>{{formatDateTime .CreatedAt}}</td><td>{{.Size}}</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="/admin/backups/download/{{.ID}}"><i class="bi bi-download me-1"></i>{{t $.Lang "backup.download"}}</a></td></tr>{{end}}</tbody></table></div>
+            {{else}}<div class="text-muted py-3">{{t .Lang "backup.none"}}</div>{{end}}
+        </div>
+    </div>
+    {{end}}
+</div>
+<script>
+function createBackup(){var button=document.getElementById('createBackupBtn');button.disabled=true;fetch('/admin/backups/create',{method:'POST',headers:{'Accept':'application/json'}}).then(function(response){return response.json().then(function(data){if(!response.ok)throw new Error(data.error||'backup');return data;});}).then(function(){button.innerHTML='<i class="bi bi-arrow-repeat me-1"></i>{{t .Lang "backup.running"}}';pollBackup();}).catch(function(error){button.disabled=false;alert(error.message);});}
+function pollBackup(){fetch('/admin/backups/status',{cache:'no-store'}).then(function(response){return response.json();}).then(function(status){if(status.running){setTimeout(pollBackup,1500);return;}if(status.error){alert(status.error);}window.location.reload();}).catch(function(){setTimeout(pollBackup,2000);});}
+</script>
+{{template "admin-footer" .}}
+{{end}}
