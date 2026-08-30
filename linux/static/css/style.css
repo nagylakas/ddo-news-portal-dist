@@ -1060,12 +1060,17 @@ main {
 /* The compact SEO indicator in the admin article list only shows three
    checkmarks when all three editorial SEO fields are present. */
 .admin-articles-table td[data-bs-title*="—"] > span {
-    display: none;
+    display: inline-block;
+    min-width: 0.8rem;
+    margin-left: 0.18rem !important;
+    font-size: 0;
+    text-align: center;
 }
 
-.admin-articles-table td[data-bs-title*="—"]::after {
+.admin-articles-table td[data-bs-title*="—"] > span::after {
     content: "—";
     color: #6c757d;
+    font-size: 0.95rem;
 }
 
 .article-content th,
