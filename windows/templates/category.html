@@ -11,7 +11,7 @@
 }
 </script>
 
-{{template "listing/hero" dict "Crumb" (upper .Category) "Title" .Category "Description" (printf "Összes cikk a %s kategóriában" .Category)}}
+{{template "listing/hero" dict "Crumb" (upper .Category) "Title" .Category "Description" (or .CategoryDescription (printf "Összes cikk a %s kategóriában" .Category))}}
 
 <!-- Content -->
 <div class="container-fluid px-4 px-lg-5 py-5">

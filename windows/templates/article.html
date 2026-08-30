@@ -57,7 +57,7 @@
         </nav>
         <!-- Badges -->
         <div class="art-hero-badges mb-3">
-            <span class="hero-badge hero-badge-cat">{{.Article.Category}}</span>
+            <span class="hero-badge hero-badge-cat"{{if .CategoryDescription}} data-bs-toggle="tooltip" data-bs-title="{{.CategoryDescription}}" tabindex="0"{{end}}>{{.Article.Category}}</span>
         </div>
         <!-- Title -->
         <h1 class="art-hero-title">{{.Article.Title}}</h1>
