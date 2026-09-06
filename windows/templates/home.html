@@ -10,7 +10,7 @@
             <a href="/article/{{.FeaturedNews.Slug}}" class="hero-card-link">
                 <div class="hero-card hero-card-main">
                     {{if .FeaturedNews.ImageURL}}
-                    <img src="{{coverURL .FeaturedNews}}" class="hero-bg-img" alt="{{.FeaturedNews.Title}}">
+                    <img src="{{coverURL .FeaturedNews}}" class="hero-bg-img" alt="{{.FeaturedNews.Title}}" fetchpriority="high" decoding="async">
                     {{else}}
                     <div class="hero-bg-placeholder"></div>
                     {{end}}
