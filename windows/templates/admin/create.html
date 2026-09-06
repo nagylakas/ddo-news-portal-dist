@@ -148,6 +148,14 @@
                                 <div class="form-text">{{t .Lang "article.publish_hint"}}</div>
                             </div>
 
+                            <!-- Publish date/time -->
+                            <div class="col-md-6">
+                                <label for="publish_at" class="form-label">{{t .Lang "article.field_publish_at"}}</label>
+                                <input type="datetime-local" class="form-control" id="publish_at" name="publish_at"
+                                       value="{{.PublishAtValue}}" min="{{.PublishAtMin}}">
+                                <div class="form-text">{{t .Lang "article.publish_at_hint"}}</div>
+                            </div>
+
                             <!-- Actions -->
                             <div class="col-12">
                                 <hr>

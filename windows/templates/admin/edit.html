@@ -168,6 +168,15 @@
                                     <input class="form-check-input" type="checkbox" id="published" name="published" role="switch" {{if .Article.Published}}checked{{end}}>
                                     <label class="form-check-label fw-semibold" for="published">{{t .Lang "common.published"}}</label>
                                 </div>
+                                <div class="form-text">{{t .Lang "article.publish_hint"}}</div>
+                            </div>
+
+                            <!-- Publish date/time -->
+                            <div class="col-md-6">
+                                <label for="publish_at" class="form-label">{{t .Lang "article.field_publish_at"}}</label>
+                                <input type="datetime-local" class="form-control" id="publish_at" name="publish_at"
+                                       value="{{.PublishAtValue}}" min="{{.PublishAtMin}}">
+                                <div class="form-text">{{t .Lang "article.publish_at_hint"}}</div>
                             </div>
 
                             <!-- Metadata -->
