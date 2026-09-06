@@ -837,8 +837,11 @@ function showToast(message) {
         }
         var html = sections.map(function (section) {
             var items = (section.items || []).map(function (item) {
+                var responsive = item.image_srcset
+                    ? ' srcset="' + esc(item.image_srcset) + '" sizes="48px"'
+                    : '';
                 var thumb = item.image_url
-                    ? '<img class="search-dropdown-thumb" src="' + esc(item.image_url) + '" alt="" loading="lazy">'
+                    ? '<img class="search-dropdown-thumb" src="' + esc(item.image_url) + '"' + responsive + ' alt="" loading="lazy" decoding="async">'
                     : '<div class="search-dropdown-thumb-placeholder"><i class="bi bi-search"></i></div>';
                 var summary = item.summary ? esc(item.summary.substring(0, 80)) + (item.summary.length > 80 ? '\u2026' : '') : '';
                 return '<a href="' + esc(item.url) + '" class="search-dropdown-item">'

@@ -3,7 +3,7 @@
     <!-- Thumbnail -->
     <div class="listing-thumb">
         {{if .ImageURL}}
-        <img src="{{coverURL .}}" alt="{{.Title}}">
+        <img src="{{coverSizedURL . 320}}"{{with coverSrcSet .}} srcset="{{.}}"{{end}} sizes="(max-width: 767.98px) 110px, 180px" alt="{{.Title}}" loading="lazy" decoding="async">
         {{else}}
         <div class="listing-thumb-placeholder"></div>
         {{end}}

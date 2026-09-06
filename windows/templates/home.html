@@ -10,7 +10,7 @@
             <a href="/article/{{.FeaturedNews.Slug}}" class="hero-card-link">
                 <div class="hero-card hero-card-main">
                     {{if .FeaturedNews.ImageURL}}
-                    <img src="{{coverURL .FeaturedNews}}" class="hero-bg-img" alt="{{.FeaturedNews.Title}}" fetchpriority="high" decoding="async">
+                    <img src="{{coverSizedURL .FeaturedNews 1280}}"{{with coverSrcSet .FeaturedNews}} srcset="{{.}}"{{end}} sizes="(max-width: 991.98px) 100vw, 55vw" class="hero-bg-img" alt="{{.FeaturedNews.Title}}" fetchpriority="high" decoding="async">
                     {{else}}
                     <div class="hero-bg-placeholder"></div>
                     {{end}}
@@ -43,7 +43,7 @@
                 <a href="/article/{{$art.Slug}}" class="hero-card-link">
                     <div class="hero-card hero-card-side">
                         {{if $art.ImageURL}}
-                        <img src="{{coverURL $art}}" class="hero-bg-img" alt="{{$art.Title}}">
+                        <img src="{{coverSizedURL $art 960}}"{{with coverSrcSet $art}} srcset="{{.}}"{{end}} sizes="(max-width: 991.98px) 50vw, 45vw" class="hero-bg-img" alt="{{$art.Title}}" decoding="async">
                         {{else}}
                         <div class="hero-bg-placeholder"></div>
                         {{end}}
@@ -92,7 +92,7 @@
                 <div class="latest-main">
                     <div class="latest-main-img-wrap">
                         {{if $art.ImageURL}}
-                        <img src="{{coverURL $art}}" class="latest-main-img" alt="{{$art.Title}}">
+                        <img src="{{coverSizedURL $art 960}}"{{with coverSrcSet $art}} srcset="{{.}}"{{end}} sizes="(max-width: 991.98px) 100vw, (min-width: 1400px) 50vw, (min-width: 1200px) 58vw, 50vw" class="latest-main-img" alt="{{$art.Title}}" loading="lazy" decoding="async">
                         {{else}}
                         <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
@@ -178,7 +178,7 @@
                 <div class="latest-main">
                     <div class="latest-main-img-wrap">
                         {{if $art.ImageURL}}
-                        <img src="{{coverURL $art}}" class="latest-main-img" alt="{{$art.Title}}">
+                        <img src="{{coverSizedURL $art 960}}"{{with coverSrcSet $art}} srcset="{{.}}"{{end}} sizes="(max-width: 991.98px) 100vw, (min-width: 1400px) 50vw, (min-width: 1200px) 58vw, 50vw" class="latest-main-img" alt="{{$art.Title}}" loading="lazy" decoding="async">
                         {{else}}
                         <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
@@ -225,7 +225,7 @@
                 <div class="latest-main">
                     <div class="latest-main-img-wrap">
                         {{if $art.ImageURL}}
-                        <img src="{{coverURL $art}}" class="latest-main-img" alt="{{$art.Title}}">
+                        <img src="{{coverSizedURL $art 960}}"{{with coverSrcSet $art}} srcset="{{.}}"{{end}} sizes="(max-width: 991.98px) 100vw, (min-width: 1400px) 50vw, (min-width: 1200px) 58vw, 50vw" class="latest-main-img" alt="{{$art.Title}}" loading="lazy" decoding="async">
                         {{else}}
                         <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
@@ -272,7 +272,7 @@
                 <div class="latest-main">
                     <div class="latest-main-img-wrap">
                         {{if $art.ImageURL}}
-                        <img src="{{coverURL $art}}" class="latest-main-img" alt="{{$art.Title}}">
+                        <img src="{{coverSizedURL $art 960}}"{{with coverSrcSet $art}} srcset="{{.}}"{{end}} sizes="(max-width: 991.98px) 100vw, (min-width: 1400px) 50vw, (min-width: 1200px) 58vw, 50vw" class="latest-main-img" alt="{{$art.Title}}" loading="lazy" decoding="async">
                         {{else}}
                         <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>

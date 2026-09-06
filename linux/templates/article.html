@@ -41,7 +41,7 @@
 <!-- ===== ARTICLE HERO ===== -->
 <div class="art-hero">
     {{if .Article.ImageURL}}
-    <img src="{{coverURL .Article}}" class="art-hero-img" alt="{{.Article.EffectiveImageAltText}}">
+    <img src="{{coverSizedURL .Article 1280}}"{{with coverSrcSet .Article}} srcset="{{.}}"{{end}} sizes="100vw" class="art-hero-img" alt="{{.Article.EffectiveImageAltText}}" loading="eager" fetchpriority="high" decoding="async">
     {{else}}
     <div class="art-hero-img art-hero-placeholder"></div>
     {{end}}
@@ -296,7 +296,7 @@
                     <a href="/article/{{.Slug}}" class="text-decoration-none text-dark">
                         <div class="art-rel-card">
                             {{if .ImageURL}}
-                            <img src="{{coverURL .}}" class="art-rel-img" alt="{{.Title}}">
+                            <img src="{{coverSizedURL . 640}}"{{with coverSrcSet .}} srcset="{{.}}"{{end}} sizes="(max-width: 767.98px) 50vw, 33vw" class="art-rel-img" alt="{{.Title}}" loading="lazy" decoding="async">
                             {{else}}
                             <div class="art-rel-img art-rel-img-placeholder"></div>
                             {{end}}

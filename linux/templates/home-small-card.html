@@ -3,7 +3,7 @@
     <div class="latest-small-card">
         <div class="latest-small-img-wrap">
             {{if .ImageURL}}
-            <img src="{{coverURL .}}" class="latest-small-img" alt="{{.Title}}">
+            <img src="{{coverSizedURL . 320}}"{{with coverSrcSet .}} srcset="{{.}}"{{end}} sizes="(max-width: 991.98px) 50vw, (min-width: 1400px) 25vw, (min-width: 1200px) 21vw, 25vw" class="latest-small-img" alt="{{.Title}}" loading="lazy" decoding="async">
             {{else}}
             <div class="latest-small-img bg-light d-flex align-items-center justify-content-center">
                 <i class="bi bi-image text-muted" style="font-size:2rem;"></i>
