@@ -3,7 +3,7 @@
     <div class="latest-small-card">
         <div class="latest-small-img-wrap">
             {{if .ImageURL}}
-            <img src="{{.ImageURL}}" class="latest-small-img" alt="{{.Title}}">
+            <img src="{{coverURL .}}" class="latest-small-img" alt="{{.Title}}">
             {{else}}
             <div class="latest-small-img bg-light d-flex align-items-center justify-content-center">
                 <i class="bi bi-image text-muted" style="font-size:2rem;"></i>

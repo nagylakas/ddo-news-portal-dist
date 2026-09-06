@@ -18,7 +18,7 @@
   "headline": {{js .Article.EffectiveSEOTitle}},
   "description": {{js (truncate .Article.EffectiveMetaDescription 160)}},
   "url": "{{siteURL}}/article/{{.Article.Slug}}",
-  {{if .Article.ImageURL}}"image": ["{{.Article.ImageURL}}"],{{end}}
+  {{if .Article.ImageURL}}"image": ["{{siteURL}}{{coverURL .Article}}"],{{end}}
   "datePublished": "{{rfc3339 .Article.PublishedAt}}",
   "dateModified": "{{rfc3339 .Article.UpdatedAt}}",
   "author": {
@@ -41,7 +41,7 @@
 <!-- ===== ARTICLE HERO ===== -->
 <div class="art-hero">
     {{if .Article.ImageURL}}
-    <img src="{{.Article.ImageURL}}" class="art-hero-img" alt="{{.Article.EffectiveImageAltText}}">
+    <img src="{{coverURL .Article}}" class="art-hero-img" alt="{{.Article.EffectiveImageAltText}}">
     {{else}}
     <div class="art-hero-img art-hero-placeholder"></div>
     {{end}}
@@ -296,7 +296,7 @@
                     <a href="/article/{{.Slug}}" class="text-decoration-none text-dark">
                         <div class="art-rel-card">
                             {{if .ImageURL}}
-                            <img src="{{.ImageURL}}" class="art-rel-img" alt="{{.Title}}">
+                            <img src="{{coverURL .}}" class="art-rel-img" alt="{{.Title}}">
                             {{else}}
                             <div class="art-rel-img art-rel-img-placeholder"></div>
                             {{end}}

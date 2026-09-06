@@ -69,7 +69,7 @@
     <meta property="og:title" content="{{.Article.EffectiveSEOTitle}}">
     <meta property="og:description" content="{{truncate .Article.EffectiveMetaDescription 200}}">
     <meta property="og:url" content="{{siteURL}}/article/{{.Article.Slug}}">
-    {{if .Article.ImageURL}}<meta property="og:image" content="{{.Article.ImageURL}}">{{else if seoDefaultShareImageURL}}<meta property="og:image" content="{{seoDefaultShareImageURL}}">{{end}}
+    {{if .Article.ImageURL}}<meta property="og:image" content="{{siteURL}}{{coverURL .Article}}">{{else if seoDefaultShareImageURL}}<meta property="og:image" content="{{seoDefaultShareImageURL}}">{{end}}
     <meta property="article:published_time" content="{{rfc3339 .Article.PublishedAt}}">
     <meta property="article:modified_time" content="{{rfc3339 .Article.UpdatedAt}}">
     <meta property="article:author" content="{{.Article.Author}}">
@@ -79,7 +79,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{.Article.EffectiveSEOTitle}}">
     <meta name="twitter:description" content="{{truncate .Article.EffectiveMetaDescription 200}}">
-    {{if .Article.ImageURL}}<meta name="twitter:image" content="{{.Article.ImageURL}}">{{else if seoDefaultShareImageURL}}<meta name="twitter:image" content="{{seoDefaultShareImageURL}}">{{end}}
+    {{if .Article.ImageURL}}<meta name="twitter:image" content="{{siteURL}}{{coverURL .Article}}">{{else if seoDefaultShareImageURL}}<meta name="twitter:image" content="{{seoDefaultShareImageURL}}">{{end}}
     {{else}}
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{.Title}}">

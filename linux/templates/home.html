@@ -10,7 +10,7 @@
             <a href="/article/{{.FeaturedNews.Slug}}" class="hero-card-link">
                 <div class="hero-card hero-card-main">
                     {{if .FeaturedNews.ImageURL}}
-                    <img src="{{.FeaturedNews.ImageURL}}" class="hero-bg-img" alt="{{.FeaturedNews.Title}}">
+                    <img src="{{coverURL .FeaturedNews}}" class="hero-bg-img" alt="{{.FeaturedNews.Title}}">
                     {{else}}
                     <div class="hero-bg-placeholder"></div>
                     {{end}}
@@ -43,7 +43,7 @@
                 <a href="/article/{{$art.Slug}}" class="hero-card-link">
                     <div class="hero-card hero-card-side">
                         {{if $art.ImageURL}}
-                        <img src="{{$art.ImageURL}}" class="hero-bg-img" alt="{{$art.Title}}">
+                        <img src="{{coverURL $art}}" class="hero-bg-img" alt="{{$art.Title}}">
                         {{else}}
                         <div class="hero-bg-placeholder"></div>
                         {{end}}
@@ -92,7 +92,7 @@
                 <div class="latest-main">
                     <div class="latest-main-img-wrap">
                         {{if $art.ImageURL}}
-                        <img src="{{$art.ImageURL}}" class="latest-main-img" alt="{{$art.Title}}">
+                        <img src="{{coverURL $art}}" class="latest-main-img" alt="{{$art.Title}}">
                         {{else}}
                         <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
@@ -178,7 +178,7 @@
                 <div class="latest-main">
                     <div class="latest-main-img-wrap">
                         {{if $art.ImageURL}}
-                        <img src="{{$art.ImageURL}}" class="latest-main-img" alt="{{$art.Title}}">
+                        <img src="{{coverURL $art}}" class="latest-main-img" alt="{{$art.Title}}">
                         {{else}}
                         <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
@@ -225,7 +225,7 @@
                 <div class="latest-main">
                     <div class="latest-main-img-wrap">
                         {{if $art.ImageURL}}
-                        <img src="{{$art.ImageURL}}" class="latest-main-img" alt="{{$art.Title}}">
+                        <img src="{{coverURL $art}}" class="latest-main-img" alt="{{$art.Title}}">
                         {{else}}
                         <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
@@ -272,7 +272,7 @@
                 <div class="latest-main">
                     <div class="latest-main-img-wrap">
                         {{if $art.ImageURL}}
-                        <img src="{{$art.ImageURL}}" class="latest-main-img" alt="{{$art.Title}}">
+                        <img src="{{coverURL $art}}" class="latest-main-img" alt="{{$art.Title}}">
                         {{else}}
                         <div class="latest-main-img bg-secondary d-flex align-items-center justify-content-center">
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>

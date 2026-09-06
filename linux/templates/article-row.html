@@ -3,7 +3,7 @@
     <!-- Thumbnail -->
     <div class="listing-thumb">
         {{if .ImageURL}}
-        <img src="{{.ImageURL}}" alt="{{.Title}}">
+        <img src="{{coverURL .}}" alt="{{.Title}}">
         {{else}}
         <div class="listing-thumb-placeholder"></div>
         {{end}}
