@@ -7,22 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/branding/icons/favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="/branding/icons/icon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/branding/icons/icon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/branding/icons/icon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="/branding/icons/favicon.ico?v={{assetVersion}}">
+    <link rel="icon" type="image/png" sizes="16x16" href="/branding/icons/icon-16x16.png?v={{assetVersion}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="/branding/icons/icon-32x32.png?v={{assetVersion}}">
+    <link rel="icon" type="image/png" sizes="96x96" href="/branding/icons/icon-96x96.png?v={{assetVersion}}">
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" sizes="57x57"   href="/branding/icons/icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60"   href="/branding/icons/icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72"   href="/branding/icons/icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76"   href="/branding/icons/icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/branding/icons/icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/branding/icons/icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/branding/icons/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/branding/icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/branding/icons/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="57x57"   href="/branding/icons/icon-57x57.png?v={{assetVersion}}">
+    <link rel="apple-touch-icon" sizes="60x60"   href="/branding/icons/icon-60x60.png?v={{assetVersion}}">
+    <link rel="apple-touch-icon" sizes="72x72"   href="/branding/icons/icon-72x72.png?v={{assetVersion}}">
+    <link rel="apple-touch-icon" sizes="76x76"   href="/branding/icons/icon-76x76.png?v={{assetVersion}}">
+    <link rel="apple-touch-icon" sizes="114x114" href="/branding/icons/icon-114x114.png?v={{assetVersion}}">
+    <link rel="apple-touch-icon" sizes="120x120" href="/branding/icons/icon-120x120.png?v={{assetVersion}}">
+    <link rel="apple-touch-icon" sizes="144x144" href="/branding/icons/icon-144x144.png?v={{assetVersion}}">
+    <link rel="apple-touch-icon" sizes="152x152" href="/branding/icons/icon-152x152.png?v={{assetVersion}}">
+    <link rel="apple-touch-icon" sizes="180x180" href="/branding/icons/icon-180x180.png?v={{assetVersion}}">
     <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json?v={{assetVersion}}">
     <meta name="theme-color" content="{{.PrimaryColor}}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -99,7 +99,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm site-navbar">
         <div class="container-fluid px-4 px-lg-5">
             <a class="navbar-brand" href="/">
-                <img src="/branding/logo.png" alt="{{.SiteNameShort}}" height="40" style="display:block;">
+                <img src="/branding/logo.png?v={{assetVersion}}" alt="{{.SiteNameShort}}" height="40" style="display:block;">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -311,7 +311,7 @@
     </script>
     {{end}}
     <!-- Bootstrap 5.3 JS Bundle (local-first, CDN fallback) -->
-    <script src="/static/vendor/bootstrap@5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/vendor/bootstrap@5.3.2/js/bootstrap.bundle.min.js?v={{assetVersion}}"></script>
     <script>
         if(typeof bootstrap==='undefined'){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';s.integrity='sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL';s.crossOrigin='anonymous';document.head.appendChild(s);}
     </script>
@@ -320,6 +320,13 @@
     <script src="/static/js/category-menu.js?v={{assetVersion}}"></script>
     <!-- First-party analytics beacon (cookie-free engagement measurement) -->
     <script src="/static/js/analytics-beacon.js?v={{assetVersion}}" defer></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').catch(function () {});
+            });
+        }
+    </script>
 
 </html>
 {{end}}
