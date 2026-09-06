@@ -3439,3 +3439,5 @@ body:not(.admin-body) .btn-outline-primary:hover {
         display: none;
     }
 }
+.poll-card{border:1px solid var(--bs-border-color);border-radius:.75rem;padding:1.25rem;margin:1.5rem 0;background:var(--bs-body-bg)}
+.poll-card h3{margin-top:0}.poll-result{margin:.8rem 0}.poll-result .progress{height:.65rem;margin-top:.25rem}.poll-results{margin-top:1.25rem}

@@ -54,6 +54,7 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('gallery')">{{t .Lang "page.block_gallery"}}</button>
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('banner')">{{t .Lang "page.block_banner"}}</button>
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('articles')">{{t .Lang "page.block_articles"}}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="pageBlockInsert('poll')">{{t .Lang "nav.polls"}}</button>
                         <div class="ms-auto">
                             <button type="button" class="btn btn-sm btn-outline-primary" id="btn-preview-page" onclick="togglePreview('content','md-preview-page','btn-preview-page')">&#128065; {{t .Lang "common.preview"}}</button>
                         </div>
@@ -224,5 +225,6 @@ window.pageBlocksConfig = {
 };
 </script>
 <script src="/static/js/md-editor.js"></script>
+<script src="/static/js/poll-picker.js"></script>
 <script src="/static/js/page-blocks.js"></script>
 {{end}}

@@ -1,0 +1,15 @@
+{{define "admin-polls"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+  {{template "admin-page-header" dict "Title" (t .Lang "poll.title") "Icon" "bar-chart" "Actions" (list (dict "URL" "/admin/polls/create" "Label" (t .Lang "poll.create") "Icon" "plus-lg"))}}
+  {{if .Error}}<div class="alert alert-danger">{{.Error}}</div>{{end}}
+  <form class="mb-3" method="get"><select name="status" class="form-select d-inline-block w-auto" onchange="this.form.submit()"><option value="">{{t .Lang "poll.all"}}</option><option value="draft">{{t .Lang "poll.status_draft"}}</option><option value="active">{{t .Lang "poll.status_active"}}</option><option value="closed">{{t .Lang "poll.status_closed"}}</option><option value="archived">{{t .Lang "poll.status_archived"}}</option></select></form>
+  <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>{{t .Lang "poll.question"}}</th><th>{{t .Lang "poll.status"}}</th><th>{{t .Lang "poll.ends"}}</th><th class="text-end">{{t .Lang "common.actions"}}</th></tr></thead><tbody>
+  {{range .Polls}}<tr><td><strong>{{.Title}}</strong><br><code>```poll {{.ID.Hex}} ```</code></td><td><span class="badge bg-secondary">{{t $.Lang (printf "poll.status_%s" .Status)}}</span></td><td>{{formatDateTime .EndsAt}}</td><td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-secondary" href="/admin/polls/edit/{{.ID.Hex}}"><i class="bi bi-pencil"></i></a> <a class="btn btn-sm btn-outline-primary" href="/admin/polls/results/{{.ID.Hex}}"><i class="bi bi-bar-chart"></i></a>
+  {{if eq .Status "draft"}}<form method="post" action="/admin/polls/action/{{.ID.Hex}}/activate" class="d-inline"><button class="btn btn-sm btn-success" title="{{t $.Lang "poll.activate"}}"><i class="bi bi-play"></i></button></form>{{end}}
+  {{if eq .Status "active"}}<form method="post" action="/admin/polls/action/{{.ID.Hex}}/close" class="d-inline"><button class="btn btn-sm btn-warning" title="{{t $.Lang "poll.close"}}"><i class="bi bi-stop"></i></button></form>{{end}}
+  {{if eq .Status "scheduled"}}<form method="post" action="/admin/polls/action/{{.ID.Hex}}/close" class="d-inline"><button class="btn btn-sm btn-warning" title="{{t $.Lang "poll.close"}}"><i class="bi bi-stop"></i></button></form>{{end}}
+  {{if eq .Status "draft"}}<form method="post" action="/admin/polls/action/{{.ID.Hex}}/delete" class="d-inline"><button class="btn btn-sm btn-outline-danger" title="{{t $.Lang "common.delete"}}" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></button></form>{{end}}
+  {{if eq .Status "closed"}}<form method="post" action="/admin/polls/action/{{.ID.Hex}}/archive" class="d-inline"><button class="btn btn-sm btn-outline-dark" title="{{t $.Lang "poll.archive"}}"><i class="bi bi-archive"></i></button></form>{{end}}</td></tr>{{else}}<tr><td colspan="4" class="text-center text-muted py-5">{{t .Lang "poll.empty"}}</td></tr>{{end}}
+  </tbody></table></div></div>
+</div>{{template "admin-footer" .}}{{end}}

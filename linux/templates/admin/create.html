@@ -126,6 +126,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','> ')" title="{{t .Lang "article.md_quote"}}">&ldquo; {{t .Lang "article.md_quote"}}</button>
                                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdInsertLink('content')" title="{{t .Lang "article.md_link"}}">&#128279; {{t .Lang "article.md_link"}}</button>
                                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','---')" title="{{t .Lang "article.md_hr"}}">&#8212;</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPollPicker()"><i class="bi bi-bar-chart"></i> {{t .Lang "nav.polls"}}</button>
                                     <div class="ms-auto">
                                         <button type="button" class="btn btn-sm btn-outline-primary" id="btn-preview-create" onclick="togglePreview('content','md-preview-create','btn-preview-create')">&#128065; {{t .Lang "common.preview"}}</button>
                                     </div>
@@ -295,5 +296,6 @@ function doUploadToMedia(input) {
 <script>(function(){var input=document.getElementById('image_url');if(!input)return;function show(message){var old=document.getElementById('seo-image-warning');if(old)old.remove();var note=document.createElement('div');note.id='seo-image-warning';note.className='form-text text-warning';note.innerHTML='<i class="bi bi-exclamation-triangle me-1"></i>'+message;input.closest('.mb-3, .col-12, .col-md-6, div').appendChild(note);}function check(){var old=document.getElementById('seo-image-warning');if(old)old.remove();var url=input.value.trim();if(!url)return;var image=new Image();image.onload=function(){if(!image.naturalWidth||image.naturalWidth<1200)show('A Discoverhez legalább 1200 px széles indexkép javasolt.');};image.onerror=function(){show('A kép szélessége nem ellenőrizhető. A Discoverhez legalább 1200 px széles indexkép javasolt.');};image.src=url;}input.addEventListener('change',check);input.addEventListener('blur',check);check();}());</script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="/static/js/md-editor.js"></script>
+<script src="/static/js/poll-picker.js"></script>
 {{template "admin-footer" .}}
 {{end}}

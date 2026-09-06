@@ -283,6 +283,7 @@
             case 'youtube':  return insertYouTube();
             case 'map':      return insertMap();
             case 'button':   return insertButton();
+            case 'poll':     return window.openPollPicker && window.openPollPicker();
             default:         return;
         }
     };
