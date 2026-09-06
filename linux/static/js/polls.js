@@ -20,7 +20,7 @@
             if(p.mode==='multiple')h+='<p class="small text-muted mt-2">Jelöljön meg legalább '+p.min_choices+', legfeljebb '+p.max_choices+' választ.</p>';
             h+='<button class="btn btn-primary mt-2" type="submit">'+(p.has_voted?'Szavazat módosítása':'Szavazás')+'</button><div class="poll-message mt-2" aria-live="polite"></div></fieldset></form>';
         } else if (!p.logged_in && p.status==='active') h+='<a class="btn btn-primary" href="'+esc(p.login_url)+'">Bejelentkezés a szavazáshoz</a>';
-        if(p.results_visible)h+=resultHTML(p); else if(p.status==='closed')h+='<div class="alert alert-secondary">A szavazás lezárult.</div>';
+        if(p.results_visible)h+=resultHTML(p); else if(p.status==='closed'||p.status==='archived')h+='<div class="alert alert-secondary">A szavazás lezárult.</div>';
         h+='</section>';el.innerHTML=h;
         var form=el.querySelector('form');if(form)form.addEventListener('submit',function(ev){ev.preventDefault();submit(el,p,form);});
     }
