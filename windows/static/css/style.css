@@ -2414,7 +2414,7 @@ body:not(.admin-body) .btn-outline-primary:hover {
     border-top: 2px solid #f0f0f0;
 }
 
-.comments-section h3 {
+.comments-section h2 {
     font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 1.5rem;

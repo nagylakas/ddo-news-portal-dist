@@ -225,7 +225,7 @@
 
         <!-- Comments section -->
         <section class="comments-section" id="comments">
-            <h3><i class="bi bi-chat-dots me-2"></i>Hozzászólások</h3>
+            <h2><i class="bi bi-chat-dots me-2"></i>Hozzászólások</h2>
 
             {{if .CurrentUser}}
             <div class="comment-form-wrap" id="main-comment-form-wrap">
@@ -289,7 +289,7 @@
         <!-- Related articles grid -->
         {{if .RelatedArticles}}
         <section class="art-related mt-5 pt-4 border-top">
-            <h4 class="art-related-title mb-4">További érdekes <span class="text-primary">cikkek</span></h4>
+            <h2 class="art-related-title mb-4">További érdekes <span class="text-primary">cikkek</span></h2>
             <div class="row g-3">
                 {{range $i, $art := .RelatedArticles}}
                 <div class="col-6 col-lg-4 {{if eq $i 2}}d-none d-lg-block{{end}}">
@@ -303,7 +303,7 @@
                             <div class="art-rel-overlay"></div>
                             <div class="art-rel-content">
                                 <span class="hero-badge hero-badge-cat mb-1 d-inline-block">{{.Category}}</span>
-                                <h6 class="art-rel-card-title">{{truncate .Title 65}}</h6>
+                                <h3 class="art-rel-card-title">{{truncate .Title 65}}</h3>
                                 <div class="art-rel-meta">
                                     <span>szerző: {{upper .Author}}</span>
                                     <span class="mx-1">•</span>
