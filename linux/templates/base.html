@@ -100,7 +100,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm site-navbar">
         <div class="container-fluid px-4 px-lg-5">
             <a class="navbar-brand" href="/">
-                <img src="/branding/logo.png?v={{assetVersion}}" alt="{{.SiteNameShort}}" height="40" style="display:block;">
+                <img src="/branding/logo.png?v={{assetVersion}}" alt="{{.SiteNameShort}}" {{if brandingLogoWidth}}width="{{brandingLogoWidth}}" height="{{brandingLogoHeight}}"{{end}} style="height:40px; width:auto; display:block;">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -253,7 +253,7 @@
                 </span>
                 <span class="footer-built">
                     A Diffusi csoport tagja.
-                    <img src="/static/img/diffusi/diffusi_white_footer.png" alt="Diffusi" style="height:20px; vertical-align:middle; margin-left:8px;">
+                    <img src="/static/img/diffusi/diffusi_white_footer.png" alt="Diffusi" width="128" height="30" style="height:20px; width:auto; vertical-align:middle; margin-left:8px;">
                 </span>
             </div>
         </div>
