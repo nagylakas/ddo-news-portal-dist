@@ -1,7 +1,7 @@
 {
-  "version": "0.6.15",
-  "source_commit": "ed4500a",
-  "build_time_utc": "2026-09-06T19:05:03Z",
+  "version": "0.6.16",
+  "source_commit": "e97315b",
+  "build_time_utc": "2026-09-06T19:53:40Z",
   "linux_archive": "linux.tar.gz",
   "artifacts": [
     {

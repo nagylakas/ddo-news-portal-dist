@@ -26,6 +26,32 @@
         </div>
     </div>
 
+    <!-- Runtime versions -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-lg-4 d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-info-circle text-primary fs-5"></i>
+                    </div>
+                    <div class="fw-semibold">{{t .Lang "dash.system_info"}}</div>
+                </div>
+                <div class="col-6 col-lg-4">
+                    <div class="text-muted small">{{t .Lang "dash.portal_version"}}</div>
+                    <div class="fw-semibold"><code>v{{.AppVersion}}</code></div>
+                </div>
+                <div class="col-6 col-lg-4">
+                    <div class="text-muted small">{{t .Lang "dash.active_icon_pack"}}</div>
+                    {{if .IconPackVersion}}
+                    <div class="fw-semibold"><code>{{.IconPack}}</code> <span class="badge text-bg-light border">v{{.IconPackVersion}}</span></div>
+                    {{else}}
+                    <div class="text-muted">{{t .Lang "dash.not_available"}}</div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stat cards row -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-4 col-lg">
