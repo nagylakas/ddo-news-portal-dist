@@ -6,7 +6,7 @@
   "@type": "BreadcrumbList",
   "itemListElement": [
     {"@type":"ListItem","position":1,"name":"Kezdőlap","item":"{{siteURL}}/"},
-    {"@type":"ListItem","position":2,"name":{{js .Article.Category}},"item":"{{siteURL}}/category/{{lower .Article.Category}}"},
+    {"@type":"ListItem","position":2,"name":{{js .Article.Category}},"item":"{{siteURL}}/category/{{.CategorySlug}}"},
     {"@type":"ListItem","position":3,"name":{{js .Article.Title}},"item":"{{siteURL}}/article/{{.Article.Slug}}"}
   ]
 }
@@ -15,25 +15,22 @@
 {
   "@context": "https://schema.org",
   "@type": "NewsArticle",
-  "headline": {{js .Article.EffectiveSEOTitle}},
+  "@id": "{{.CanonicalURL}}#article",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "{{.CanonicalURL}}"},
+  "headline": {{js .Article.Title}},
   "description": {{js (truncate .Article.EffectiveMetaDescription 160)}},
-  "url": "{{siteURL}}/article/{{.Article.Slug}}",
+  "url": "{{.CanonicalURL}}",
+  "inLanguage": "hu-HU",
+  "isAccessibleForFree": true,
   {{if .Article.ImageURL}}"image": ["{{siteURL}}{{coverURL .Article}}"],{{end}}
   "datePublished": "{{rfc3339 .Article.PublishedAt}}",
   "dateModified": "{{rfc3339 .Article.UpdatedAt}}",
   "author": {
     "@type": "Person",
     "name": {{js .Article.Author}},
-    "url": "{{siteURL}}/author/{{authorSlug .Article.Author}}"
+    "url": "{{siteURL}}/author/{{.AuthorSlug}}"
   },
-  "publisher": {
-    "@type": "Organization",
-    "name": {{js (publisherName)}},
-    "logo": {
-      "@type": "ImageObject",
-      "url": "{{publisherLogoURL}}"
-    }
-  },
+  "publisher": {"@id": "{{siteURL}}/#organization"},
   "articleSection": {{js .Article.Category}}
 }
 </script>
@@ -51,7 +48,7 @@
         <nav class="art-breadcrumb mb-3" aria-label="breadcrumb">
             <a href="/">KEZDŐLAP</a>
             <span class="art-bc-sep">›</span>
-            <a href="/category/{{lower .Article.Category}}">{{upper .Article.Category}}</a>
+            <a href="/category/{{.CategorySlug}}">{{upper .Article.Category}}</a>
             <span class="art-bc-sep">›</span>
             <span>{{upper .Article.Title}}</span>
         </nav>
@@ -68,7 +65,7 @@
             <span class="art-hero-avatar">
                 {{if .AuthorAvatarURL}}<img src="{{secureURL .AuthorAvatarURL}}" alt="{{.Article.Author}}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">{{else}}<i class="bi bi-person-circle"></i>{{end}}
             </span>
-            <a href="/author/{{authorSlug .Article.Author}}" class="art-hero-author">Szerző: {{.Article.Author}}</a>
+            <a href="/author/{{.AuthorSlug}}" class="art-hero-author">Szerző: {{.Article.Author}}</a>
             {{if .AIDisclosureTooltip}}
             <span class="art-hero-dot">•</span>
             <button type="button" class="art-ai-disclosure" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" data-bs-custom-class="ai-disclosure-tooltip" data-bs-title="{{.AIDisclosureTooltip}}" aria-label="{{.AIDisclosureTooltip}}">
@@ -76,7 +73,7 @@
             </button>
             {{end}}
             <span class="art-hero-dot">•</span>
-            <span>{{formatDateTime .Article.PublishedAt}}</span>
+            <time datetime="{{rfc3339 .Article.PublishedAt}}">{{formatDateTime .Article.PublishedAt}}</time>{{if .ShowModified}}<span class="art-hero-dot">•</span><time datetime="{{rfc3339 .Article.UpdatedAt}}">Frissítve: {{formatDateTime .Article.UpdatedAt}}</time>{{end}}
             <span class="art-hero-dot">•</span>
             <span><i class="bi bi-clock me-1"></i>{{.ReadingMinutes}} perc olvasás</span>
         </div>

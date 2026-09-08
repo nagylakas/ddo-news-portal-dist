@@ -26,6 +26,7 @@
 
                     <form action="/admin/edit/{{.Article.ID.Hex}}" method="POST">
                         <div class="row g-4">
+                            {{template "admin-google-news-checklist" .}}
                             <!-- Title -->
                             <div class="col-12">
                                 <label for="title" class="form-label fw-semibold">{{t .Lang "article.field_title"}} <span class="text-danger">*</span></label>
@@ -66,7 +67,7 @@
                                     onchange="document.getElementById('author_name').value = this.options[this.selectedIndex].text">
                                     <option value="">{{t .Lang "article.choose_author"}}</option>
                                     {{range $.Authors}}
-                                    <option value="{{.ID.Hex}}" {{if and $.Article.AuthorID (eq .ID.Hex $.Article.AuthorID.Hex)}}selected{{end}}>{{.Name}}</option>
+                                    <option value="{{.ID.Hex}}" data-author-bio="{{if .Bio}}true{{else}}false{{end}}" {{if and $.Article.AuthorID (eq .ID.Hex $.Article.AuthorID.Hex)}}selected{{end}}>{{.Name}}</option>
                                     {{end}}
                                 </select>
                                 <input type="hidden" id="author_name" name="author_name" value="{{.Article.Author}}">

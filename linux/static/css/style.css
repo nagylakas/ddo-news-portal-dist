@@ -3441,3 +3441,6 @@ body:not(.admin-body) .btn-outline-primary:hover {
 }
 .poll-card{border:1px solid var(--bs-border-color);border-radius:.75rem;padding:1.25rem;margin:1.5rem 0;background:var(--bs-body-bg)}
 .poll-card h3{margin-top:0}.poll-result{margin:.8rem 0}.poll-result .progress{height:.65rem;margin-top:.25rem}.poll-results{margin-top:1.25rem}
+.editorial-publisher-logo{width:88px;height:88px;object-fit:contain;border-radius:1rem;background:var(--bs-light);padding:.5rem}
+.editorial-author-avatar,.editorial-author-placeholder{width:96px;height:96px;border-radius:50%;object-fit:cover}.editorial-author-placeholder{display:inline-flex;align-items:center;justify-content:center;background:var(--bs-light);font-size:2.5rem;color:var(--bs-secondary)}
+.editorial-office .list-group-item{background:transparent}

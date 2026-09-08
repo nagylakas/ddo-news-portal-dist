@@ -1,0 +1,11 @@
+{{define "admin-google-news-checklist"}}
+<div class="col-12"><div class="alert alert-light border mb-0" id="article-news-readiness">
+<h6 class="fw-semibold mb-1"><i class="bi bi-newspaper me-2 text-primary"></i>{{t .Lang "article.news_readiness_title"}}</h6>
+<p class="small text-muted mb-3">{{t .Lang "article.news_readiness_help"}}</p>
+<ul class="list-unstyled mb-0 row g-2">
+<li class="col-md-6" data-news-check="title">{{t .Lang "article.news_title"}}</li><li class="col-md-6" data-news-check="words">{{t .Lang "article.news_words"}}</li>
+<li class="col-md-6" data-news-check="author">{{t .Lang "article.news_author"}}</li><li class="col-md-6" data-news-check="image">{{t .Lang "article.news_image"}}</li>
+<li class="col-md-6" data-news-check="alt">{{t .Lang "article.news_alt"}}</li><li class="col-md-6" data-news-check="summary">{{t .Lang "article.news_summary"}}</li>
+</ul></div></div>
+<script>(function(){function value(id){var el=document.getElementById(id);return el?el.value.trim():'';}function words(text){return text.replace(/[#*_>`~\[\]()-]/g,' ').trim().split(/\s+/).filter(Boolean).length;}function mark(name,ok){var el=document.querySelector('[data-news-check="'+name+'"]');if(!el)return;el.classList.toggle('text-success',ok);el.classList.toggle('text-warning',!ok);var icon=el.querySelector('i');if(!icon){icon=document.createElement('i');icon.className='bi me-2';el.prepend(icon);}icon.classList.toggle('bi-check-circle-fill',ok);icon.classList.toggle('bi-exclamation-triangle-fill',!ok);}function update(){var title=value('title'),author=document.getElementById('author_id'),option=author&&author.selectedIndex>=0?author.options[author.selectedIndex]:null;mark('title',Array.from(title).length>=10&&Array.from(title).length<=110);mark('words',words(value('content'))>=300);mark('author',!!(author&&author.value&&option&&option.dataset.authorBio==='true'));mark('image',value('image_url')!=='');mark('alt',value('image_alt_text')!=='');mark('summary',value('summary')!=='');}document.addEventListener('input',update);document.addEventListener('change',update);document.addEventListener('DOMContentLoaded',update);update();}());</script>
+{{end}}
