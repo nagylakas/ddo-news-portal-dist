@@ -1,0 +1,150 @@
+{{define "marketplace/home"}}
+{{template "header" .}}
+{{if .MarketCategory}}
+{{template "module/hero" dict "Title" .MarketCategory.Name "Description" .MarketCategory.Description "Crumb" "MARKETPLACE"}}
+{{else}}
+{{template "module/hero" dict "Title" "Marketplace" "Description" "Vásárolj, adj el és keress hardvereket a portál közösségében." "Crumb" "MARKETPLACE"}}
+{{end}}
+<section class="marketplace-page module-page container-fluid px-4 px-lg-5 py-4">
+    <div class="row g-4">
+        <aside class="col-lg-3 col-xl-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="/marketplace" class="list-group-item list-group-item-action px-0 {{if not .CategorySlug}}fw-semibold text-primary{{end}}">
+                            <i class="bi bi-grid me-2"></i>Összes hirdetés
+                        </a>
+                        {{range .MarketCategories}}
+                        {{if eq .ParentIDHex ""}}
+                        {{/* Főkategória — fejléc stílusban */}}
+                        <div class="list-group-item px-0 pt-3 pb-1 border-0 bg-transparent">
+                            <a href="/marketplace/category/{{.Slug}}"
+                               class="text-decoration-none fw-semibold small text-uppercase text-muted d-flex align-items-center gap-1 {{if eq $.CategorySlug .Slug}}text-primary{{end}}">
+                                <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}folder{{end}}"></i>{{.Name}}
+                            </a>
+                        </div>
+                        {{else}}
+                        {{/* Alkategória — behúzva */}}
+                        <a href="/marketplace/category/{{.Slug}}"
+                           class="list-group-item list-group-item-action border-0 py-1 ps-4 pe-0 {{if eq $.CategorySlug .Slug}}fw-semibold text-primary{{end}}">
+                            <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} me-1 small"></i><span class="small">{{.Name}}</span>
+                        </a>
+                        {{end}}
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="col-lg-9 col-xl-10">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">{{if .Query}}Keresési eredmények{{else}}Legújabb hirdetések{{end}}</h2>
+                <div class="d-flex gap-2">
+                    {{if .Query}}<a href="/marketplace" class="btn btn-sm btn-outline-secondary">Keresés törlése</a>{{end}}
+                    {{if and .Query .CurrentUser}}
+                    <form method="POST" action="/marketplace/save-search" class="d-inline">
+                        <input type="hidden" name="q" value="{{.Query}}">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-bookmark me-1"></i>Keresés mentése
+                        </button>
+                    </form>
+                    {{end}}
+                    <a href="/marketplace/sell" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>Hirdetés feladása
+                    </a>
+                </div>
+            </div>
+
+            {{if .Listings}}
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4">
+                {{range .Listings}}
+                {{$isFav := index $.FavoritedIDs .ID.Hex}}
+                <div class="col">
+                    <a href="/marketplace/listing/{{.Slug}}" class="card h-100 text-decoration-none text-dark shadow-sm marketplace-card">
+                        {{if .CoverImage}}
+                        <img src="{{.CoverImage}}" class="card-img-top" alt="{{.Title}}" style="aspect-ratio:4/3;object-fit:cover;">
+                        {{else}}
+                        <div class="card-img-top bg-secondary-subtle d-flex align-items-center justify-content-center" style="aspect-ratio:4/3;">
+                            <i class="bi bi-image text-secondary" style="font-size:3rem;"></i>
+                        </div>
+                        {{end}}
+                        <div class="card-body">
+                            <div class="d-flex gap-2 mb-2">
+                                <span class="badge text-bg-secondary">{{.Condition}}</span>
+                                {{if .CategoryName}}<span class="badge text-bg-light border">{{.CategoryName}}</span>{{end}}
+                            </div>
+                            <h3 class="h6 card-title mb-2">{{truncate .Title 70}}</h3>
+                            <div class="small text-muted mb-3">
+                                {{if .Location}}<i class="bi bi-geo-alt me-1"></i>{{.Location}}{{else}}<i class="bi bi-person me-1"></i>{{.SellerName}}{{end}}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                <div>
+                                    <strong class="fs-5 text-primary d-block">{{.ListPriceFormatted}}</strong>
+                                    {{if .Negotiable}}<span class="badge text-bg-success mt-1">Alkudható</span>{{end}}
+                                </div>
+                                {{if $isFav}}
+                                <i class="bi bi-heart-fill text-danger"></i>
+                                {{else}}
+                                <i class="bi bi-heart text-muted"></i>
+                                {{end}}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {{end}}
+            </div>
+
+            {{if or .HasPrev .HasNext}}
+            <nav class="mt-5" aria-label="Marketplace pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                        <a class="page-link" href="?page={{subtract .CurrentPage 1}}{{if .Query}}&q={{.Query}}{{end}}">Előző</a>
+                    </li>
+                    <li class="page-item active"><span class="page-link">{{.CurrentPage}}. oldal</span></li>
+                    <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                        <a class="page-link" href="?page={{add .CurrentPage 1}}{{if .Query}}&q={{.Query}}{{end}}">Következő</a>
+                    </li>
+                </ul>
+            </nav>
+            {{end}}
+            {{else}}
+            <div class="text-center py-5 border rounded-3 bg-light">
+                <i class="bi bi-shop text-muted" style="font-size:4rem;"></i>
+                <h3 class="h5 mt-3 text-muted">{{if .Query}}Nincs találat{{else}}Még nincsenek aktív hirdetések{{end}}</h3>
+                <p class="text-muted mb-0">{{if .Query}}Próbálj más keresőkifejezést vagy kategóriát.{{else}}Még senki sem adott fel hirdetést. Legyél az első — kattints a "Hirdetés feladása" gombra!{{end}}</p>
+            </div>
+            {{end}}
+        </main>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}
+
+{{define "marketplace-card"}}
+<a href="/marketplace/listing/{{.Slug}}" class="card h-100 text-decoration-none text-dark shadow-sm marketplace-card">
+    {{if .CoverImage}}
+    <img src="{{.CoverImage}}" class="card-img-top" alt="{{.Title}}" style="aspect-ratio:4/3;object-fit:cover;">
+    {{else}}
+    <div class="card-img-top bg-secondary-subtle d-flex align-items-center justify-content-center" style="aspect-ratio:4/3;">
+        <i class="bi bi-image text-secondary" style="font-size:3rem;"></i>
+    </div>
+    {{end}}
+    <div class="card-body">
+        <div class="d-flex gap-2 mb-2">
+            <span class="badge text-bg-secondary">{{.Condition}}</span>
+            {{if .CategoryName}}<span class="badge text-bg-light border">{{.CategoryName}}</span>{{end}}
+        </div>
+        <h3 class="h6 card-title mb-2">{{truncate .Title 70}}</h3>
+        <div class="small text-muted mb-3">
+            {{if .Location}}<i class="bi bi-geo-alt me-1"></i>{{.Location}}{{else}}<i class="bi bi-person me-1"></i>{{.SellerName}}{{end}}
+        </div>
+        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+            <div>
+                <strong class="fs-5 text-primary d-block">{{.ListPriceFormatted}}</strong>
+                {{if .Negotiable}}<span class="badge text-bg-success mt-1">Alkudható</span>{{end}}
+            </div>
+            <i class="bi bi-heart text-muted"></i>
+        </div>
+    </div>
+</a>
+{{end}}

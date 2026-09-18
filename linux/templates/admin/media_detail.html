@@ -1,0 +1,177 @@
+{{template "admin-header" .}}
+<div class="container-fluid">
+    {{template "admin-flash" .}}
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin/media">{{t .Lang "media.title"}}</a></li>
+            <li class="breadcrumb-item active">{{if .Item.Title}}{{.Item.Title}}{{else}}{{.Item.Filename}}{{end}}</li>
+        </ol>
+    </nav>
+
+    {{if .Item}}
+    <div class="row g-4">
+        <!-- Left column: preview + file info -->
+        <div class="col-md-5">
+            <div class="card shadow-sm mb-3">
+                <img src="{{secureURL .Item.URL}}" class="card-img-top img-fluid rounded-top"
+                    style="max-height:300px;object-fit:contain;background:#f8f9fa;" alt="{{.Item.AltText}}">
+            </div>
+            <table class="table table-sm table-bordered mb-3">
+                <tbody>
+                    <tr>
+                        <th style="width:40%">{{t .Lang "media.dimensions"}}</th>
+                        <td>{{.Item.Width}} &times; {{.Item.Height}} px</td>
+                    </tr>
+                    <tr>
+                        <th>{{t .Lang "media.filesize"}}</th>
+                        <td>{{.Item.FileSize}} B</td>
+                    </tr>
+                    <tr>
+                        <th>{{t .Lang "media.mime"}}</th>
+                        <td>{{.Item.MIMEType}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{t .Lang "media.uploaded"}}</th>
+                        <td>{{formatDate .Item.CreatedAt}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control form-control-sm" id="media_url" value="{{secureURL .Item.URL}}"
+                    readonly>
+                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="copyURL()">
+                    <i class="bi bi-clipboard me-1"></i>{{t .Lang "media.copy_url"}}
+                </button>
+            </div>
+            <div id="url_copied_msg" class="text-success small mb-3" style="display:none;">
+                <i class="bi bi-check2 me-1"></i>{{t .Lang "media.url_copied"}}
+            </div>
+            <script>window._mediaDeleteConfirm = '{{t .Lang "media.delete_confirm"}}';</script>
+            <form method="post" action="/admin/media/{{.Item.ID.Hex}}/delete"
+                onsubmit="return confirm(window._mediaDeleteConfirm)">
+                <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                    <i class="bi bi-trash me-1"></i>{{t .Lang "common.delete"}}
+                </button>
+            </form>
+        </div>
+        <!-- Right column: metadata form + versions -->
+        <div class="col-md-7">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">{{t .Lang "media.edit_title"}}</h5>
+                    <form method="post" action="/admin/media/{{.Item.ID.Hex}}/edit">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{t .Lang "media.field_title"}}</label>
+                            <input type="text" name="title" class="form-control" value="{{.Item.Title}}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{t .Lang "media.field_alt"}}</label>
+                            <input type="text" name="alt_text" class="form-control" value="{{.Item.AltText}}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{t .Lang "media.field_desc"}}</label>
+                            <textarea name="description" class="form-control" rows="3">{{.Item.Description}}</textarea>
+                        </div>
+                        {{if ne .Item.Category "avatar"}}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{t .Lang "media.field_article"}}</label>
+                            <select name="article_id" class="form-select">
+                                <option value="">{{t .Lang "media.field_article_none"}}</option>
+                                {{range .Articles}}
+                                <option value="{{.ID.Hex}}" {{if and $.Item.ArticleID (eq $.Item.ArticleID.Hex
+                                    .ID.Hex)}}selected{{end}}>
+                                    {{.Title}}
+                                </option>
+                                {{end}}
+                            </select>
+                        </div>
+                        {{end}}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>{{t .Lang "common.save"}}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {{if .S3Enabled}}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">{{t .Lang "media.versions"}}</h5>
+                    <div id="versions_container">
+                        <p class="text-muted small">
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            Loading...
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+</div>
+
+{{if .S3Enabled}}
+<script>
+    (function () {
+        var itemID = '{{.Item.ID.Hex}}';
+        var noVersions = '{{t .Lang "media.no_versions"}}';
+        var restoreLabel = '{{t .Lang "media.restore"}}';
+        var restoreConfirm = '{{t .Lang "media.restore_confirm"}}';
+
+        fetch('/admin/media/' + itemID + '/versions')
+            .then(function (r) { return r.json(); })
+            .then(function (versions) {
+                var c = document.getElementById('versions_container');
+                if(!versions || versions.length === 0 || versions.error) {
+                    c.innerHTML = '<p class="text-muted small">' + noVersions + '</p>';
+                    return;
+                }
+                var rows = versions.map(function (v) {
+                    var badge = v.is_latest ? '<span class="badge bg-success me-1">current</span>' : '';
+                    var d = new Date(v.last_modified).toLocaleString();
+                    var restoreBtn = v.is_latest ? '' :
+                        '<button class="btn btn-sm btn-outline-secondary" ' +
+                        'onclick="restoreVersion(' + JSON.stringify(v.version_id) + ')">' +
+                        restoreLabel + "</button>";
+                    return '<tr><td>' + badge + d + '</td>' +
+                        '<td>' + v.size + ' B</td>' +
+                        '<td style="font-size:0.75rem">' + v.version_id.substring(0, 16) + '...</td>' +
+                        '<td>' + restoreBtn + '</td></tr>';
+                }).join('');
+                c.innerHTML = '<table class="table table-sm table-hover">' +
+                    '<thead><tr><th>Date</th><th>Size</th><th>Version ID</th><th></th></tr></thead>' +
+                    '<tbody>' + rows + '</tbody></table>';
+            })
+            .catch(function () {
+                document.getElementById('versions_container').innerHTML =
+                    '<p class="text-muted small">' + noVersions + '</p>';
+            });
+
+        window.restoreVersion = function (versionID) {
+            if(!confirm(restoreConfirm)) return;
+            fetch('/admin/media/' + itemID + '/restore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ version_id: versionID })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if(d.url) { location.reload(); }
+                    else { alert(d.error || 'Error'); }
+                });
+        };
+    })();
+
+    function copyURL() {
+        var el = document.getElementById('media_url');
+        navigator.clipboard.writeText(el.value).then(function () {
+            var msg = document.getElementById('url_copied_msg');
+            msg.style.display = 'block';
+            setTimeout(function () { msg.style.display = 'none'; }, 2000);
+        });
+    }
+</script>
+{{end}}
+
+{{template "admin-footer" .}}

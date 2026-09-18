@@ -1,0 +1,12 @@
+{{define "admin/category_edit"}}
+{{template "admin-header" .}}
+<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-8">
+    <div class="d-flex align-items-center mb-4"><a href="/admin/categories" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i> {{t .Lang "common.back"}}</a><h2 class="mb-0">{{t .Lang "cat.edit_title"}}</h2></div>
+    {{if .ErrorMessage}}<div class="alert alert-danger alert-dismissible fade show" role="alert">{{.ErrorMessage}}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>{{end}}
+    {{if .Category}}
+    <div class="card border-0 shadow-sm"><div class="card-body p-4">{{template "admin/category_form" dict "Lang" .Lang "Category" .Category "Action" (printf "/admin/categories/edit/%s" .Category.ID.Hex) "IsEdit" true "S3Enabled" .S3Enabled "PrimaryColor" .PrimaryColor}}</div></div>
+    <div class="card border-0 shadow-sm mt-3 border-danger"><div class="card-body"><h5 class="card-title text-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "common.danger_zone"}}</h5><p class="card-text text-muted">{{t .Lang "cat.danger_text"}}</p><form action="/admin/categories/delete/{{.Category.ID.Hex}}" method="POST"><button type="submit" class="btn btn-danger" onclick="return confirm(this.dataset.confirm)" data-confirm="{{t .Lang "cat.confirm_delete2"}}"><i class="bi bi-trash me-2"></i>{{t .Lang "common.delete"}}</button></form></div></div>
+    {{end}}
+</div></div></div>
+{{template "admin-footer" .}}
+{{end}}

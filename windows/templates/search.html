@@ -1,0 +1,236 @@
+{{define "search"}}
+{{template "header" .}}
+
+{{template "listing/hero" dict "Crumb" "KERESÉS" "Title" "Keresési eredmények" "Description" (printf "Eredmények: “%s”" .Query)}}
+
+<div class="container-fluid px-4 px-lg-5 py-5">
+    <div class="search-layout search-layout-left">
+        <aside class="search-sidebar search-sidebar-left">
+            <div class="search-sidebar-inner">
+                <div class="section-header mb-3">
+                    <h2 class="h5 section-title" style="font-size:1rem;">Keresés <span class="text-primary">helye</span></h2>
+                </div>
+                <div class="search-cat-list mb-4">
+                    {{range .AvailableScopes}}
+                    <a class="search-cat-item text-decoration-none {{if eq $.ActiveScope .ID}}search-cat-active{{end}}" href="{{.URL}}">
+                        <i class="bi {{if eq .ID "articles"}}bi-newspaper{{else if eq .ID "pages"}}bi-file-earmark-text{{else if eq .ID "marketplace"}}bi-shop{{else if eq .ID "webshop"}}bi-bag-check{{else}}bi-chat-square-text{{end}} text-primary me-2"></i>
+                        <span>{{.Label}}</span>
+                        <span class="search-cat-count ms-auto">{{.Count}}</span>
+                    </a>
+                    {{end}}
+                </div>
+
+                {{if eq .ActiveScope "articles"}}
+                <div class="section-header mb-3">
+                    <h2 class="h5 section-title" style="font-size:1rem;">Cikk <span class="text-primary">kategória</span></h2>
+                </div>
+                <div class="search-cat-list" id="searchCatList">
+                    <button type="button" class="search-cat-item search-cat-active" data-cat="">
+                        <i class="bi bi-globe2 text-primary me-2"></i>
+                        <span>Összes cikk</span>
+                        <span class="search-cat-count ms-auto">{{.TotalCount}}</span>
+                    </button>
+                    {{range .Categories}}
+                    {{$count := index $.CategoryCounts .}}
+                    <button type="button" class="search-cat-item{{if eq $count 0}} search-cat-disabled{{end}}" data-cat="{{.}}"{{if eq $count 0}} disabled{{end}}>
+                        <i class="bi bi-folder2-open {{if eq $count 0}}text-muted{{else}}text-primary{{end}} me-2"></i>
+                        <span>{{.}}</span>
+                        {{if gt $count 0}}<span class="search-cat-count ms-auto">{{$count}}</span>{{end}}
+                    </button>
+                    {{end}}
+                </div>
+                {{else if eq .ActiveScope "marketplace"}}
+                <div class="section-header mb-3">
+                    <h2 class="h5 section-title" style="font-size:1rem;">Marketplace <span class="text-primary">kategória</span></h2>
+                </div>
+                <div class="search-cat-list">
+                    <a class="search-cat-item text-decoration-none {{if eq .SelectedCategory ""}}search-cat-active{{end}}" href="/search?q={{queryEscape .Query}}&scope=marketplace">
+                        <i class="bi bi-grid text-primary me-2"></i>
+                        <span>Összes hirdetés</span>
+                        <span class="search-cat-count ms-auto">{{.TotalCount}}</span>
+                    </a>
+                    {{range .MarketplaceCategories}}
+                    {{$count := index $.MarketplaceCounts .Slug}}
+                    <a class="search-cat-item text-decoration-none {{if eq $.SelectedCategory .Slug}}search-cat-active{{end}} {{if eq $count 0}}search-cat-disabled{{end}}" href="/search?q={{queryEscape $.Query}}&scope=marketplace&category={{.Slug}}">
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} {{if eq $count 0}}text-muted{{else}}text-primary{{end}} me-2"></i>
+                        <span>{{.Name}}</span>
+                        {{if gt $count 0}}<span class="search-cat-count ms-auto">{{$count}}</span>{{end}}
+                    </a>
+                    {{end}}
+                </div>
+                {{else if eq .ActiveScope "webshop"}}
+                <div class="section-header mb-3">
+                    <h2 class="h5 section-title" style="font-size:1rem;">Webshop <span class="text-primary">kategória</span></h2>
+                </div>
+                <div class="search-cat-list">
+                    <a class="search-cat-item text-decoration-none {{if eq .SelectedCategory ""}}search-cat-active{{end}}" href="/search?q={{queryEscape .Query}}&scope=webshop">
+                        <i class="bi bi-grid text-primary me-2"></i>
+                        <span>Összes termék</span>
+                        <span class="search-cat-count ms-auto">{{.TotalCount}}</span>
+                    </a>
+                    {{range .WebshopCategories}}
+                    {{$count := index $.WebshopCounts .Slug}}
+                    <a class="search-cat-item text-decoration-none {{if eq $.SelectedCategory .Slug}}search-cat-active{{end}} {{if eq $count 0}}search-cat-disabled{{end}}" href="/search?q={{queryEscape $.Query}}&scope=webshop&category={{.Slug}}">
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} {{if eq $count 0}}text-muted{{else}}text-primary{{end}} me-2"></i>
+                        <span>{{.DisplayName "hu"}}</span>
+                        {{if gt $count 0}}<span class="search-cat-count ms-auto">{{$count}}</span>{{end}}
+                    </a>
+                    {{end}}
+                </div>
+                {{else if eq .ActiveScope "forum"}}
+                <div class="section-header mb-3">
+                    <h2 class="h5 section-title" style="font-size:1rem;">Fórum <span class="text-primary">kategória</span></h2>
+                </div>
+                <div class="search-cat-list">
+                    <a class="search-cat-item text-decoration-none {{if eq .SelectedCategory ""}}search-cat-active{{end}}" href="/search?q={{queryEscape .Query}}&scope=forum">
+                        <i class="bi bi-grid text-primary me-2"></i>
+                        <span>Összes téma</span>
+                        <span class="search-cat-count ms-auto">{{.TotalCount}}</span>
+                    </a>
+                    {{range .ForumCategories}}
+                    {{$count := index $.ForumCounts .Slug}}
+                    <a class="search-cat-item text-decoration-none {{if eq $.SelectedCategory .Slug}}search-cat-active{{end}} {{if eq $count 0}}search-cat-disabled{{end}}" href="/search?q={{queryEscape $.Query}}&scope=forum&category={{.Slug}}">
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}chat-square-text{{end}} {{if eq $count 0}}text-muted{{else}}text-primary{{end}} me-2"></i>
+                        <span>{{.Name}}</span>
+                        {{if gt $count 0}}<span class="search-cat-count ms-auto">{{$count}}</span>{{end}}
+                    </a>
+                    {{end}}
+                </div>
+                {{end}}
+            </div>
+        </aside>
+
+        <div class="search-results">
+            <p class="listing-count mb-4">
+                <span class="listing-count-num">{{.TotalCount}}</span> találat
+                &ldquo;<strong>{{.Query}}</strong>&rdquo; keresésre
+            </p>
+
+            {{if eq .ActiveScope "articles"}}
+                {{if .Articles}}
+                <div class="listing-list">
+                    {{range .Articles}}
+                    {{template "article-row" .}}
+                    {{end}}
+                </div>
+                {{else}}
+                {{template "search-empty" dict "Text" "Nincs cikk találat. Próbálj más kulcsszavakat vagy válts keresési helyet."}}
+                {{end}}
+            {{else if eq .ActiveScope "pages"}}
+                {{if .Pages}}
+                <div class="listing-list">
+                    {{range .Pages}}
+                    <article class="article-row">
+                        {{if .OGImage}}
+                        <a class="article-row-img" href="{{$.PageURLPrefix}}/{{.Path}}">
+                            <img src="{{.OGImage}}" alt="{{.Title}}" loading="lazy">
+                        </a>
+                        {{end}}
+                        <div class="article-row-body">
+                            <h2 class="article-row-title">
+                                <a href="{{$.PageURLPrefix}}/{{.Path}}">{{.Title}}</a>
+                            </h2>
+                            {{if .Summary}}<p class="article-row-summary">{{truncate .Summary 180}}</p>{{end}}
+                            <a class="article-row-more" href="{{$.PageURLPrefix}}/{{.Path}}">Megnyitás</a>
+                        </div>
+                    </article>
+                    {{end}}
+                </div>
+                {{else}}
+                {{template "search-empty" dict "Text" "Nincs oldal találat. Próbálj más kulcsszavakat vagy válts keresési helyet."}}
+                {{end}}
+            {{else if eq .ActiveScope "marketplace"}}
+                {{if .Listings}}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    {{range .Listings}}
+                    <div class="col">{{template "marketplace-card" .}}</div>
+                    {{end}}
+                </div>
+                {{else}}
+                {{template "search-empty" dict "Text" "Nincs marketplace találat. Próbálj más kulcsszavakat vagy kategóriát."}}
+                {{end}}
+            {{else if eq .ActiveScope "webshop"}}
+                {{if .Products}}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    {{range .Products}}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            {{if .ImageURLs}}
+                            <img src="{{index .ImageURLs 0}}" class="card-img-top" alt="{{.Name}}" style="object-fit:cover;height:220px;">
+                            {{end}}
+                            <div class="card-body d-flex flex-column">
+                                <h2 class="h5"><a class="text-decoration-none" href="/webshop/product/{{.Slug}}">{{.Name}}</a></h2>
+                                <p class="text-muted small mb-2">SKU: {{.SKU}}</p>
+                                <p class="mb-2">{{truncate .Description 140}}</p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <strong>{{fmtMoney .GrossPriceCents .CurrencyCode}}</strong>
+                                    <a href="/webshop/product/{{.Slug}}" class="btn btn-sm btn-outline-primary">Részletek</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                {{template "search-empty" dict "Text" "Nincs webshop találat. Próbálj más kulcsszavakat vagy kategóriát."}}
+                {{end}}
+            {{else if eq .ActiveScope "forum"}}
+                {{if .Topics}}
+                <div class="forum-topic-list">
+                    {{range .Topics}}
+                    <a class="forum-topic-row" href="/forum/topic/{{.Slug}}">
+                        <div>
+                            <div class="forum-topic-title">
+                                {{if .Pinned}}<i class="bi bi-pin-angle-fill text-primary"></i>{{end}}
+                                {{if eq .Status "locked"}}<i class="bi bi-lock-fill text-secondary"></i>{{end}}
+                                <strong>{{.Title}}</strong>
+                            </div>
+                            <small>{{.CategoryName}} · {{.CreatedByName}} · {{formatDateTime .CreatedAt}}</small>
+                        </div>
+                        <div class="forum-topic-stats">
+                            <span>{{.ReplyCount}} válasz</span>
+                            <span>{{.ViewCount}} megtekintés</span>
+                        </div>
+                        <div class="forum-topic-last">
+                            {{formatDateTime .LastPostAt}}<br><small>{{.LastPostUser}}</small>
+                        </div>
+                    </a>
+                    {{end}}
+                </div>
+                {{else}}
+                {{template "search-empty" dict "Text" "Nincs fórum találat. Próbálj más kulcsszavakat vagy kategóriát."}}
+                {{end}}
+            {{end}}
+
+            {{if or .HasPrev .HasNext}}
+            <nav aria-label="Search pagination" class="mt-5">
+                <ul class="pagination justify-content-start">
+                    <li class="page-item {{if not .HasPrev}}disabled{{end}}">
+                        <a class="page-link" href="/search?q={{queryEscape .Query}}&scope={{.ActiveScope}}{{if .SelectedCategory}}&category={{.SelectedCategory}}{{end}}&page={{subtract .CurrentPage 1}}" aria-label="Previous">
+                            <i class="bi bi-chevron-left"></i> Előző
+                        </a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link">{{.CurrentPage}}. oldal</span>
+                    </li>
+                    <li class="page-item {{if not .HasNext}}disabled{{end}}">
+                        <a class="page-link" href="/search?q={{queryEscape .Query}}&scope={{.ActiveScope}}{{if .SelectedCategory}}&category={{.SelectedCategory}}{{end}}&page={{add .CurrentPage 1}}" aria-label="Next">
+                            Következő <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{template "footer" .}}
+{{end}}
+
+{{define "search-empty"}}
+<div class="text-center py-5 border rounded-3 bg-light">
+    <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+    <h2 class="h4 mt-3 text-muted">Nincs találat</h2>
+    <p class="text-muted mb-0">{{.Text}}</p>
+</div>
+{{end}}
