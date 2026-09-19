@@ -19,6 +19,15 @@ main {
     flex: 1;
 }
 
+/* Admin API documentation: keep the long desktop table of contents reachable. */
+.api-docs-toc {
+    top: 4.5rem;
+    max-height: calc(100vh - 4.5rem);
+    max-height: calc(100dvh - 4.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
 /* ===== NAVBAR ===== */
 .navbar-brand {
     font-size: 1.4rem;
