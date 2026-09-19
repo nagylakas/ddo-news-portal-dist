@@ -83,6 +83,7 @@
                     <p class="card-text text-muted">
                         {{t .Lang "author.danger_text"}}
                     </p>
+                    {{if .Deletable}}
                     <form action="/admin/authors/delete/{{.Author.ID.Hex}}" method="POST">
                         <button type="submit" class="btn btn-danger"
                                 onclick="return confirm(this.dataset.confirm)"
@@ -90,6 +91,12 @@
                             <i class="bi bi-trash me-2"></i>{{t .Lang "author.delete_btn"}}
                         </button>
                     </form>
+                    {{else}}
+                    <p class="text-danger small mb-2">{{t .Lang "author.cannot_delete_has_articles"}} ({{.ArticleCount}})</p>
+                    <button type="button" class="btn btn-danger" disabled>
+                        <i class="bi bi-trash me-2"></i>{{t .Lang "author.delete_btn"}}
+                    </button>
+                    {{end}}
                 </div>
             </div>
             {{end}}

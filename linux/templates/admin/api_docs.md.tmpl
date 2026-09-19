@@ -850,7 +850,9 @@ curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" 
       "bio":        "Senior writer covering technology.",
       "avatar_url": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/jane.jpg",
       "created_at": "2025-01-01T00:00:00Z",
-      "updated_at": "2025-01-01T00:00:00Z"
+      "updated_at": "2025-01-01T00:00:00Z",
+      "article_count": 12,
+      "deletable": false
     }
   ]
 }
@@ -862,7 +864,9 @@ curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" 
 | --- | --- | --- |
 | GET | `/api/authors/{id}` | Required |
 
-**Response 200:** single author object.
+`article_count` is the number of non-deleted articles, including drafts and scheduled articles, that reference the author. `deletable` is `true` only when this count is `0`.
+
+**Response 200:** single author object, including `article_count` and `deletable` as above.
 **Response 404:** `{"error":"..."}`
 
 ### Create author

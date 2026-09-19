@@ -969,10 +969,13 @@ Content-Type: application/json
       "bio":        "Senior writer covering technology.",
       "avatar_url": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/jane.jpg",
       "created_at": "2025-01-01T00:00:00Z",
-      "updated_at": "2025-01-01T00:00:00Z"
+      "updated_at": "2025-01-01T00:00:00Z",
+      "article_count": 12,
+      "deletable": false
     }
   ]
 }</code></pre>
+                <p class="mt-2 mb-1 small text-muted"><code>article_count</code> includes every non-deleted article, including drafts and scheduled articles. <code>deletable</code> is <code>true</code> only when this count is <code>0</code>.</p>
             </section>
 
             <!-- Get one author -->
@@ -988,7 +991,7 @@ Content-Type: application/json
                         </tr></tbody>
                     </table>
                 </div>
-                <p class="mb-1"><strong>Response 200:</strong> single author object.<br>
+                <p class="mb-1"><strong>Response 200:</strong> single author object, including <code>article_count</code> and <code>deletable</code> as above.<br>
                    <strong>Response 404:</strong> <code>{"error":"..."}</code></p>
             </section>
 
@@ -1049,7 +1052,7 @@ Content-Type: application/json
                         <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
                         <tbody><tr>
                             <td><span class="badge bg-danger">DELETE</span></td>
-                            <td><code>/api/categories/{id}</code></td>
+                            <td><code>/api/authors/{id}</code></td>
                             <td>Required</td>
                         </tr></tbody>
                     </table>
