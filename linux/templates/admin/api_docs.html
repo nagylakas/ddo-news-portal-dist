@@ -778,7 +778,7 @@ Content-Type: application/json
                         <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
                         <tbody><tr>
                             <td><span class="badge bg-success">GET</span></td>
-                            <td><code>/api/categories/{id}</code></td>
+                            <td><code>/api/authors/{id}</code></td>
                             <td>Required</td>
                         </tr></tbody>
                     </table>
@@ -861,7 +861,7 @@ Content-Type: application/json
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb</code></pre>
                 <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message": "..."}</code>.</p>
-                <p class="mt-2 mb-1"><strong>Response 409:</strong> category still has articles referencing it.</p>
+                <p class="mt-2 mb-1"><strong>Response 409:</strong> <code>resource_in_use</code> with the referencing article count and a suggested action. Personal category follows are removed automatically and never block deletion.</p>
                 <p class="mt-2 mb-1"><strong>Response 404:</strong> category not found.</p>
             </section>
 
@@ -983,12 +983,18 @@ Content-Type: application/json
                         </tr></tbody>
                     </table>
                 </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    An author cannot be deleted while non-deleted articles reference it. Author follows are non-blocking and are cleaned up automatically. A blocked request returns <code>409 resource_in_use</code> with the article count.
+                </div>
                 <div class="alert alert-info py-2 small">
                     <i class="bi bi-info-circle me-1"></i>
                     Deleting an author does not delete their articles.
                 </div>
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/authors/664a000000000000000000aa</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message": "..."}</code>.</p>
+                <p class="mt-2 mb-1"><strong>Response 409:</strong> <code>resource_in_use</code> with the referencing article count.</p>
             </section>
 
             <!-- ── Pages ──────────────────────────────────────────────── -->
