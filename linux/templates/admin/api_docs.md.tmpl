@@ -44,6 +44,15 @@ REST API reference for programmatic access to this news portal.
   - [Create author](#create-author)
   - [Update author](#update-author)
   - [Delete author](#delete-author)
+- [Banners](#banners)
+  - [List banners](#list-banners)
+  - [Get one banner](#get-one-banner)
+  - [Create banner](#create-banner)
+  - [Update banner](#update-banner)
+  - [Delete banner](#delete-banner)
+  - [Targeting metadata](#targeting-metadata)
+  - [Single banner stats](#single-banner-stats)
+  - [Aggregate stats](#aggregate-stats)
 - [Pages](#pages)
   - [List pages](#list-pages)
   - [Get one page](#get-one-page)
@@ -921,6 +930,259 @@ curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" 
 **Response 200:** `{"message":"A szerző sikeresen törölve"}`
 
 **Response 409:** `resource_in_use` when active articles reference the author.
+
+---
+
+## Banners
+
+Ad placements assigned to one of the fixed `slot_id` values under `/admin/banners`. Each banner has optional article-level targeting (categories, tags, authors, devices, URL path patterns), scheduling, daily impression/click limits, weighted rotation, and campaign/advertiser metadata for reporting. See [Targeting metadata](#targeting-metadata) for the full set of selectable slots, statuses, devices, categories, authors and tags, and [Single banner stats](#single-banner-stats) / [Aggregate stats](#aggregate-stats) for impression/click/CTR reporting.
+
+### List banners
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners` | Required |
+
+**Response:** a bare JSON array (not wrapped in `{"banners": [...]}`), ordered by `slot_id`, then priority descending.
+
+```json
+[
+  {
+    "id":                     "664a000000000000000000cc",
+    "slot_id":                "article-sidebar",
+    "name":                   "Spring campaign sidebar",
+    "image_url":              "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg",
+    "target_url":             "https://advertiser.example.com/",
+    "alt_text":               "Spring sale",
+    "active_from":            "2025-03-01T00:00:00Z",
+    "active_until":           "2025-04-01T00:00:00Z",
+    "priority":               10,
+    "active":                 true,
+    "impressions":            18234,
+    "clicks":                 312,
+    "campaign_name":          "Spring 2025",
+    "advertiser":              "Acme Corp",
+    "status":                 "active",
+    "weight":                 2,
+    "notes":                  "Internal note, never shown publicly.",
+    "targeting": {
+      "categories":   ["Technology"],
+      "tags":         ["ai"],
+      "authors":      [],
+      "devices":      ["desktop"],
+      "url_patterns": ["/article/*"]
+    },
+    "daily_impression_limit": 5000,
+    "daily_click_limit":      200,
+    "archived":               false,
+    "created_at":             "2025-01-01T00:00:00Z",
+    "updated_at":             "2025-01-01T00:00:00Z",
+    "delivery_state":         "active",
+    "ctr":                    1.71,
+    "effective_status":       "active",
+    "effective_campaign_name": "Spring 2025",
+    "effective_weight":       2
+  }
+]
+```
+
+The last five fields (`delivery_state`, `ctr`, `effective_status`, `effective_campaign_name`, `effective_weight`) are computed, not stored — they exist so a client doesn't have to reimplement the fallback rules. `delivery_state` is one of `scheduled`, `active`, `expired`, `paused`, `archived`. `effective_campaign_name` falls back to `name` when `campaign_name` is empty; `effective_weight` falls back to `1` when `weight` is unset or below 1.
+
+### Get one banner
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners/{id}` | Required |
+
+**Response 200:** single banner object, same shape as one array entry above.
+**Response 404:** `{"error":"not found"}`
+
+### Create banner
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/banners` | Required |
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `slot_id` | string | Yes | Must be one of the slots listed by [Targeting metadata](#targeting-metadata). |
+| `name` | string | Yes | Internal label, not shown publicly. Used as the campaign name fallback. |
+| `image_url` | string | Yes | Creative image URL. |
+| `target_url` | string | Yes | Must be an absolute `http(s)` URL — anything else is rejected to prevent open redirects. |
+| `alt_text` | string | | |
+| `active_from` | datetime | Yes | RFC 3339. |
+| `active_until` | datetime | Yes | Must be after `active_from`. |
+| `priority` | int | | 0-100. Higher wins when multiple banners are eligible for the same slot at the same time. |
+| `active` | bool | | Forced to `false` when `status` is `paused`. |
+| `campaign_name` | string | | Defaults to `name` when empty. Snapshotted onto daily stats — see [Aggregate stats](#aggregate-stats). |
+| `advertiser` | string | | Snapshotted onto daily stats. |
+| `status` | string | | `active` or `paused`. Defaults from `active` when omitted. |
+| `weight` | int | | >= 1. Used for weighted random rotation among same-priority banners in a slot. |
+| `notes` | string | | Internal only, never rendered publicly. |
+| `targeting.categories` | string[] | | Category display names. Empty = eligible for every category. |
+| `targeting.tags` | string[] | | Article tags. Empty = eligible for every tag. |
+| `targeting.authors` | string[] | | Author display names. Empty = eligible for every author. |
+| `targeting.devices` | string[] | | One or more of `desktop`, `mobile`, `tablet`. Empty = every device. |
+| `targeting.url_patterns` | string[] | | Matched against the request path. A trailing `*` matches by prefix; otherwise exact or substring match. Empty = every path. |
+| `daily_impression_limit` | int64 | | 0 = unlimited. |
+| `daily_click_limit` | int64 | | 0 = unlimited. |
+| `archived` | bool | | Archived banners are never eligible for delivery regardless of `active`/`status`. |
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "slot_id": "article-sidebar",
+    "name": "Spring campaign sidebar",
+    "image_url": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg",
+    "target_url": "https://advertiser.example.com/",
+    "active_from": "2025-03-01T00:00:00Z",
+    "active_until": "2025-04-01T00:00:00Z",
+    "priority": 10,
+    "active": true,
+    "campaign_name": "Spring 2025",
+    "advertiser": "Acme Corp",
+    "weight": 2,
+    "targeting": {"categories": ["Technology"], "devices": ["desktop"]}
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners
+```
+
+**Response 201:** created banner object (plain, not the computed-fields shape from List/Get).
+**Response 400:** unknown `slot_id`, missing required field, invalid `target_url`, or `active_until` not after `active_from`.
+
+### Update banner
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| PUT | `/api/banners/{id}` | Required |
+
+Same fields as Create — a full replacement of the mutable fields, not a partial patch.
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"slot_id":"article-sidebar","name":"Spring campaign sidebar","image_url":"{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg","target_url":"https://advertiser.example.com/","active_from":"2025-03-01T00:00:00Z","active_until":"2025-04-15T00:00:00Z","active":true}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc
+```
+
+**Response 200:** updated banner object.
+**Response 400:** same validation as Create.
+
+### Delete banner
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/banners/{id}` | Required |
+
+> **Note:** Deleting a banner does not delete its recorded daily stats — see [Aggregate stats](#aggregate-stats) for how historical campaign/advertiser reporting behaves after a banner is deleted.
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc
+```
+
+**Response 204:** no body.
+
+### Targeting metadata
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners/meta` | Required |
+
+Everything an external client needs to build a banner-targeting UI in one round trip: every known slot with its pixel size, the selectable statuses and device values, and the categories/authors/tags currently available on the portal to target against.
+
+```json
+{
+  "slots": [
+    {"ID": "article-sidebar", "Label": "Cikk oldalsáv (desktop)", "WidthPx": 300, "HeightPx": 600, "Description": "Jobb oldali sáv, cikkoldalakon, csak desktopn (>=xl)."},
+    {"ID": "article-horizontal", "Label": "Cikk vízszintes (mobil)", "WidthPx": 728, "HeightPx": 90, "Description": "Vízszintes sáv, cikkoldalakon, csak mobilon (<xl)."}
+  ],
+  "statuses": ["active", "paused"],
+  "devices": ["desktop", "mobile", "tablet"],
+  "categories": ["Technology", "Gaming"],
+  "authors": ["Jane Doe"],
+  "tags": ["ai", "review"],
+  "targeting": {
+    "empty_list": "An empty targeting list for a dimension (categories, tags, authors, devices, url_patterns) means the banner is eligible for every value of that dimension — targeting is opt-in, not opt-out.",
+    "url_patterns": "Each pattern matches the request path (not the full URL). A trailing '*' matches by prefix (e.g. \"/category/tech*\"); otherwise an exact match or substring match is used."
+  }
+}
+```
+
+`slots` is the fixed, code-defined list of ad placements the site supports (currently `article-sidebar` 300x600 desktop, `article-horizontal` 728x90 mobile) — new placements require a code change and a template wire-up, so this list only changes with a deployment. `categories`/`authors`/`tags` reflect current portal content and can change at any time.
+
+### Single banner stats
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners/{id}/stats` | Required |
+
+| Query param | Default | Range |
+| --- | --- | --- |
+| `days` | 30 | 1-366 |
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc/stats?days=30"
+```
+
+```json
+{
+  "banner_id": "664a000000000000000000cc",
+  "days": 30,
+  "totals":  {"impressions": 18234, "clicks": 312, "ctr": 1.71},
+  "series": [
+    {"date": "2025-03-01", "impressions": 640, "clicks": 12, "ctr": 1.88},
+    {"date": "2025-03-02", "impressions": 712, "clicks": 9,  "ctr": 1.26}
+  ]
+}
+```
+
+`series` only contains days with at least one recorded impression or click — pad missing days with zero on the client if a continuous calendar is needed.
+
+**Response 400:** missing/invalid banner ID, or `days` outside 1-366.
+**Response 404:** banner not found.
+**Response 500:** database error.
+
+### Aggregate stats
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners/stats` | Required |
+
+| Query param | Default | Notes |
+| --- | --- | --- |
+| `days` | 30 | 1-366. |
+| `group_by` | (all three) | Optional. One of `campaign`, `advertiser`, `slot` — when given, only that grouping is computed (the other two are omitted from the response). Omit to get all three. |
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/stats?days=30"
+```
+
+```json
+{
+  "days": 30,
+  "totals": {"impressions": 52310, "clicks": 601, "ctr": 1.15},
+  "series": [
+    {"date": "2025-03-01", "impressions": 1820, "clicks": 22, "ctr": 1.21}
+  ],
+  "by_campaign": [
+    {"key": "Spring 2025",  "impressions": 18234, "clicks": 312, "ctr": 1.71},
+    {"key": "(unknown)",    "impressions": 400,   "clicks": 3,   "ctr": 0.75}
+  ],
+  "by_advertiser": [
+    {"key": "Acme Corp", "impressions": 18234, "clicks": 312, "ctr": 1.71}
+  ],
+  "by_slot": [
+    {"key": "article-sidebar", "impressions": 30120, "clicks": 470, "ctr": 1.56}
+  ]
+}
+```
+
+Every daily stat row keeps a **snapshot** of its banner's `campaign_name`/`advertiser` taken on the day it was recorded, so renaming a campaign, reassigning an advertiser, or deleting the banner entirely never rewrites or drops historical rows from these reports — a same-day rename only affects future days. Rows predating this snapshot, or whose banner no longer exists, are grouped under the key `"(unknown)"` rather than being dropped.
+
+**Response 400:** `days` outside 1-366, or invalid `group_by`.
+**Response 500:** database error.
 
 ---
 

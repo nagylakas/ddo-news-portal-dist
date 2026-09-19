@@ -44,6 +44,15 @@
                     <a href="#aut-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
                     <a href="#aut-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
                     <a href="#aut-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#banners"    class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Banners</a>
+                    <a href="#ban-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#ban-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
+                    <a href="#ban-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
+                    <a href="#ban-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
+                    <a href="#ban-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#ban-meta"   class="list-group-item list-group-item-action py-1 px-2 ms-2">Targeting metadata</a>
+                    <a href="#ban-stats"  class="list-group-item list-group-item-action py-1 px-2 ms-2">Single banner stats</a>
+                    <a href="#ban-stats-agg" class="list-group-item list-group-item-action py-1 px-2 ms-2">Aggregate stats</a>
                     <a href="#pages"      class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Pages</a>
                     <a href="#page-list"       class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
                     <a href="#page-get"        class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
@@ -1069,6 +1078,340 @@ Content-Type: application/json
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/authors/664a000000000000000000aa</code></pre>
                 <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message": "..."}</code>.</p>
                 <p class="mt-2 mb-1"><strong>Response 409:</strong> <code>resource_in_use</code> with the referencing article count.</p>
+            </section>
+
+            <!-- ── Banners ────────────────────────────────────────────── -->
+            <section id="banners" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-badge-ad me-2"></i>Banners
+                </h3>
+                <p class="text-muted">
+                    Ad placements assigned to one of the fixed <code>slot_id</code> values under
+                    <code>/admin/banners</code>. Each banner has optional article-level targeting
+                    (categories, tags, authors, devices, URL path patterns), scheduling, daily
+                    impression/click limits, weighted rotation, and campaign/advertiser metadata for
+                    reporting. See <a href="#ban-meta">Targeting metadata</a> for the full set of
+                    selectable slots, statuses, devices, categories, authors and tags, and
+                    <a href="#ban-stats">Single banner stats</a> / <a href="#ban-stats-agg">Aggregate stats</a>
+                    for impression/click/CTR reporting.
+                </p>
+            </section>
+
+            <!-- List banners -->
+            <section id="ban-list" class="mb-5 ps-3">
+                <h5>List banners</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response:</strong> a bare JSON array (not wrapped in <code>{"banners": [...]}</code>), ordered by <code>slot_id</code>, then priority descending.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>[
+  {
+    "id":                     "664a000000000000000000cc",
+    "slot_id":                "article-sidebar",
+    "name":                   "Spring campaign sidebar",
+    "image_url":              "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg",
+    "target_url":             "https://advertiser.example.com/",
+    "alt_text":                "Spring sale",
+    "active_from":            "2025-03-01T00:00:00Z",
+    "active_until":           "2025-04-01T00:00:00Z",
+    "priority":               10,
+    "active":                 true,
+    "impressions":            18234,
+    "clicks":                 312,
+    "campaign_name":          "Spring 2025",
+    "advertiser":             "Acme Corp",
+    "status":                 "active",
+    "weight":                 2,
+    "notes":                  "Internal note, never shown publicly.",
+    "targeting": {
+      "categories":   ["Technology"],
+      "tags":         ["ai"],
+      "authors":      [],
+      "devices":      ["desktop"],
+      "url_patterns": ["/article/*"]
+    },
+    "daily_impression_limit": 5000,
+    "daily_click_limit":      200,
+    "archived":               false,
+    "created_at":             "2025-01-01T00:00:00Z",
+    "updated_at":             "2025-01-01T00:00:00Z",
+    "delivery_state":         "active",
+    "ctr":                    1.71,
+    "effective_status":       "active",
+    "effective_campaign_name": "Spring 2025",
+    "effective_weight":       2
+  }
+]</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    The last five fields (<code>delivery_state</code>, <code>ctr</code>,
+                    <code>effective_status</code>, <code>effective_campaign_name</code>,
+                    <code>effective_weight</code>) are computed, not stored — they exist so a client
+                    doesn't have to reimplement the fallback rules. <code>delivery_state</code> is one of
+                    <code>scheduled</code>, <code>active</code>, <code>expired</code>, <code>paused</code>,
+                    <code>archived</code>. <code>effective_campaign_name</code> falls back to
+                    <code>name</code> when <code>campaign_name</code> is empty; <code>effective_weight</code>
+                    falls back to <code>1</code> when <code>weight</code> is unset or below 1.
+                </p>
+            </section>
+
+            <!-- Get one banner -->
+            <section id="ban-get" class="mb-5 ps-3">
+                <h5>Get one banner</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response 200:</strong> single banner object, same shape as one array entry above.<br>
+                   <strong>Response 404:</strong> <code>{"error":"not found"}</code></p>
+            </section>
+
+            <!-- Create banner -->
+            <section id="ban-create" class="mb-5 ps-3">
+                <h5>Create banner</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/banners</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>slot_id</code></td><td>string</td><td>Yes</td><td>Must be one of the slots listed by <a href="#ban-meta">Targeting metadata</a>.</td></tr>
+                            <tr><td><code>name</code></td><td>string</td><td>Yes</td><td>Internal label, not shown publicly. Used as the campaign name fallback.</td></tr>
+                            <tr><td><code>image_url</code></td><td>string</td><td>Yes</td><td>Creative image URL.</td></tr>
+                            <tr><td><code>target_url</code></td><td>string</td><td>Yes</td><td>Must be an absolute <code>http(s)</code> URL — anything else is rejected to prevent open redirects.</td></tr>
+                            <tr><td><code>alt_text</code></td><td>string</td><td></td><td></td></tr>
+                            <tr><td><code>active_from</code></td><td>datetime</td><td>Yes</td><td>RFC 3339.</td></tr>
+                            <tr><td><code>active_until</code></td><td>datetime</td><td>Yes</td><td>Must be after <code>active_from</code>.</td></tr>
+                            <tr><td><code>priority</code></td><td>int</td><td></td><td>0–100. Higher wins when multiple banners are eligible for the same slot at the same time.</td></tr>
+                            <tr><td><code>active</code></td><td>bool</td><td></td><td>Forced to <code>false</code> when <code>status</code> is <code>paused</code>.</td></tr>
+                            <tr><td><code>campaign_name</code></td><td>string</td><td></td><td>Defaults to <code>name</code> when empty. Snapshotted onto daily stats — see <a href="#ban-stats-agg">Aggregate stats</a>.</td></tr>
+                            <tr><td><code>advertiser</code></td><td>string</td><td></td><td>Snapshotted onto daily stats.</td></tr>
+                            <tr><td><code>status</code></td><td>string</td><td></td><td><code>active</code> or <code>paused</code>. Defaults from <code>active</code> when omitted.</td></tr>
+                            <tr><td><code>weight</code></td><td>int</td><td></td><td>≥ 1. Used for weighted random rotation among same-priority banners in a slot.</td></tr>
+                            <tr><td><code>notes</code></td><td>string</td><td></td><td>Internal only, never rendered publicly.</td></tr>
+                            <tr><td><code>targeting.categories</code></td><td>string[]</td><td></td><td>Category display names. Empty = eligible for every category.</td></tr>
+                            <tr><td><code>targeting.tags</code></td><td>string[]</td><td></td><td>Article tags. Empty = eligible for every tag.</td></tr>
+                            <tr><td><code>targeting.authors</code></td><td>string[]</td><td></td><td>Author display names. Empty = eligible for every author.</td></tr>
+                            <tr><td><code>targeting.devices</code></td><td>string[]</td><td></td><td>One or more of <code>desktop</code>, <code>mobile</code>, <code>tablet</code>. Empty = every device.</td></tr>
+                            <tr><td><code>targeting.url_patterns</code></td><td>string[]</td><td></td><td>Matched against the request path. A trailing <code>*</code> matches by prefix; otherwise exact or substring match. Empty = every path.</td></tr>
+                            <tr><td><code>daily_impression_limit</code></td><td>int64</td><td></td><td>0 = unlimited.</td></tr>
+                            <tr><td><code>daily_click_limit</code></td><td>int64</td><td></td><td>0 = unlimited.</td></tr>
+                            <tr><td><code>archived</code></td><td>bool</td><td></td><td>Archived banners are never eligible for delivery regardless of <code>active</code>/<code>status</code>.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "slot_id": "article-sidebar",
+    "name": "Spring campaign sidebar",
+    "image_url": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg",
+    "target_url": "https://advertiser.example.com/",
+    "active_from": "2025-03-01T00:00:00Z",
+    "active_until": "2025-04-01T00:00:00Z",
+    "priority": 10,
+    "active": true,
+    "campaign_name": "Spring 2025",
+    "advertiser": "Acme Corp",
+    "weight": 2,
+    "targeting": {"categories": ["Technology"], "devices": ["desktop"]}
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 201:</strong> created banner object (plain, not the computed-fields shape from List/Get).</p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> unknown <code>slot_id</code>, missing required field, invalid <code>target_url</code>, or <code>active_until</code> not after <code>active_from</code>.</p>
+            </section>
+
+            <!-- Update banner -->
+            <section id="ban-update" class="mb-5 ps-3">
+                <h5>Update banner</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-warning text-dark">PUT</span></td>
+                            <td><code>/api/banners/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Same fields as Create — a full replacement of the mutable fields, not a partial patch.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"slot_id":"article-sidebar","name":"Spring campaign sidebar","image_url":"{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg","target_url":"https://advertiser.example.com/","active_from":"2025-03-01T00:00:00Z","active_until":"2025-04-15T00:00:00Z","active":true}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated banner object.</p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> same validation as Create.</p>
+            </section>
+
+            <!-- Delete banner -->
+            <section id="ban-delete" class="mb-5 ps-3">
+                <h5>Delete banner</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/banners/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Deleting a banner does not delete its recorded daily stats — see
+                    <a href="#ban-stats-agg">Aggregate stats</a> for how historical campaign/advertiser
+                    reporting behaves after a banner is deleted.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 204:</strong> no body.</p>
+            </section>
+
+            <!-- Banner targeting metadata -->
+            <section id="ban-meta" class="mb-5 ps-3">
+                <h5>Targeting metadata</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners/meta</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Everything an external client needs to build a banner-targeting UI in one round trip:
+                   every known slot with its pixel size, the selectable statuses and device values, and the
+                   categories/authors/tags currently available on the portal to target against.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "slots": [
+    {"ID": "article-sidebar", "Label": "Cikk oldalsáv (desktop)", "WidthPx": 300, "HeightPx": 600, "Description": "Jobb oldali sáv, cikkoldalakon, csak desktopn (≥xl)."},
+    {"ID": "article-horizontal", "Label": "Cikk vízszintes (mobil)", "WidthPx": 728, "HeightPx": 90, "Description": "Vízszintes sáv, cikkoldalakon, csak mobilon (&lt;xl)."}
+  ],
+  "statuses": ["active", "paused"],
+  "devices": ["desktop", "mobile", "tablet"],
+  "categories": ["Technology", "Gaming"],
+  "authors": ["Jane Doe"],
+  "tags": ["ai", "review"],
+  "targeting": {
+    "empty_list": "An empty targeting list for a dimension (categories, tags, authors, devices, url_patterns) means the banner is eligible for every value of that dimension — targeting is opt-in, not opt-out.",
+    "url_patterns": "Each pattern matches the request path (not the full URL). A trailing '*' matches by prefix (e.g. \"/category/tech*\"); otherwise an exact match or substring match is used."
+  }
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    <code>slots</code> is the fixed, code-defined list of ad placements the site supports
+                    (currently <code>article-sidebar</code> 300×600 desktop, <code>article-horizontal</code>
+                    728×90 mobile) — new placements require a code change and a template wire-up, so this
+                    list only changes with a deployment. <code>categories</code>/<code>authors</code>/<code>tags</code>
+                    reflect current portal content and can change at any time.
+                </p>
+            </section>
+
+            <!-- Single banner stats -->
+            <section id="ban-stats" class="mb-5 ps-3">
+                <h5>Single banner stats</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners/{id}/stats</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Query param</th><th>Default</th><th>Range</th></tr></thead>
+                        <tbody><tr><td><code>days</code></td><td>30</td><td>1–366</td></tr></tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc/stats?days=30"</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "banner_id": "664a000000000000000000cc",
+  "days": 30,
+  "totals":  {"impressions": 18234, "clicks": 312, "ctr": 1.71},
+  "series": [
+    {"date": "2025-03-01", "impressions": 640, "clicks": 12, "ctr": 1.88},
+    {"date": "2025-03-02", "impressions": 712, "clicks": 9,  "ctr": 1.26}
+  ]
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted"><code>series</code> only contains days with at least one recorded impression or click — pad missing days with zero on the client if a continuous calendar is needed.</p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> missing/invalid banner ID, or <code>days</code> outside 1–366.<br>
+                   <strong>Response 404:</strong> banner not found.<br>
+                   <strong>Response 500:</strong> database error.</p>
+            </section>
+
+            <!-- Aggregate banner stats -->
+            <section id="ban-stats-agg" class="mb-5 ps-3">
+                <h5>Aggregate stats</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners/stats</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Query param</th><th>Default</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>days</code></td><td>30</td><td>1–366.</td></tr>
+                            <tr><td><code>group_by</code></td><td>(all three)</td><td>Optional. One of <code>campaign</code>, <code>advertiser</code>, <code>slot</code> — when given, only that grouping is computed (the other two are omitted from the response). Omit to get all three.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/stats?days=30"</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "days": 30,
+  "totals": {"impressions": 52310, "clicks": 601, "ctr": 1.15},
+  "series": [
+    {"date": "2025-03-01", "impressions": 1820, "clicks": 22, "ctr": 1.21}
+  ],
+  "by_campaign": [
+    {"key": "Spring 2025",  "impressions": 18234, "clicks": 312, "ctr": 1.71},
+    {"key": "(unknown)",    "impressions": 400,   "clicks": 3,   "ctr": 0.75}
+  ],
+  "by_advertiser": [
+    {"key": "Acme Corp", "impressions": 18234, "clicks": 312, "ctr": 1.71}
+  ],
+  "by_slot": [
+    {"key": "article-sidebar", "impressions": 30120, "clicks": 470, "ctr": 1.56}
+  ]
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    Every daily stat row keeps a <strong>snapshot</strong> of its banner's
+                    <code>campaign_name</code>/<code>advertiser</code> taken on the day it was recorded, so
+                    renaming a campaign, reassigning an advertiser, or deleting the banner entirely never
+                    rewrites or drops historical rows from these reports — a same-day rename only affects
+                    future days. Rows predating this snapshot, or whose banner no longer exists, are grouped
+                    under the key <code>"(unknown)"</code> rather than being dropped.
+                </p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> <code>days</code> outside 1–366, or invalid <code>group_by</code>.<br>
+                   <strong>Response 500:</strong> database error.</p>
             </section>
 
             <!-- ── Pages ──────────────────────────────────────────────── -->
