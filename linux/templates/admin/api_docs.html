@@ -1932,6 +1932,19 @@ Content-Type: application/json
                    <strong>Response 409:</strong> the poll is not a vote-free draft.</p>
             </section>
 
+            <section id="galleries" class="mb-5">
+                <h2>Galériák</h2>
+                <p>A <code>GET /api/galleries/{id}</code> nyilvános, a teljes rendezett képsort adja az overlayhez. A kezelés API-kulccsal vagy admin munkamenettel érhető el.</p>
+                <table class="table table-sm table-bordered"><thead><tr><th>Method</th><th>URL</th></tr></thead><tbody><tr><td>GET, POST</td><td><code>/api/galleries/manage</code></td></tr><tr><td>GET, PUT, DELETE</td><td><code>/api/galleries/manage/{id}</code></td></tr></tbody></table>
+                <p>Írási törzs: <code>{"title":"Nyári képek","image_ids":["&lt;media-id&gt;"]}</code>. Csak képfájl-médiák választhatók. A kezelő válaszok az <code>images</code>, <code>article_references</code>, <code>page_references</code> és <code>deletable</code> mezőket tartalmazzák.</p>
+                <p>Aktív cikk- vagy publikálható oldalhivatkozás esetén a törlés <strong>409 Conflict</strong>, <code>resource_in_use</code> kóddal tér vissza. Hibás ID: 400; hiányzó galéria: 404; adattári hiba: 500.</p>
+                <p>Markdown cikkbe és statikus oldalba:</p><pre class="bg-dark text-light p-3 rounded"><code>```gallery
+6aab40c08158ffeec624c2ff
+[1-4]
+```</code></pre>
+                <p>A tartomány 1-alapú, inkluzív, legfeljebb 9 képes; elhagyva <code>[1-4]</code>. A galéria többször is beilleszthető eltérő tartományokkal.</p>
+            </section>
+
         </div><!-- /col -->
     </div><!-- /row -->
 </div><!-- /container -->

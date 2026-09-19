@@ -1,0 +1,5 @@
+{{define "admin-galleries"}}{{template "admin-header" .}}
+<div class="container-fluid px-4"><div class="d-flex justify-content-between align-items-center mb-4"><h1 class="h3">Galériák</h1><a class="btn btn-primary" href="/admin/galleries/create"><i class="bi bi-plus-circle me-1"></i>Új galéria</a></div>
+{{if .Error}}<div class="alert alert-danger">{{.Error}}</div>{{end}}
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Cím</th><th>Képek</th><th>Hivatkozások</th><th></th></tr></thead><tbody>{{range .Galleries}}<tr><td>{{.Title}}</td><td>{{len .Images}}</td><td>{{.ArticleReferences}} cikk, {{.PageReferences}} oldal</td><td class="text-end"><a href="/admin/galleries/edit/{{.ID}}" class="btn btn-sm btn-outline-primary">Szerkesztés</a><form method="post" action="/admin/galleries/delete/{{.ID}}" class="d-inline"><button class="btn btn-sm btn-outline-danger" {{if not .Deletable}}disabled title="Aktív tartalom hivatkozik rá"{{end}}>Törlés</button></form></td></tr>{{else}}<tr><td colspan="4" class="text-muted">Még nincs galéria.</td></tr>{{end}}</tbody></table></div></div></div>
+{{template "admin-footer" .}}{{end}}

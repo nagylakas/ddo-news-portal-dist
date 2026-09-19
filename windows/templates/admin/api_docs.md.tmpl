@@ -1590,3 +1590,29 @@ curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" 
 
 **Response 200:** `{"message":"A szavazás sikeresen törölve"}`.
 **Response 409:** the poll is not a vote-free draft.
+
+## Galériák
+
+Nyilvános overlay-adat: `GET /api/galleries/{id}`. A válasz a galéria címét és teljes, rendezett `images` képsorát adja vissza.
+
+Hitelesített kezelés:
+
+| Módszer | URL |
+| --- | --- |
+| GET, POST | `/api/galleries/manage` |
+| GET, PUT, DELETE | `/api/galleries/manage/{id}` |
+
+Írási törzs: `{"title":"Nyári képek","image_ids":["<media-id>","<media-id>"]}`. Csak `image/*` médiák választhatók. A lista és részlet tartalmazza az `images`, `article_references`, `page_references` és `deletable` mezőket.
+
+Törléskor aktív cikk- vagy publikálható oldalhivatkozás esetén a válasz `409 Conflict`, `resource_in_use` kóddal, függőségtípusokkal és darabszámmal. Hibás ID: `400`; nem létező galéria: `404`; adattári hiba: `500`.
+
+Markdown-beillesztés cikkbe és statikus oldalba:
+
+````text
+```gallery
+6aab40c08158ffeec624c2ff
+[1-4]
+```
+````
+
+A tartomány 1-alapú, inkluzív és legfeljebb 9 képes; elhagyva `[1-4]`. Egy galéria többször is beilleszthető eltérő tartományokkal. Részletes szerkesztői útmutató: `docs/galleries.md`.

@@ -160,6 +160,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdInsertLink('content')" title="{{t .Lang "article.md_link"}}">&#128279; {{t .Lang "article.md_link"}}</button>
                                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('content','---')" title="{{t .Lang "article.md_hr"}}">&#8212;</button>
                                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPollPicker()"><i class="bi bi-bar-chart"></i> {{t .Lang "nav.polls"}}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="openGalleryPicker('content')"><i class="bi bi-images"></i> Galéria</button>
                                     <div class="ms-auto">
                                         <button type="button" class="btn btn-sm btn-outline-primary" id="btn-preview-edit" onclick="togglePreview('content','md-preview-edit','btn-preview-edit')">&#128065; {{t .Lang "common.preview"}}</button>
                                     </div>
@@ -487,5 +488,6 @@ function importCurrentURL() {
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="/static/js/md-editor.js"></script>
 <script src="/static/js/poll-picker.js"></script>
+<script src="/static/js/gallery-picker.js"></script>
 {{template "admin-footer" .}}
 {{end}}

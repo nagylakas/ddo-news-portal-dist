@@ -126,6 +126,7 @@
 
     // ─── Gallery picker (multi-select from media library) ────────────────────
     function openGalleryPicker() {
+        if (window.openGalleryPicker) return window.openGalleryPicker(textarea());
         var body =
             '<div class="d-flex justify-content-between align-items-center mb-2">' +
             '  <small class="text-muted">' + escAttr(t('gallery_hint', 'Válassz egy vagy több képet')) + '</small>' +
