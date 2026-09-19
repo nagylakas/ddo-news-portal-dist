@@ -14,6 +14,8 @@
                     <a href="#update-check" class="list-group-item list-group-item-action py-1 px-2 ms-2">Check for updates</a>
                     <a href="#update-start" class="list-group-item list-group-item-action py-1 px-2 ms-2">Start update</a>
                     <a href="#update-status" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update status</a>
+                    <a href="#restart" class="list-group-item list-group-item-action py-1 px-2 ms-2">Restart portal</a>
+                    <a href="#mcp" class="list-group-item list-group-item-action py-1 px-2 ms-2">MCP server</a>
                     <a href="#stats"      class="list-group-item list-group-item-action py-1 px-2">Site Statistics</a>
                     <a href="#analytics"  class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Analytics</a>
                     <a href="#an-params"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Query parameters</a>
@@ -189,6 +191,31 @@ Content-Type: application/json
                     </table>
                 </div>
                 <p>Returns <code>in_progress</code>, <code>step</code>, <code>message</code>, <code>error</code>, and version fields. The portal restarts shortly after a successful install; clients should retry after its temporary unavailability.</p>
+            </section>
+
+            <section id="restart" class="mb-5 ps-3">
+                <h5>Restart portal</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead><tbody><tr><td><span class="badge bg-primary">POST</span></td><td><code>/api/system/restart</code></td><td>Required</td></tr></tbody></table></div>
+                <p>Starts the same graceful process restart as the admin UI. The portal briefly becomes unavailable after the accepted response.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{"message":"Restart started"}</code></pre>
+            </section>
+
+            <section id="mcp" class="mb-5 ps-3">
+                <h5>MCP server</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th><th>Description</th></tr></thead><tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/mcp</code></td><td>Required</td><td>Running and configured MCP state, plus published tools when active.</td></tr><tr><td><span class="badge bg-warning text-dark">PUT</span></td><td><code>/api/mcp</code></td><td>Required</td><td>Persist MCP enablement for the next restart.</td></tr></tbody></table></div>
+                <p><code>enabled</code> and <code>oauth_enabled</code> describe the running process; <code>configured_*</code> values are read from <code>.env</code>. A pending difference sets <code>restart_required</code>. <code>tools</code> is populated only while MCP is active.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "enabled": true,
+  "oauth_enabled": false,
+  "configured_enabled": true,
+  "configured_oauth_enabled": false,
+  "restart_required": false,
+  "endpoint": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/mcp",
+  "tools": [{"name":"list_banners","description":"List every banner...","read_only":true}]
+}</code></pre>
+                <p class="mb-1"><strong>Update request:</strong> <code>enabled</code> is required. <code>oauth_enabled</code> is optional and unchanged when omitted.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" -d '{"enabled":true,"oauth_enabled":true}' {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/mcp</code></pre>
+                <p class="mb-0"><strong>Errors:</strong> <code>400</code> missing <code>enabled</code> or OAuth enabled while MCP is disabled; <code>500</code> unreadable or unwritable configuration.</p>
             </section>
 
             <!-- ── Site Statistics ────────────────────────────────────── -->

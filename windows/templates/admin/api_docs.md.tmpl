@@ -14,6 +14,8 @@ REST API reference for programmatic access to this news portal.
   - [Check for updates](#check-for-updates)
   - [Start an update](#start-an-update)
   - [Update status](#update-status)
+  - [Restart portal](#restart-portal)
+  - [MCP server](#mcp-server)
 - [Site Statistics](#site-statistics)
 - [Analytics](#analytics)
   - [Query parameters](#query-parameters)
@@ -198,6 +200,48 @@ Starts the same asynchronous download, installation, and restart procedure as th
 | GET | `/api/system/update/status` | Required |
 
 Returns the current asynchronous update state (`in_progress`, `step`, `message`, `error`, `current_version`, `latest_version`, and `update_available`). The portal restarts shortly after a successful install, so a client should tolerate a temporary connection failure and then query `/api/system` again.
+
+### Restart portal
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/system/restart` | Required |
+
+Starts the same graceful process restart as the admin UI. The portal briefly becomes unavailable after the accepted response.
+
+```json
+{"message":"Restart started"}
+```
+
+### MCP server
+
+| Method | URL | Auth | Description |
+| --- | --- | --- | --- |
+| GET | `/api/mcp` | Required | Running and configured MCP state, plus published tools when active. |
+| PUT | `/api/mcp` | Required | Persist MCP enablement for the next restart. |
+
+`enabled` and `oauth_enabled` describe the running process; `configured_enabled` and `configured_oauth_enabled` are read from `.env`. A pending difference sets `restart_required`. `tools` is populated only while MCP is active.
+
+```json
+{
+  "enabled": true,
+  "oauth_enabled": false,
+  "configured_enabled": true,
+  "configured_oauth_enabled": false,
+  "restart_required": false,
+  "endpoint": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/mcp",
+  "tools": [{"name":"list_banners","description":"List every banner...","read_only":true}]
+}
+```
+
+For `PUT`, `enabled` is required. `oauth_enabled` is optional and remains unchanged when omitted:
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"enabled":true,"oauth_enabled":true}' {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/mcp
+```
+
+Errors: `400` for a missing `enabled` field or enabling OAuth while MCP is disabled; `500` when the configuration cannot be read or written.
 
 ## Site Statistics
 
