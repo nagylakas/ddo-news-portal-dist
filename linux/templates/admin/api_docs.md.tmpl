@@ -641,11 +641,17 @@ curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
       "og_image":      "https://cdn.example.com/category.png",
       "display_order": 1,
       "created_at":    "2025-01-01T00:00:00Z",
-      "updated_at":    "2025-01-01T00:00:00Z"
+      "updated_at":    "2025-01-01T00:00:00Z",
+      "article_count": 12,
+      "deletable":     false
     }
   ]
 }
 ```
+
+`article_count` is the number of non-deleted articles (including drafts and scheduled ones)
+currently referencing this category. `deletable` is `true` only when `article_count` is `0` —
+see [Delete category](#delete-category).
 
 ### Get one category
 
@@ -653,7 +659,7 @@ curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
 | --- | --- | --- |
 | GET | `/api/categories/{id}` | Required |
 
-**Response 200:** single category object.
+**Response 200:** single category object, including `article_count` and `deletable` as above.
 **Response 404:** `{"error":"..."}`
 
 ### Create category
@@ -700,12 +706,20 @@ curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H 
 | --- | --- | --- |
 | DELETE | `/api/categories/{id}` | Required |
 
-> **Note:** Deleting a category does not delete its articles; they simply lose their category association.
+> **Warning:** A category cannot be deleted while any non-deleted article still references it (by
+> `category_id` or by its cached name), including drafts and scheduled articles. Reassign or delete
+> those articles first.
 
 ```bash
 curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb
 ```
+
+**Response 200:** `{"message": "..."}`.
+
+**Response 409:** category still has articles referencing it.
+
+**Response 404:** category not found.
 
 ---
 

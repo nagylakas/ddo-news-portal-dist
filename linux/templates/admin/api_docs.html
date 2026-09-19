@@ -756,10 +756,18 @@ Content-Type: application/json
       "og_image":      "https://cdn.example.com/category.png",
       "display_order": 1,
       "created_at":    "2025-01-01T00:00:00Z",
-      "updated_at":    "2025-01-01T00:00:00Z"
+      "updated_at":    "2025-01-01T00:00:00Z",
+      "article_count": 12,
+      "deletable":     false
     }
   ]
 }</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    <code>article_count</code> is the number of non-deleted articles (including drafts and
+                    scheduled ones) currently referencing this category. <code>deletable</code> is
+                    <code>true</code> only when <code>article_count</code> is <code>0</code> — see
+                    <a href="#cat-delete">Delete category</a>.
+                </p>
             </section>
 
             <!-- Get one category -->
@@ -775,7 +783,8 @@ Content-Type: application/json
                         </tr></tbody>
                     </table>
                 </div>
-                <p class="mb-1"><strong>Response 200:</strong> single category object.<br>
+                <p class="mb-1"><strong>Response 200:</strong> single category object, including
+                   <code>article_count</code> and <code>deletable</code> as above.<br>
                    <strong>Response 404:</strong> <code>{"error":"..."}</code></p>
             </section>
 
@@ -843,12 +852,17 @@ Content-Type: application/json
                         </tr></tbody>
                     </table>
                 </div>
-                <div class="alert alert-info py-2 small">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Deleting a category does not delete its articles; they simply lose their category association.
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    A category cannot be deleted while any non-deleted article still references it
+                    (by <code>category_id</code> or by its cached name), including drafts and scheduled
+                    articles. Reassign or delete those articles first.
                 </div>
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message": "..."}</code>.</p>
+                <p class="mt-2 mb-1"><strong>Response 409:</strong> category still has articles referencing it.</p>
+                <p class="mt-2 mb-1"><strong>Response 404:</strong> category not found.</p>
             </section>
 
             <!-- ═══════════════════════════════════════════════════════ -->

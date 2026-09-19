@@ -16,6 +16,7 @@
                         <th>{{t .Lang "cat.col_desc"}}</th>
                         <th>{{t .Lang "cat.col_icon"}}</th>
                         <th class="text-center">{{t .Lang "cat.col_order"}}</th>
+                        <th class="text-center">{{t .Lang "cat.col_articles"}}</th>
                         <th class="text-center">{{t .Lang "cat.col_created"}}</th>
                         <th class="text-end">{{t .Lang "cat.col_actions"}}</th>
                     </tr>
@@ -34,11 +35,15 @@
                             {{end}}
                         </td>
                         <td class="text-center text-muted small">{{.DisplayOrder}}</td>
+                        <td class="text-center text-muted small">
+                            <a href="/admin/articles?category={{pathEscape .Name}}" class="text-decoration-none">{{.ArticleCount}}</a>
+                        </td>
                         <td class="text-center text-muted small text-nowrap">{{formatDate .CreatedAt}}</td>
                         <td class="text-end text-nowrap">
                             <a href="/admin/categories/edit/{{.ID.Hex}}" class="btn btn-sm btn-outline-secondary" title="{{t $.Lang "common.edit"}}">
                                 <i class="bi bi-pencil"></i>
                             </a>
+                            {{if .Deletable}}
                             <form action="/admin/categories/delete/{{.ID.Hex}}" method="POST" class="d-inline">
                                 <button type="submit" class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm(this.dataset.confirm)"
@@ -47,6 +52,12 @@
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
+                            {{else}}
+                            <button type="button" class="btn btn-sm btn-outline-danger disabled" disabled
+                                    title="{{t $.Lang "cat.cannot_delete_has_articles"}}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            {{end}}
                         </td>
                     </tr>
                     {{end}}
