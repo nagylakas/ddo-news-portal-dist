@@ -9,6 +9,11 @@ REST API reference for programmatic access to this news portal.
 - [Authentication](#authentication)
 - [Deletion safeguards](#deletion-safeguards)
 - [Version](#version)
+- [System and updates](#system-and-updates)
+  - [System identity](#system-identity)
+  - [Check for updates](#check-for-updates)
+  - [Start an update](#start-an-update)
+  - [Update status](#update-status)
 - [Site Statistics](#site-statistics)
 - [Analytics](#analytics)
   - [Query parameters](#query-parameters)
@@ -122,6 +127,68 @@ The feature-flagged admin modules follow the same rule: forum and marketplace ca
 ```json
 {"version":"{{.AppVersion}}"}
 ```
+
+## System and updates
+
+All endpoints in this section require an admin session or `X-API-Key`. They are intended for a trusted external administration service.
+
+### System identity
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/system` | Required |
+
+Returns the running portal engine version and the configured icon package. `icon_pack.loaded` is true only when that package version is available locally and is actually active.
+
+```json
+{
+  "engine_version": "{{.AppVersion}}",
+  "icon_pack": {
+    "id": "itlife",
+    "version": "1.2.0",
+    "loaded": true
+  }
+}
+```
+
+### Check for updates
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/system/update/check` | Required |
+
+Fetches and validates the distribution manifest but does not install anything. The response has the same `current_version`, `latest_version`, and `update_available` fields used by the update status endpoint.
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/system/update/check
+```
+
+`409 Conflict` means self-update is unavailable in this deployment; `502 Bad Gateway` means the update manifest could not be retrieved.
+
+### Start an update
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/system/update` | Required |
+
+Starts the same asynchronous download, installation, and restart procedure as the **Install update** button in the admin UI. Call this only after a successful check where `update_available` is true.
+
+**Response 202:**
+
+```json
+{"message":"Update started","version":"0.6.38"}
+```
+
+`409 Conflict` means the portal is already current, the updater is unavailable, or another update is in progress.
+
+### Update status
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/system/update/status` | Required |
+
+Returns the current asynchronous update state (`in_progress`, `step`, `message`, `error`, `current_version`, `latest_version`, and `update_available`). The portal restarts shortly after a successful install, so a client should tolerate a temporary connection failure and then query `/api/system` again.
 
 ## Site Statistics
 

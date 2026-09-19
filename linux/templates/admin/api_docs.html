@@ -9,6 +9,11 @@
                 <div class="list-group list-group-flush small">
                     <a href="#auth"       class="list-group-item list-group-item-action py-1 px-2">Authentication</a>
                     <a href="#version"    class="list-group-item list-group-item-action py-1 px-2">Version</a>
+                    <a href="#system"     class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">System &amp; updates</a>
+                    <a href="#system-info" class="list-group-item list-group-item-action py-1 px-2 ms-2">System identity</a>
+                    <a href="#update-check" class="list-group-item list-group-item-action py-1 px-2 ms-2">Check for updates</a>
+                    <a href="#update-start" class="list-group-item list-group-item-action py-1 px-2 ms-2">Start update</a>
+                    <a href="#update-status" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update status</a>
                     <a href="#stats"      class="list-group-item list-group-item-action py-1 px-2">Site Statistics</a>
                     <a href="#analytics"  class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Analytics</a>
                     <a href="#an-params"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Query parameters</a>
@@ -112,6 +117,69 @@ Content-Type: application/json
                 </div>
                 <p class="mb-1"><strong>Response:</strong></p>
 <pre class="bg-dark text-light p-3 rounded small"><code>{"version":"{{.AppVersion}}"}</code></pre>
+            </section>
+
+            <!-- ── System and updates ───────────────────────────────── -->
+            <section id="system" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-cpu me-2"></i>System &amp; updates
+                </h3>
+                <p class="text-muted">Protected endpoints for a trusted external administration service. They require an admin session or <code>X-API-Key</code>.</p>
+            </section>
+
+            <section id="system-info" class="mb-5 ps-3">
+                <h5>System identity</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/system</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <p>Returns the running portal engine version and the active icon package. <code>icon_pack.loaded</code> is true only when the selected package version is installed and active locally.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "engine_version": "{{.AppVersion}}",
+  "icon_pack": {"id": "itlife", "version": "1.2.0", "loaded": true}
+}</code></pre>
+            </section>
+
+            <section id="update-check" class="mb-5 ps-3">
+                <h5>Check for updates</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-primary">POST</span></td><td><code>/api/system/update/check</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <p>Fetches and validates the distribution manifest without installing it. Use <code>update_available</code> from the response before starting an update.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" +  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/system/update/check</code></pre>
+                <p class="mb-0"><strong>Errors:</strong> <code>409</code> self-update unavailable; <code>502</code> update manifest unavailable.</p>
+            </section>
+
+            <section id="update-start" class="mb-5 ps-3">
+                <h5>Start update</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-primary">POST</span></td><td><code>/api/system/update</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Starts the same asynchronous download, installation, and restart as the admin UI's <strong>Install update</strong> button. Start it only when the preceding check reports <code>update_available: true</code>.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" +  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/system/update</code></pre>
+                <p class="mb-0"><strong>Response 202:</strong> <code>{"message":"Update started","version":"0.6.38"}</code>. A <code>409</code> means already current, unsupported, or already running.</p>
+            </section>
+
+            <section id="update-status" class="mb-5 ps-3">
+                <h5>Update status</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/system/update/status</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <p>Returns <code>in_progress</code>, <code>step</code>, <code>message</code>, <code>error</code>, and version fields. The portal restarts shortly after a successful install; clients should retry after its temporary unavailability.</p>
             </section>
 
             <!-- ── Site Statistics ────────────────────────────────────── -->
