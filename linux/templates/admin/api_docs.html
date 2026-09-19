@@ -46,6 +46,9 @@
                     <a href="#page-create"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
                     <a href="#page-update"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
                     <a href="#page-delete"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#comments"   class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Comment moderation</a>
+                    <a href="#comment-list" class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#comment-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
                     <a href="#polls"      class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Polls</a>
                     <a href="#poll-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
                     <a href="#poll-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
@@ -1206,6 +1209,79 @@ Content-Type: application/json
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/664a1b2c3d4e5f6789abcd11</code></pre>
                 <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message":"Az oldal sikeresen törölve"}</code></p>
+            </section>
+
+            <!-- Comment moderation -->
+            <section id="comments" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-chat-left-text me-2"></i>Comment moderation
+                </h3>
+                <p class="text-muted">
+                    Protected endpoints for an external administration interface. They are separate from the public
+                    <code>/api/comments</code> endpoints: an admin session or <code>X-API-Key</code> is required.
+                </p>
+            </section>
+
+            <!-- List comments -->
+            <section id="comment-list" class="mb-5 ps-3">
+                <h5>List comments for moderation</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/admin/comments</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Query parameters:</strong></p>
+                <ul>
+                    <li><code>article_id</code> — optional article ID filter</li>
+                    <li><code>limit</code> — 1–500, default 100</li>
+                    <li><code>offset</code> — zero-based pagination offset, default 0</li>
+                </ul>
+                <p>Only comments that have not already been deleted are returned. Each item includes the article and user IDs required by an external moderation UI.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/admin/comments?limit=100&amp;offset=0"</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total": 1,
+  "limit": 100,
+  "offset": 0,
+  "comments": [{
+    "id": "664a1b2c3d4e5f6789abcd11",
+    "article_id": "664a1b2c3d4e5f6789abcd12",
+    "user_id": "664a1b2c3d4e5f6789abcd13",
+    "user_name": "Jane Doe",
+    "content": "Useful article.",
+    "created_at": "2026-09-19T10:00:00Z"
+  }]
+}</code></pre>
+            </section>
+
+            <!-- Delete comment -->
+            <section id="comment-delete" class="mb-5 ps-3">
+                <h5>Delete a comment as moderator</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/admin/comments/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-shield-check me-1"></i>
+                    This performs the same soft delete as admin moderation and records the action in the audit log.
+                    It does not require the commenting user's session.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/admin/comments/664a1b2c3d4e5f6789abcd11</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message":"Comment deleted successfully"}</code></p>
+                <p class="mb-0"><strong>Errors:</strong> <code>400</code> invalid ID; <code>404</code> unknown or already deleted comment.</p>
             </section>
 
             <!-- ── Polls ──────────────────────────────────────────────── -->

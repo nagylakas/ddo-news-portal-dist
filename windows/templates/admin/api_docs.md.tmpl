@@ -46,6 +46,9 @@ REST API reference for programmatic access to this news portal.
   - [Create page](#create-page)
   - [Update page](#update-page)
   - [Delete page](#delete-page)
+- [Comment moderation](#comment-moderation)
+  - [List comments for moderation](#list-comments-for-moderation)
+  - [Delete a comment as moderator](#delete-a-comment-as-moderator)
 - [Polls](#polls)
   - [List polls](#list-polls)
   - [Get one poll](#get-one-poll)
@@ -1012,6 +1015,40 @@ curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" 
 ```
 
 **Response 200:** `{"message":"Az oldal sikeresen törölve"}`
+
+---
+
+## Comment moderation
+
+These endpoints are for external admin tools. They require the same admin session or `X-API-Key` as the rest of the management API. They are separate from the public `/api/comments` endpoints, which use an OIDC user session.
+
+### List comments for moderation
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/admin/comments` | Required |
+
+Only non-deleted comments are returned. Optional query parameters: `article_id` (ObjectID filter), `limit` (1–500, default 100), and `offset` (default 0).
+
+```json
+{
+  "comments": [{"id":"...","article_id":"...","user_id":"...","user_name":"Anna","content":"Example comment","created_at":"2026-09-19T12:00:00Z"}],
+  "total": 1,
+  "limit": 100,
+  "offset": 0
+}
+```
+
+### Delete a comment as moderator
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/admin/comments/{id}` | Required |
+
+Soft-deletes any non-deleted comment regardless of its author, exactly like the built-in admin moderation action. It is audit logged.
+
+**Response 200:** `{"message":"A hozzászólás sikeresen moderálva és törölve"}`.
+**Response 400:** invalid comment ID. **Response 404:** comment does not exist or was already deleted.
 
 ---
 
