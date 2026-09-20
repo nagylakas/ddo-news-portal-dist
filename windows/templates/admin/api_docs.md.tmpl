@@ -617,6 +617,10 @@ GET /api/analytics/realtime?minutes=5
 - `offset` — zero-based skip (default: `0`)
 - `published` — `true` to return only published articles; omit for all
 
+> Supplying `sync_source` switches this endpoint to the sync-reconciliation listing — see
+> [Central publishing sync](#central-publishing-sync) for its own parameters (`external_id`,
+> `sync_state`, `changed_since`) and response shape.
+
 **Response:**
 
 ```json
@@ -697,6 +701,8 @@ curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
 | `ai_image_disclosure` | string | Yes, if image_url is set | AI declaration for the featured image: `unmodified`, `modified`, or `generated`. For backward compatibility only, an omitted value is stored as `unmodified` when `image_url` is set. |
 | `published` | bool | | Publish immediately (default: `false`). |
 | `publish_at` | string (RFC3339) | | Scheduled publish time. Null or omit to use the current time when `published=true`. |
+| `sync_source` | string | | Identifies the central publishing system, e.g. `ivr`. Must be supplied together with `external_id` — see [Central publishing sync](#central-publishing-sync). |
+| `external_id` | string | | The central system's opaque identifier for this article. Together with `sync_source` forms a durable, unique external identity. |
 
 **curl:**
 
@@ -718,6 +724,11 @@ curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H
 **Response 201:** the created article object.
 **Response 400:** `{"error":"A cím megadása kötelező"}`
 
+> When `sync_source`+`external_id` are both supplied, this endpoint becomes **idempotent** for
+> that identity: re-posting the same pair updates the existing linked article (returning `200`)
+> instead of creating a duplicate. See [Central publishing sync](#central-publishing-sync) for the
+> full contract, including the `409 sync_conflict` response.
+
 ### Update article
 
 | Method | URL | Auth |
@@ -729,6 +740,7 @@ Same body fields as [Create article](#create-article), plus:
 | Field | Type | Notes |
 | --- | --- | --- |
 | `update_slug` | bool | When `true` the slug is regenerated from the title (default: `false` — existing URLs stay stable). |
+| `sync_source` / `external_id` | string | Same meaning as on create. Supplying both claims/re-confirms the central identity and sets `sync_state=in_sync`. **Omitting them** on an article that already has a sync connection marks it `locally_modified` instead — this is how the admin UI's own edit form behaves, since it never sends these fields. See [Central publishing sync](#central-publishing-sync). |
 
 > **Warning:** Omit `update_slug` (or set it to `false`) to keep the existing URL intact. Setting it to `true` will break any external links to the old URL.
 
@@ -746,6 +758,9 @@ curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H 
 ```
 
 **Response 200:** updated article object.
+**Response 409 (sync_conflict):** the article was modified locally since the last central sync, or is
+already linked to a different `sync_source`/`external_id` pair — see
+[Central publishing sync](#central-publishing-sync).
 
 ### Delete article
 
@@ -769,6 +784,86 @@ curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" 
 
 `cleanup.saved_articles` is the number of personal saved-article records removed during deletion. Saved articles never prevent a soft delete.
 **Response 404:** `{"error":"..."}`
+
+> A soft delete on an article linked to a central sync record does not clear the link:
+> `sync_state` becomes `deleted_locally` instead, so the central system can still discover the
+> deletion via [Central publishing sync](#central-publishing-sync)'s `changed_since` query.
+
+### Central publishing sync
+
+A central publishing system (identified by `sync_source`, e.g. `ivr`) can push articles into this
+portal via the regular [Create](#create-article) and [Update](#update-article) endpoints, and later
+poll this endpoint to find out what happened to each one locally. Reconciliation is poll-based in
+this release — there is no webhook.
+
+**Sync fields on the article object** (present only for articles with a sync connection):
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `sync_source` | string | The central system that owns this article, e.g. `ivr`. |
+| `external_id` | string | The central system's own, opaque identifier. Together with `sync_source`, unique across all articles. |
+| `sync_state` | string | `in_sync` — matches the central write. `locally_modified` — an admin (or a non-sync API write) changed the article since the last central write; the next central write on this identity is rejected with `409 sync_conflict` instead of silently overwriting it. `deleted_locally` — the article was soft-deleted here; the connection is kept so the central system can discover the deletion. |
+| `last_synced_at` | string (RFC3339) | Timestamp of the most recent write from the central system. |
+| `local_modified_at` | string (RFC3339) | Timestamp of the most recent local change (admin edit, restore, or non-sync API write) since the last central write. |
+
+**Idempotent publish contract** (POST/PUT with `sync_source`+`external_id`):
+
+- No article currently claims this identity → a new article is created. **201**.
+- An article already claims this identity and is `in_sync` or `deleted_locally` → it is updated (a
+  re-publish of a locally-deleted article un-deletes it). **200**.
+- An article already claims this identity but is `locally_modified` → the write is rejected. The
+  central system must resolve the conflict out-of-band before writing again. **409**:
+
+  ```json
+  {
+    "error": {
+      "code": "sync_conflict",
+      "message": "..."
+    }
+  }
+  ```
+- `PUT /api/articles/{id}` only: if `{id}` is already linked to a *different* `sync_source`/`external_id`
+  pair than the one supplied, the write is rejected the same way (re-pointing an existing link is
+  not allowed). **409**.
+
+A plain admin-UI or API write (no `sync_source`/`external_id` in the request body) on an article
+that already has a sync connection always succeeds, but flips `sync_state` to `locally_modified` —
+local edits are never blocked, only the next central write onto that identity is.
+
+**Reconciliation listing** — `GET /api/articles?sync_source=...`:
+
+- `sync_source` — **required** to activate this mode; identifies the central system.
+- `external_id` — narrow to one article's identity.
+- `sync_state` — `in_sync`, `locally_modified`, or `deleted_locally`.
+- `changed_since` — RFC3339 timestamp; returns articles whose `last_synced_at`,
+  `local_modified_at`, or soft-deletion time is at or after this instant. This is the primary
+  mechanism for incremental polling.
+- `limit` / `offset` — same as the default listing.
+
+> Unlike the default article listing, this mode includes soft-deleted articles (so
+> `deleted_locally` stays discoverable) and is not restricted to published content.
+
+**curl — claim/update an article from the central system:**
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title":       "Wire Story: Example",
+    "content":     "## Lead\n\nBody text…",
+    "sync_source": "ivr",
+    "external_id": "ivr-article-98765",
+    "published":   true,
+    "ai_content_disclosure": "none"
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles
+```
+
+**curl — poll for changes since the last reconciliation run:**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles?sync_source=ivr&changed_since=2025-06-01T00:00:00Z"
+```
 
 ### Article statistics
 
