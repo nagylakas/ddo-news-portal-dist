@@ -303,7 +303,9 @@ make the aggregator own `/`; the portal's own news then remains at `/news`.
 
 Source body: `{"name":"Example","feed_url":"https://example.com/feed.xml","site_url":"https://example.com","tags":["Tech","Mobile"],"active":true}`.
 Only public HTTP(S) feed URLs are accepted. RSS data is refreshed in the
-background every 15 minutes and cached for 30 days. Failed sources are hidden
+background every 15 minutes. Cached items are retained for 90 days by default
+(enforced by a once-daily cleanup tick) — configurable via
+`AGGREGATOR_RETENTION_DAYS` (`0` = keep forever). Failed sources are hidden
 from the public aggregator until a successful refresh. Duplicate original
 URLs/GUIDs are stored only once; manual hiding survives later imports.
 
