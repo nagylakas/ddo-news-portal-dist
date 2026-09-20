@@ -254,6 +254,8 @@ curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H 
 
 Errors: `400` for a missing `enabled` field or enabling OAuth while MCP is disabled; `500` when the configuration cannot be read or written.
 
+The read-only MCP tool `get_system_info` returns the current engine and icon-pack versions, the nightly automatic-update state (`enabled`, `last_check`, `last_result`, `in_progress`), and a fresh manifest check. `update_check.checked=true` means `latest_version` and `update_available` are current; it never installs an update. If the self-update mechanism or manifest is unavailable, `update_check.error` explains why.
+
 ## Plugin status
 
 | Method | URL | Auth | Description |

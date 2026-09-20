@@ -226,6 +226,7 @@ Content-Type: application/json
                 <p class="mb-1"><strong>Update request:</strong> <code>enabled</code> is required. <code>oauth_enabled</code> is optional and unchanged when omitted.</p>
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" -d '{"enabled":true,"oauth_enabled":true}' {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/mcp</code></pre>
                 <p class="mb-0"><strong>Errors:</strong> <code>400</code> missing <code>enabled</code> or OAuth enabled while MCP is disabled; <code>500</code> unreadable or unwritable configuration.</p>
+                <p class="mt-3 mb-0">The read-only MCP tool <code>get_system_info</code> returns the current engine and icon-pack versions, nightly automatic-update state (<code>enabled</code>, <code>last_check</code>, <code>last_result</code>, <code>in_progress</code>), and a fresh manifest check. <code>update_check.checked=true</code> means <code>latest_version</code> and <code>update_available</code> are current; it never installs an update. If self-update or the manifest is unavailable, <code>update_check.error</code> explains why.</p>
             </section>
 
             <section id="plugins-status" class="mb-5">
