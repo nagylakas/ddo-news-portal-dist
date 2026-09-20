@@ -27,7 +27,7 @@
                     <a href="/admin/marketplace/messages/{{$.Listing.ID.Hex}}?thread={{.ThreadID.Hex}}" class="list-group-item list-group-item-action {{if eq $.ThreadID .ThreadID.Hex}}active{{end}}">
                         <div class="fw-semibold small">{{.SenderName}} &rarr; {{.RecipientName}}</div>
                         <div class="small {{if eq $.ThreadID .ThreadID.Hex}}text-white-50{{else}}text-muted{{end}}">{{truncate .Content 90}}</div>
-                        <div class="small {{if eq $.ThreadID .ThreadID.Hex}}text-white-50{{else}}text-muted{{end}}">{{formatDateTime .CreatedAt}}</div>
+                        <div class="small {{if eq $.ThreadID .ThreadID.Hex}}text-white-50{{else}}text-muted{{end}}">{{adminDateTime .CreatedAt}}</div>
                     </a>
                     {{end}}
                     {{else}}
@@ -50,7 +50,7 @@
                                 <span class="text-muted fw-normal mx-1">&rarr;</span>
                                 {{.RecipientName}}
                             </div>
-                            <div class="small text-muted text-nowrap">{{formatDateTime .CreatedAt}}</div>
+                            <div class="small text-muted text-nowrap">{{adminDateTime .CreatedAt}}</div>
                         </div>
                         {{if .IsSystemMsg}}
                         <div class="alert alert-info py-2 px-3 mb-0 small">

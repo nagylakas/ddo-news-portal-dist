@@ -15,7 +15,7 @@
                     <td><div class="fw-semibold">{{.Title}}</div>{{if .Summary}}<div class="small text-muted">{{truncate .Summary 140}}</div>{{end}}</td>
                     <td>{{if .Author}}{{.Author}}{{else}}<span class="text-muted">—</span>{{end}}</td>
                     <td>{{if .Category}}{{.Category}}{{else}}<span class="text-muted">—</span>{{end}}</td>
-                    <td class="text-muted text-nowrap">{{if .DeletedAt}}{{formatDateTime .DeletedAt}}{{end}}</td>
+                    <td class="text-muted text-nowrap">{{if .DeletedAt}}{{adminDateTime .DeletedAt}}{{end}}</td>
                     <td class="text-end text-nowrap">
                         <form action="/admin/articles/restore/{{.ID.Hex}}" method="POST" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-success" title="{{t $.Lang "article.restore"}}"><i class="bi bi-arrow-counterclockwise me-1"></i>{{t $.Lang "article.restore"}}</button>

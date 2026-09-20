@@ -44,7 +44,7 @@
                     <td>
                         {{if .ReporterName}}{{.ReporterName}}{{else}}<span class="text-muted fst-italic">{{t $.Lang "mkt.reports_anonymous"}}</span>{{end}}
                     </td>
-                    <td class="small text-muted text-nowrap">{{formatDateTime .CreatedAt}}</td>
+                    <td class="small text-muted text-nowrap">{{adminDateTime .CreatedAt}}</td>
                     <td class="text-center">
                         {{if .Resolved}}
                         <span class="badge text-bg-success">{{t $.Lang "mkt.reports_resolved"}}</span>

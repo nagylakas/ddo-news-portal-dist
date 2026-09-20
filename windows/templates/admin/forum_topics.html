@@ -16,7 +16,7 @@
                     <td><a href="/forum/topic/{{.Slug}}" target="_blank">{{.Title}}</a><br><small class="text-muted">{{.CreatedByName}}</small></td>
                     <td>{{.CategoryName}}</td>
                     <td>{{.Status}}{{if .Pinned}} · kiemelt{{end}}</td>
-                    <td>{{formatDateTime .LastPostAt}}<br><small>{{.LastPostUser}}</small></td>
+                    <td>{{adminDateTime .LastPostAt}}<br><small>{{.LastPostUser}}</small></td>
                     <td class="text-end">
                         <form method="POST" action="/admin/forum/topics/{{.ID.Hex}}/{{if .Pinned}}unpin{{else}}pin{{end}}" class="d-inline"><button class="btn btn-sm btn-outline-secondary" type="submit">{{if .Pinned}}Kiemelés le{{else}}Kiemel{{end}}</button></form>
                         <form method="POST" action="/admin/forum/topics/{{.ID.Hex}}/{{if eq .Status "locked"}}open{{else}}lock{{end}}" class="d-inline"><button class="btn btn-sm btn-outline-primary" type="submit">{{if eq .Status "locked"}}Nyit{{else}}Zár{{end}}</button></form>

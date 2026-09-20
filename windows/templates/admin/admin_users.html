@@ -37,9 +37,9 @@
                             {{end}}
                         </td>
                         <td class="text-center text-muted small text-nowrap">
-                            {{if .LastLoginAt.IsZero}}—{{else}}{{formatDateTime .LastLoginAt}}{{end}}
+                            {{if .LastLoginAt.IsZero}}—{{else}}{{adminDateTime .LastLoginAt}}{{end}}
                         </td>
-                        <td class="text-center text-muted small text-nowrap">{{formatDate .CreatedAt}}</td>
+                        <td class="text-center text-muted small text-nowrap">{{adminDate .CreatedAt}}</td>
                         <td class="text-end text-nowrap">
                             {{if .IsSuperAdmin}}
                             <span class="text-muted small"><i class="bi bi-lock me-1"></i>{{t $.Lang "adminuser.env_managed"}}</span>
