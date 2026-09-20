@@ -72,7 +72,9 @@
                             Mentés után indítsa újra az alkalmazást, hogy a menüpontok és route-ok is frissüljenek.
                         </span>
                     </form>
-                    {{if eq .ID "marketplace"}}
+                    {{if eq .ID "aggregator"}}
+                    <div class="border-top mt-3 pt-3"><div class="d-flex flex-wrap align-items-center gap-3"><div class="small flex-grow-1"><div class="fw-semibold">Aggregátor API és admin kezelés</div><div class="text-muted">Publikus kezdőlapcsere nélkül is kezelhetők RSS-források{{if .AggregatorAPIEnabled}}, az <a href="/admin/aggregator">aggregátor adminban</a>{{end}}.</div></div><span class="badge {{if .AggregatorAPIEnabled}}text-bg-success{{else}}text-bg-secondary{{end}}">.env: {{if .AggregatorAPIEnabled}}bekapcsolva{{else}}kikapcsolva{{end}}</span><form method="POST" action="/admin/plugins"><input type="hidden" name="plugin_id" value="aggregator_api"><input type="hidden" name="enabled" value="{{if .AggregatorAPIEnabled}}false{{else}}true{{end}}"><button type="submit" class="btn {{if .AggregatorAPIEnabled}}btn-outline-danger{{else}}btn-outline-success{{end}}" {{if .Enabled}}disabled{{end}}>{{if .AggregatorAPIEnabled}}Aggregátor API kikapcsolása{{else}}Csak Aggregátor API bekapcsolása{{end}}</button></form></div></div>
+                    {{else if eq .ID "marketplace"}}
                     <div class="border-top mt-3 pt-3">
                         <div class="d-flex flex-wrap align-items-center gap-3">
                             <div class="small flex-grow-1">
