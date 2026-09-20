@@ -3892,6 +3892,8 @@ body:not(.admin-body) .btn-outline-primary:hover {
 .aggregator-image,.aggregator-placeholder { height:12rem; width:100%; object-fit:cover; background:var(--bs-tertiary-bg); }
 .aggregator-magazine .aggregator-card:first-child .aggregator-image,.aggregator-magazine .aggregator-card:first-child .aggregator-placeholder { height:28rem; }
 .aggregator-placeholder { display:grid; place-items:center; font-size:3rem; color:var(--bs-secondary); }
+.aggregator-favicon { width:16px; height:16px; object-fit:contain; vertical-align:-3px; margin-right:.35rem; }
+.aggregator-favicon-placeholder { display:inline-block; width:16px; margin-right:.35rem; color:var(--bs-secondary); }
 @media (max-width:991.98px) { .aggregator-magazine,.aggregator-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .aggregator-magazine .aggregator-card:first-child { grid-column:span 2; } }
 @media (max-width:575.98px) { .aggregator-magazine,.aggregator-grid { grid-template-columns:1fr; } .aggregator-magazine .aggregator-card:first-child { grid-column:auto; } .aggregator-magazine .aggregator-card:first-child .aggregator-image,.aggregator-magazine .aggregator-card:first-child .aggregator-placeholder { height:18rem; } }
 @media (max-width: 767.98px) { .content-gallery { width:100%; } .content-gallery-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .content-gallery-8 .content-gallery-item:nth-child(7),.content-gallery-7 .content-gallery-item:last-child { grid-column:auto; } .gallery-overlay { padding:1rem; gap:.25rem; } .gallery-overlay button { font-size:2rem; padding:.25rem .5rem; } }
