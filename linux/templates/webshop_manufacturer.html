@@ -1,0 +1,62 @@
+{{define "webshop_manufacturer"}}
+{{template "header" .}}
+{{if .Manufacturer}}
+{{template "module/hero" dict "Title" .Manufacturer.Name "Description" .Manufacturer.Description "Crumb" "WEBSHOP"}}
+{{else}}
+{{template "module/hero" dict "Title" "Gyártó" "Description" "" "Crumb" "WEBSHOP"}}
+{{end}}
+<section class="module-page container-fluid px-4 px-lg-5 py-4">
+    <div class="row g-4">
+        {{template "webshop/sidebar" .}}
+        <main class="col-lg-9 col-xl-10">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">
+                    {{if .Category}}{{.Manufacturer.Name}} - {{.Category.DisplayName "hu"}}{{else}}{{.Manufacturer.Name}} termékei{{end}}
+                </h2>
+                <a href="/webshop/cart" class="btn btn-sm btn-primary"><i class="bi bi-cart3 me-1"></i>Kosár</a>
+            </div>
+            {{if .Manufacturer.LogoURL}}<img src="{{.Manufacturer.LogoURL}}" alt="{{.Manufacturer.Name}}" class="img-fluid mb-3" style="max-height:90px;">{{end}}
+            {{if .Manufacturer.WebsiteURL}}<p><a href="{{.Manufacturer.WebsiteURL}}" target="_blank" rel="noopener">Gyártói weboldal</a></p>{{end}}
+
+            {{if .Category}}
+            {{template "webshop/product-filters" .}}
+            <div class="row g-3">
+                {{range .ProductCards}}
+                <div class="col-12 col-md-6 col-xl-4">
+                    {{template "webshop/product-card" .}}
+                </div>
+                {{else}}
+                <div class="col-12">
+                    <div class="alert alert-info mb-0">Nincs találat ebben a kategóriában.</div>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                {{range .CategoriesWS}}
+                <a class="btn btn-sm btn-outline-secondary" href="/webshop/manufacturer/{{$.Manufacturer.Slug}}?category={{.Slug}}">{{.DisplayName "hu"}}</a>
+                {{end}}
+            </div>
+            {{range .ManufacturerSections}}
+            <section class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="h5 mb-0">{{.Category.DisplayName "hu"}}</h3>
+                    <a class="btn btn-sm btn-outline-primary" href="/webshop/manufacturer/{{$.Manufacturer.Slug}}?category={{.Category.Slug}}">Szűrés ebben a kategóriában</a>
+                </div>
+                <div class="row g-3">
+                    {{range .ProductCards}}
+                    <div class="col-12 col-md-6 col-xl-4">
+                        {{template "webshop/product-card" .}}
+                    </div>
+                    {{end}}
+                </div>
+            </section>
+            {{else}}
+            <div class="alert alert-info mb-0">Ennek a gyártónak még nincs publikus terméke.</div>
+            {{end}}
+            {{end}}
+        </main>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}

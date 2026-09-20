@@ -1,0 +1,12 @@
+{{define "category-menu/classic"}}
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        {{.Label}}
+    </a>
+    <ul class="dropdown-menu">
+        {{range .Categories}}
+        <li><a class="dropdown-item" href="/category/{{lower .}}">{{.}}</a></li>
+        {{end}}
+    </ul>
+</li>
+{{end}}

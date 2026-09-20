@@ -1,0 +1,41 @@
+{{define "editorial-office"}}
+{{template "header" .}}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"AboutPage","@id":"{{.CanonicalURL}}#page","url":"{{.CanonicalURL}}","name":{{js (printf "%s szerkesztősége" .SiteNameLong)}},"inLanguage":"hu-HU","mainEntity":{"@id":"{{siteURL}}/#organization"}{{if .Authors}},"contributor":[{{range $i,$author := .Authors}}{{if $i}},{{end}}{"@type":"Person","@id":"{{siteURL}}/author/{{$author.Slug}}#person","name":{{js $author.Name}},"url":"{{siteURL}}/author/{{$author.Slug}}"{{if $author.Bio}},"description":{{js $author.Bio}}{{end}}{{if $author.AvatarURL}},"image":{{js (absoluteURL $author.AvatarURL)}}{{end}}}{{end}}]{{end}}}
+</script>
+<div class="listing-hero {{listingHeroClass}}"><div class="listing-hero-inner">
+<nav class="art-breadcrumb mb-2" aria-label="breadcrumb"><a href="/">KEZDŐLAP</a><span class="art-bc-sep">›</span><span>SZERKESZTŐSÉG</span></nav>
+<h1 class="listing-hero-title mb-2">{{.SiteNameLong}} szerkesztősége</h1>
+<p class="listing-hero-sub mb-0">Ismerd meg a portál szerzőit, kiadói hátterét és szerkesztési alapelveit.</p>
+</div></div>
+<main class="container py-5 editorial-office">
+<section class="row g-4 align-items-stretch mb-5" aria-labelledby="editorial-publisher-title">
+<div class="col-lg-7"><div class="card h-100 border-0 shadow-sm"><div class="card-body p-4 p-lg-5">
+<div class="d-flex align-items-center gap-3 mb-4">
+{{if publisherLogoURL}}<img src="{{secureURL (publisherLogoURL)}}" alt="{{publisherName}} logó" class="editorial-publisher-logo">{{end}}
+<div><div class="text-uppercase small text-muted fw-semibold">Kiadó</div><h2 id="editorial-publisher-title" class="h3 mb-0">{{publisherName}}</h2></div></div>
+{{if publisherDescription}}<p class="lead mb-4">{{publisherDescription}}</p>{{end}}
+<p class="mb-0"><strong>{{.SiteNameLong}}</strong> a fenti kiadó által működtetett önálló portál. Az itt felsorolt szerzők a portálon megjelent cikkekhez kapcsolódó szerzői profilok.</p>
+{{if publisherTopics}}<div class="d-flex flex-wrap gap-2 mt-4" aria-label="Szerkesztőségi fókuszok">{{range publisherTopics}}<span class="badge text-bg-light border">{{.}}</span>{{end}}</div>{{end}}
+</div></div></div>
+<div class="col-lg-5"><div class="card h-100 border-0 shadow-sm"><div class="card-body p-4 p-lg-5">
+<h2 class="h4 mb-3">Átláthatóság és kapcsolat</h2><div class="list-group list-group-flush">
+{{if publisherAboutURL}}<a class="list-group-item list-group-item-action px-0" href="{{publisherAboutURL}}" target="_blank" rel="noopener"><i class="bi bi-building me-2"></i>Kiadói és szerkesztőségi háttér</a>{{end}}
+{{if publisherEditorialPolicyURL}}<a class="list-group-item list-group-item-action px-0" href="{{publisherEditorialPolicyURL}}" target="_blank" rel="noopener"><i class="bi bi-journal-check me-2"></i>Szerkesztési irányelvek</a>{{end}}
+{{if publisherCorrectionsPolicyURL}}<a class="list-group-item list-group-item-action px-0" href="{{publisherCorrectionsPolicyURL}}" target="_blank" rel="noopener"><i class="bi bi-pencil-square me-2"></i>Helyesbítési irányelvek</a>{{end}}
+{{if publisherContactURL}}<a class="list-group-item list-group-item-action px-0" href="{{publisherContactURL}}" target="_blank" rel="noopener"><i class="bi bi-envelope-at me-2"></i>Kapcsolatfelvétel</a>{{end}}{{if contactEmailToken}}<a class="list-group-item list-group-item-action px-0 js-contact-email" href="#" data-email-token="{{contactEmailToken}}" rel="nofollow"><i class="bi bi-envelope-at me-2"></i><span class="footer-contact-label">Kapcsolattartó e-mail</span><span class="footer-contact-address ms-2">E-mail megjelenítése</span></a>{{end}}
+</div></div></div></div></section>
+<section aria-labelledby="editorial-authors-title">
+<div class="section-header mb-4"><h2 id="editorial-authors-title" class="section-title"><i class="bi bi-people me-2 text-primary"></i>A portál szerzői</h2></div>
+{{if .Authors}}<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">{{range .Authors}}
+<div class="col"><article class="card h-100 border-0 shadow-sm"><div class="card-body p-4 text-center">
+<a href="/author/{{.Slug}}" class="text-decoration-none text-body">
+{{if .AvatarURL}}<img src="{{secureURL .AvatarURL}}" alt="{{.Name}}" class="editorial-author-avatar mb-3">{{else}}<span class="editorial-author-placeholder mb-3"><i class="bi bi-person"></i></span>{{end}}
+<h3 class="h5">{{.Name}}</h3></a>
+{{if .Bio}}<p class="text-muted mb-3">{{.Bio}}</p>{{end}}
+<a href="/author/{{.Slug}}" class="btn btn-sm btn-outline-primary">Szerzői profil és cikkek</a>
+</div></article></div>{{end}}</div>
+{{else}}<div class="alert alert-light border"><i class="bi bi-info-circle me-2"></i>Jelenleg nincs publikált cikkel rendelkező szerzői profil.</div>{{end}}
+</section></main>
+{{template "footer" .}}
+{{end}}
