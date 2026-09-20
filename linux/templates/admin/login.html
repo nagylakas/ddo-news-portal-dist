@@ -1,11 +1,88 @@
 {{define "admin/login"}}
-{{template "admin-header" .}}
-<div class="container" style="max-width: 420px; margin-top: 80px;">
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="icon" type="image/x-icon" href="/branding/icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/branding/icons/icon-32x32.png">
+    <link id="bs-css" href="/static/vendor/bootstrap@5.3.2/css/bootstrap.min.css?v={{assetVersion}}" rel="stylesheet">
+    <script>
+        (function(){var l=document.getElementById('bs-css');if(!l)return;l.onerror=function(){var f=document.createElement('link');f.rel='stylesheet';f.href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';f.integrity='sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN';f.crossOrigin='anonymous';document.head.appendChild(f);};})();
+    </script>
+    <link id="bi-css" href="/static/vendor/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css?v={{assetVersion}}" rel="stylesheet">
+    <script>
+        (function(){var l=document.getElementById('bi-css');if(!l)return;l.onerror=function(){var f=document.createElement('link');f.rel='stylesheet';f.href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css';document.head.appendChild(f);};})();
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css?v={{assetVersion}}">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            {{if loginBackground}}
+            background-image: linear-gradient(to right, rgba(5, 8, 16, 0.15) 0%, rgba(5, 8, 16, 0.55) 55%, rgba(5, 8, 16, 0.85) 100%), url('{{loginBackground}}');
+            background-size: cover;
+            background-position: center;
+            {{else}}
+            background: radial-gradient(circle at 30% 20%, #1c2b4a 0%, #05070d 70%);
+            {{end}}
+        }
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: rgba(13, 17, 28, 0.72);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 1rem;
+            box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.45);
+            color: #fff;
+        }
+        .login-card .form-control {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+        .login-card .form-control:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--bs-primary);
+            color: #fff;
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+        .login-card .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .login-version-tag {
+            color: rgba(255, 255, 255, 0.55);
+        }
+        @media (max-width: 767.98px) {
+            .login-screen {
+                justify-content: center;
+                align-items: flex-end;
+                padding-bottom: 3rem;
+                background-position: left center;
+            }
+        }
+    </style>
+</head>
+
+<body class="admin-body">
+    <div class="login-screen">
+        <div class="login-card p-4 p-sm-5">
             <div class="text-center mb-4">
-                <i class="bi bi-lock-fill text-primary" style="font-size:2.5rem;"></i>
-                <h4 class="mt-2 mb-0">{{t .Lang "login.title"}}</h4>
+                {{if .SiteNameShort}}
+                <img src="/branding/logo.png" alt="{{.SiteNameShort}}" style="max-height:48px;max-width:100%;" class="mb-3"
+                     onerror="this.style.display='none'">
+                {{end}}
+                <h4 class="mb-0">{{t .Lang "login.title"}}</h4>
             </div>
 
             {{if .ErrorMessage}}
@@ -29,8 +106,13 @@
                     <i class="bi bi-box-arrow-in-right me-1"></i>{{t .Lang "login.submit"}}
                 </button>
             </form>
+
+            <div class="text-center mt-4 small login-version-tag">
+                {{.SiteNameLong}} &middot; v{{appVersion}}{{if appCodename}} "{{appCodename}}"{{end}}
+            </div>
         </div>
     </div>
-</div>
-{{template "admin-footer" .}}
+</body>
+
+</html>
 {{end}}
