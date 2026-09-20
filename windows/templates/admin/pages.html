@@ -38,7 +38,7 @@
                         <td class="text-center">
                             {{if .ShowInNav}}<i class="bi bi-check2 text-success"></i>{{else}}<span class="text-muted">—</span>{{end}}
                         </td>
-                        <td class="text-center text-muted small text-nowrap">{{formatDate .UpdatedAt}}</td>
+                        <td class="text-center text-muted small text-nowrap">{{adminDate .UpdatedAt}}</td>
                         <td class="text-end text-nowrap">
                             <a href="/admin/pages/edit/{{.ID.Hex}}" class="btn btn-sm btn-outline-secondary" title="{{t $.Lang "common.edit"}}">
                                 <i class="bi bi-pencil"></i>

@@ -125,8 +125,8 @@
                             {{end}}
                         </td>
                         <td class="small">
-                            <div>{{formatDateTime .ActiveFrom}}</div>
-                            <div class="text-muted">→ {{formatDateTime .ActiveUntil}}</div>
+                            <div>{{adminDateTime .ActiveFrom}}</div>
+                            <div class="text-muted">→ {{adminDateTime .ActiveUntil}}</div>
                             <div class="text-muted">{{t $.Lang "banner.field_priority"}} {{.Priority}} · {{t $.Lang "banner.field_weight"}} {{.EffectiveWeight}}</div>
                         </td>
                         <td class="text-end">{{.Impressions}}</td>

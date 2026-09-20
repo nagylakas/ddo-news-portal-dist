@@ -22,7 +22,7 @@
                 <tbody>
                     {{range .Alerts}}
                     <tr class="{{if not .Acknowledged}}fw-semibold{{end}}">
-                        <td class="text-nowrap text-muted small">{{formatDateTime .TS}}</td>
+                        <td class="text-nowrap text-muted small">{{adminDateTime .TS}}</td>
                         <td>
                             {{if eq .Severity "critical"}}<span class="badge bg-danger me-2">{{.Severity}}</span>
                             {{else if eq .Severity "warning"}}<span class="badge bg-warning text-dark me-2">{{.Severity}}</span>

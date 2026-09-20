@@ -61,8 +61,8 @@
                                             <span>{{t .Lang "article.sync_source_label"}}: <span class="font-monospace">{{.Article.SyncSource}}</span></span>
                                             <span>{{t .Lang "article.sync_external_id"}}: <span class="font-monospace">{{.Article.ExternalID}}</span></span>
                                             <span>{{if eq .Article.SyncState "locally_modified"}}{{t .Lang "article.sync_locally_modified"}}{{else if eq .Article.SyncState "deleted_locally"}}{{t .Lang "article.sync_deleted_locally"}}{{else}}{{t .Lang "article.sync_in_sync"}}{{end}}</span>
-                                            {{if .Article.LastSyncedAt}}<span>{{t .Lang "article.sync_last_synced"}}: {{formatDateTime .Article.LastSyncedAt}}</span>{{end}}
-                                            {{if .Article.LocalModifiedAt}}<span>{{t .Lang "article.sync_local_modified"}}: {{formatDateTime .Article.LocalModifiedAt}}</span>{{end}}
+                                            {{if .Article.LastSyncedAt}}<span>{{t .Lang "article.sync_last_synced"}}: {{adminDateTime .Article.LastSyncedAt}}</span>{{end}}
+                                            {{if .Article.LocalModifiedAt}}<span>{{t .Lang "article.sync_local_modified"}}: {{adminDateTime .Article.LocalModifiedAt}}</span>{{end}}
                                         </div>
                                     </div>
                                 </div>
@@ -215,9 +215,9 @@
                                 <div class="bg-light rounded p-3">
                                     <small class="text-muted">
                                         <i class="bi bi-info-circle me-1"></i>
-                                        Created: {{formatDateTime .Article.CreatedAt}} |
-                                        Updated: {{formatDateTime .Article.UpdatedAt}}
-                                        {{if .Article.Published}} | Published: {{formatDateTime .Article.PublishedAt}}{{end}}
+                                        Created: {{adminDateTime .Article.CreatedAt}} |
+                                        Updated: {{adminDateTime .Article.UpdatedAt}}
+                                        {{if .Article.Published}} | Published: {{adminDateTime .Article.PublishedAt}}{{end}}
                                     </small>
                                 </div>
                             </div>
@@ -267,7 +267,7 @@
                             <tbody>
                                 {{range .DailyStats}}
                                 <tr>
-                                    <td class="text-muted small">{{formatDate .Date}}</td>
+                                    <td class="text-muted small">{{adminDate .Date}}</td>
                                     <td class="text-end">
                                         <span class="badge bg-primary-subtle text-primary">{{.Count}}</span>
                                     </td>

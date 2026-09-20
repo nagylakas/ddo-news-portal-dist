@@ -18,7 +18,7 @@
             <div>
                 <h5 class="fw-semibold mb-1"><i class="bi bi-save me-2 text-primary"></i>{{t .Lang "backup.manual_title"}}</h5>
                 <p class="text-muted mb-0">{{t .Lang "backup.manual_text"}}</p>
-                {{if .Manual}}<div class="small text-muted mt-2">{{t .Lang "backup.created"}}: {{formatDateTime .Manual.CreatedAt}} &middot; {{.Manual.Size}} &middot; {{t .Lang "backup.expires"}}: {{formatDateTime .Manual.ExpiresAt}}</div>{{end}}
+                {{if .Manual}}<div class="small text-muted mt-2">{{t .Lang "backup.created"}}: {{adminDateTime .Manual.CreatedAt}} &middot; {{.Manual.Size}} &middot; {{t .Lang "backup.expires"}}: {{adminDateTime .Manual.ExpiresAt}}</div>{{end}}
             </div>
             <div class="d-flex flex-wrap gap-2 align-items-center">
                 {{if .Manual}}<a class="btn btn-outline-primary" href="/admin/backups/download/{{.Manual.ID}}"><i class="bi bi-download me-1"></i>{{t .Lang "backup.download"}}</a>{{end}}
@@ -34,7 +34,7 @@
                 <span class="badge bg-light text-secondary border">{{t .Lang "backup.automatic_schedule"}}</span>
             </div>
             {{if .Automatic}}
-            <div class="table-responsive"><table class="table table-sm table-striped align-middle mb-0"><thead><tr><th>{{t .Lang "backup.created"}}</th><th>{{t .Lang "backup.size"}}</th><th class="text-end">{{t .Lang "common.actions"}}</th></tr></thead><tbody>{{range .Automatic}}<tr><td>{{formatDateTime .CreatedAt}}</td><td>{{.Size}}</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="/admin/backups/download/{{.ID}}"><i class="bi bi-download me-1"></i>{{t $.Lang "backup.download"}}</a></td></tr>{{end}}</tbody></table></div>
+            <div class="table-responsive"><table class="table table-sm table-striped align-middle mb-0"><thead><tr><th>{{t .Lang "backup.created"}}</th><th>{{t .Lang "backup.size"}}</th><th class="text-end">{{t .Lang "common.actions"}}</th></tr></thead><tbody>{{range .Automatic}}<tr><td>{{adminDateTime .CreatedAt}}</td><td>{{.Size}}</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="/admin/backups/download/{{.ID}}"><i class="bi bi-download me-1"></i>{{t $.Lang "backup.download"}}</a></td></tr>{{end}}</tbody></table></div>
             {{else}}<div class="text-muted py-3">{{t .Lang "backup.none"}}</div>{{end}}
         </div>
     </div>

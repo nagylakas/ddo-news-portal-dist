@@ -1,6 +1,6 @@
 {{define "admin-header"}}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="{{if eq .Lang "hu"}}hu{{else}}en{{end}}" data-bs-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -197,6 +197,7 @@
     <!-- Custom JS -->
     <script src="/static/js/main.js?v={{assetVersion}}"></script>
     <script src="/static/js/galleries.js?v={{assetVersion}}"></script>
+    <script src="/static/js/admin-timezone.js?v={{assetVersion}}"></script>
     <!-- Audit alert badge (unacknowledged security alerts, 60s poll, silent on failure) -->
     <script>
     (function () {
