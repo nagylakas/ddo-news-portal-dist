@@ -86,7 +86,7 @@
                             <li><a class="dropdown-item" href="/admin/banners"><i class="bi bi-badge-ad me-2"></i>{{t .Lang "nav.banners"}}</a></li>
                         </ul>
                     </li>
-                {{if or webshopEnabled webshopCatalogAPIEnabled marketplaceEnabled forumEnabled}}
+                {{if or webshopEnabled webshopCatalogAPIEnabled marketplaceEnabled marketplaceAPIEnabled forumEnabled forumAPIEnabled}}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-grid me-1"></i>{{t .Lang "nav.modules"}}
@@ -95,10 +95,10 @@
                   {{if or webshopEnabled webshopCatalogAPIEnabled}}
                             <li><a class="dropdown-item" href="/admin/webshop"><i class="bi bi-bag-check me-2"></i>{{t .Lang "nav.webshop"}}</a></li>
                             {{end}}
-                            {{if marketplaceEnabled}}
+                            {{if or marketplaceEnabled marketplaceAPIEnabled}}
                             <li><a class="dropdown-item" href="/admin/marketplace"><i class="bi bi-shop me-2"></i>{{t .Lang "nav.marketplace"}}</a></li>
                             {{end}}
-                            {{if forumEnabled}}
+                            {{if or forumEnabled forumAPIEnabled}}
                             <li><a class="dropdown-item" href="/admin/forum"><i class="bi bi-chat-square-text me-2"></i>{{t .Lang "nav.forum"}}</a></li>
                             {{end}}
                         </ul>

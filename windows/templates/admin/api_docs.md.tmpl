@@ -9,6 +9,7 @@ REST API reference for authenticated administrative access to this news portal.
 - [Authentication](#authentication)
 - [Deletion safeguards](#deletion-safeguards)
 - [Version](#version)
+- [Plugin status](#plugin-status)
 - [System and updates](#system-and-updates)
   - [System identity](#system-identity)
   - [Check for updates](#check-for-updates)
@@ -252,6 +253,32 @@ curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H 
 ```
 
 Errors: `400` for a missing `enabled` field or enabling OAuth while MCP is disabled; `500` when the configuration cannot be read or written.
+
+## Plugin status
+
+| Method | URL | Auth | Description |
+| --- | --- | --- | --- |
+| GET | `/api/plugins/status` | Required | Effective runtime status of every optional portal module. |
+
+The response is read-only and lists `marketplace`, `forum`, and `webshop`.
+`module_enabled` means the public module is running. `api_enabled` means its
+administrative API/data layer is available; it is always true when the full
+module is enabled. `api_only` is true when the public module is off but its API
+and admin management are active. `admin_enabled` indicates whether its admin
+management UI is available.
+
+```json
+{
+  "plugins": [
+    {"id":"marketplace","module_enabled":false,"api_enabled":true,"api_only":true,"admin_enabled":true},
+    {"id":"forum","module_enabled":false,"api_enabled":false,"api_only":false,"admin_enabled":false},
+    {"id":"webshop","module_enabled":true,"api_enabled":true,"api_only":false,"admin_enabled":true}
+  ]
+}
+```
+
+Only `GET` is allowed (`405` for other methods). The MCP tool
+`get_plugin_status` returns the same `plugins` collection for AI clients.
 
 ## Site Statistics
 

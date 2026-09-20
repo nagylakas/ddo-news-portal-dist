@@ -9,6 +9,7 @@
                 <div class="list-group list-group-flush small">
                     <a href="#auth"       class="list-group-item list-group-item-action py-1 px-2">Authentication</a>
                     <a href="#version"    class="list-group-item list-group-item-action py-1 px-2">Version</a>
+                    <a href="#plugins-status" class="list-group-item list-group-item-action py-1 px-2">Plugin status</a>
                     <a href="#system"     class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">System &amp; updates</a>
                     <a href="#system-info" class="list-group-item list-group-item-action py-1 px-2 ms-2">System identity</a>
                     <a href="#update-check" class="list-group-item list-group-item-action py-1 px-2 ms-2">Check for updates</a>
@@ -225,6 +226,20 @@ Content-Type: application/json
                 <p class="mb-1"><strong>Update request:</strong> <code>enabled</code> is required. <code>oauth_enabled</code> is optional and unchanged when omitted.</p>
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" -d '{"enabled":true,"oauth_enabled":true}' {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/mcp</code></pre>
                 <p class="mb-0"><strong>Errors:</strong> <code>400</code> missing <code>enabled</code> or OAuth enabled while MCP is disabled; <code>500</code> unreadable or unwritable configuration.</p>
+            </section>
+
+            <section id="plugins-status" class="mb-5">
+                <h4 class="border-bottom pb-2"><i class="bi bi-puzzle me-2"></i>Plugin status</h4>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th><th>Description</th></tr></thead><tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/plugins/status</code></td><td>Required</td><td>Effective runtime status of every optional portal module.</td></tr></tbody></table></div>
+                <p>The read-only response lists <code>marketplace</code>, <code>forum</code>, and <code>webshop</code>. <code>module_enabled</code> means the public module is running. <code>api_enabled</code> means its administrative API/data layer is available; a full module always enables it. <code>api_only</code> is true when the public module is off but its API and admin management are active. <code>admin_enabled</code> indicates whether its admin UI is available.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "plugins": [
+    {"id":"marketplace","module_enabled":false,"api_enabled":true,"api_only":true,"admin_enabled":true},
+    {"id":"forum","module_enabled":false,"api_enabled":false,"api_only":false,"admin_enabled":false},
+    {"id":"webshop","module_enabled":true,"api_enabled":true,"api_only":false,"admin_enabled":true}
+  ]
+}</code></pre>
+                <p class="mb-0">Only <code>GET</code> is allowed (<code>405</code> for other methods). The MCP tool <code>get_plugin_status</code> returns the same <code>plugins</code> collection for AI clients.</p>
             </section>
 
             <!-- ── Site Statistics ────────────────────────────────────── -->

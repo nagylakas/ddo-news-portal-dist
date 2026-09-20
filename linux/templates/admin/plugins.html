@@ -72,7 +72,41 @@
                             Mentés után indítsa újra az alkalmazást, hogy a menüpontok és route-ok is frissüljenek.
                         </span>
                     </form>
-                    {{if eq .ID "webshop"}}
+                    {{if eq .ID "marketplace"}}
+                    <div class="border-top mt-3 pt-3">
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <div class="small flex-grow-1">
+                                <div class="fw-semibold">Marketplace API és admin kezelés</div>
+                                <div class="text-muted">A publikus apróhirdetési oldal nélkül is elérhetővé teszi az API-integrációt{{if .MarketplaceAPIEnabled}}, valamint az <a href="/admin/marketplace">admin kezelőfelületet</a>{{end}}.</div>
+                            </div>
+                            <span class="badge {{if .MarketplaceAPIEnabled}}text-bg-success{{else}}text-bg-secondary{{end}}">.env: {{if .MarketplaceAPIEnabled}}bekapcsolva{{else}}kikapcsolva{{end}}</span>
+                            <form method="POST" action="/admin/plugins">
+                                <input type="hidden" name="plugin_id" value="marketplace_api">
+                                <input type="hidden" name="enabled" value="{{if .MarketplaceAPIEnabled}}false{{else}}true{{end}}">
+                                <button type="submit" class="btn {{if .MarketplaceAPIEnabled}}btn-outline-danger{{else}}btn-outline-success{{end}}" {{if .Enabled}}disabled title="A teljes Marketplace mellett az API kötelezően engedélyezett"{{end}}>
+                                    {{if .MarketplaceAPIEnabled}}<i class="bi bi-cloud-arrow-down me-1"></i>Marketplace API kikapcsolása{{else}}<i class="bi bi-cloud-arrow-up me-1"></i>Csak Marketplace API bekapcsolása{{end}}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {{else if eq .ID "forum"}}
+                    <div class="border-top mt-3 pt-3">
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <div class="small flex-grow-1">
+                                <div class="fw-semibold">Fórum API és admin kezelés</div>
+                                <div class="text-muted">A publikus fórum nélkül is elérhetővé teszi az API-integrációt{{if .ForumAPIEnabled}}, valamint az <a href="/admin/forum">admin kezelőfelületet</a>{{end}}.</div>
+                            </div>
+                            <span class="badge {{if .ForumAPIEnabled}}text-bg-success{{else}}text-bg-secondary{{end}}">.env: {{if .ForumAPIEnabled}}bekapcsolva{{else}}kikapcsolva{{end}}</span>
+                            <form method="POST" action="/admin/plugins">
+                                <input type="hidden" name="plugin_id" value="forum_api">
+                                <input type="hidden" name="enabled" value="{{if .ForumAPIEnabled}}false{{else}}true{{end}}">
+                                <button type="submit" class="btn {{if .ForumAPIEnabled}}btn-outline-danger{{else}}btn-outline-success{{end}}" {{if .Enabled}}disabled title="A teljes Fórum mellett az API kötelezően engedélyezett"{{end}}>
+                                    {{if .ForumAPIEnabled}}<i class="bi bi-cloud-arrow-down me-1"></i>Fórum API kikapcsolása{{else}}<i class="bi bi-cloud-arrow-up me-1"></i>Csak Fórum API bekapcsolása{{end}}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {{else if eq .ID "webshop"}}
                     <div class="border-top mt-3 pt-3">
                         <div class="d-flex flex-wrap align-items-center gap-3">
                             <div class="small flex-grow-1">
