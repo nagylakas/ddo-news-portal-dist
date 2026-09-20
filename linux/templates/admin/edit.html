@@ -49,6 +49,26 @@
                                 </div>
                             </div>
 
+                            {{if .Article.HasSyncConnection}}
+                            <!-- Sync status (read-only: the connection is managed by the central publishing system) -->
+                            <div class="col-12">
+                                <div class="card border-0 bg-body-secondary">
+                                    <div class="card-body py-2 px-3">
+                                        <div class="fw-semibold small mb-1">
+                                            <i class="bi {{if eq .Article.SyncState "locally_modified"}}bi-cloud-slash text-warning{{else if eq .Article.SyncState "deleted_locally"}}bi-cloud-minus text-danger{{else}}bi-cloud-check text-success{{end}} me-1"></i>{{t .Lang "article.sync_panel_title"}}
+                                        </div>
+                                        <div class="small text-muted d-flex flex-wrap gap-3">
+                                            <span>{{t .Lang "article.sync_source_label"}}: <span class="font-monospace">{{.Article.SyncSource}}</span></span>
+                                            <span>{{t .Lang "article.sync_external_id"}}: <span class="font-monospace">{{.Article.ExternalID}}</span></span>
+                                            <span>{{if eq .Article.SyncState "locally_modified"}}{{t .Lang "article.sync_locally_modified"}}{{else if eq .Article.SyncState "deleted_locally"}}{{t .Lang "article.sync_deleted_locally"}}{{else}}{{t .Lang "article.sync_in_sync"}}{{end}}</span>
+                                            {{if .Article.LastSyncedAt}}<span>{{t .Lang "article.sync_last_synced"}}: {{formatDateTime .Article.LastSyncedAt}}</span>{{end}}
+                                            {{if .Article.LocalModifiedAt}}<span>{{t .Lang "article.sync_local_modified"}}: {{formatDateTime .Article.LocalModifiedAt}}</span>{{end}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{end}}
+
                             <!-- Category & Author -->
                             <div class="col-md-6">
                                 <label for="category_id" class="form-label fw-semibold">{{t .Lang "article.field_category"}} <span class="text-danger">*</span></label>

@@ -33,6 +33,7 @@
                     <a href="#art-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
                     <a href="#art-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
                     <a href="#art-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#art-sync"   class="list-group-item list-group-item-action py-1 px-2 ms-2">Central publishing sync</a>
                     <a href="#art-stats"  class="list-group-item list-group-item-action py-1 px-2 ms-2">Article stats</a>
                     <a href="#art-trash"   class="list-group-item list-group-item-action py-1 px-2 ms-2">Trash</a>
                     <a href="#art-restore" class="list-group-item list-group-item-action py-1 px-2 ms-2">Restore</a>
@@ -601,6 +602,12 @@ Content-Type: application/json
                     <li><code>offset</code> — zero-based skip (default: <code>0</code>)</li>
                     <li><code>published</code> — <code>true</code> to return only published articles; omit for all</li>
                 </ul>
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Supplying <code>sync_source</code> switches this endpoint to the sync-reconciliation listing —
+                    see <a href="#art-sync">Central publishing sync</a> for its own parameters
+                    (<code>external_id</code>, <code>sync_state</code>, <code>changed_since</code>) and response shape.
+                </div>
                 <p class="mb-1"><strong>Response:</strong></p>
 <pre class="bg-dark text-light p-3 rounded small"><code>{
   "total": 142,
@@ -687,6 +694,8 @@ Content-Type: application/json
 							<tr><td><code>ai_image_disclosure</code></td><td>string</td><td>Yes, if image_url is set</td><td>AI declaration for the featured image: <code>unmodified</code>, <code>modified</code>, or <code>generated</code>. For backward compatibility only, an omitted value is stored as <code>unmodified</code> when <code>image_url</code> is set.</td></tr>
                             <tr><td><code>published</code></td><td>bool</td><td></td><td>Publish immediately (default: <code>false</code>).</td></tr>
                             <tr><td><code>publish_at</code></td><td>string (RFC3339)</td><td></td><td>Scheduled publish time. Null or omit to use the current time when <code>published=true</code>.</td></tr>
+                            <tr><td><code>sync_source</code></td><td>string</td><td></td><td>Identifies the central publishing system, e.g. <code>ivr</code>. Must be supplied together with <code>external_id</code> — see <a href="#art-sync">Central publishing sync</a>.</td></tr>
+                            <tr><td><code>external_id</code></td><td>string</td><td></td><td>The central system's opaque identifier for this article. Together with <code>sync_source</code> forms a durable, unique external identity.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -705,6 +714,14 @@ Content-Type: application/json
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles</code></pre>
                 <p class="mt-2 mb-1"><strong>Response 201:</strong> the created article object.<br>
                    <strong>Response 400:</strong> <code>{"error":"A cím megadása kötelező"}</code></p>
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    When <code>sync_source</code>+<code>external_id</code> are both supplied, this endpoint becomes
+                    <strong>idempotent</strong> for that identity: re-posting the same pair updates the existing
+                    linked article (returning <code>200</code>) instead of creating a duplicate. See
+                    <a href="#art-sync">Central publishing sync</a> for the full contract, including the
+                    <code>409 sync_conflict</code> response.
+                </div>
             </section>
 
             <!-- Update article -->
@@ -726,6 +743,7 @@ Content-Type: application/json
                         <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
                         <tbody>
                             <tr><td><code>update_slug</code></td><td>bool</td><td>When <code>true</code> the slug is regenerated from the title (default: <code>false</code> — existing URLs stay stable).</td></tr>
+                            <tr><td><code>sync_source</code> / <code>external_id</code></td><td>string</td><td>Same meaning as on create. Supplying both claims/re-confirms the central identity and sets <code>sync_state=in_sync</code>. <strong>Omitting them</strong> on an article that already has a sync connection marks it <code>locally_modified</code> instead — this is how the admin UI's own edit form behaves, since it never sends these fields. See <a href="#art-sync">Central publishing sync</a>.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -743,7 +761,10 @@ Content-Type: application/json
     "published": true
   }' \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef</code></pre>
-                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated article object.</p>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated article object.<br>
+                   <strong>Response 409 (sync_conflict):</strong> the article was modified locally since the last
+                   central sync, or is already linked to a different <code>sync_source</code>/<code>external_id</code>
+                   pair — see <a href="#art-sync">Central publishing sync</a>.</p>
             </section>
 
             <!-- Delete article -->
@@ -763,6 +784,80 @@ Content-Type: application/json
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef</code></pre>
                 <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message":"A cikk sikeresen törölve"}</code><br>
                    <strong>Response 404:</strong> <code>{"error":"..."}</code></p>
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    A soft delete on an article linked to a central sync record does not clear the link:
+                    <code>sync_state</code> becomes <code>deleted_locally</code> instead, so the central system can
+                    still discover the deletion via <a href="#art-sync">Central publishing sync</a>'s
+                    <code>changed_since</code> query.
+                </div>
+            </section>
+
+            <!-- Central publishing sync -->
+            <section id="art-sync" class="mb-5 ps-3">
+                <h5>Central publishing sync</h5>
+                <p>
+                    A central publishing system (identified by <code>sync_source</code>, e.g. <code>ivr</code>) can
+                    push articles into this portal via the regular <a href="#art-create">Create</a> and
+                    <a href="#art-update">Update</a> endpoints, and later poll this endpoint to find out what
+                    happened to each one locally. Reconciliation is poll-based in this release — there is no webhook.
+                </p>
+
+                <p><strong>Sync fields on the article object</strong> (present only for articles with a sync connection):</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>sync_source</code></td><td>string</td><td>The central system that owns this article, e.g. <code>ivr</code>.</td></tr>
+                            <tr><td><code>external_id</code></td><td>string</td><td>The central system's own, opaque identifier. Together with <code>sync_source</code>, unique across all articles.</td></tr>
+                            <tr><td><code>sync_state</code></td><td>string</td><td><code>in_sync</code> — matches the central write.<br><code>locally_modified</code> — an admin (or a non-sync API write) changed the article since the last central write; the next central write on this identity is rejected with <code>409 sync_conflict</code> instead of silently overwriting it.<br><code>deleted_locally</code> — the article was soft-deleted here; the connection is kept so the central system can discover the deletion.</td></tr>
+                            <tr><td><code>last_synced_at</code></td><td>string (RFC3339)</td><td>Timestamp of the most recent write from the central system.</td></tr>
+                            <tr><td><code>local_modified_at</code></td><td>string (RFC3339)</td><td>Timestamp of the most recent local change (admin edit, restore, or non-sync API write) since the last central write.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p><strong>Idempotent publish contract</strong> (POST/PUT with <code>sync_source</code>+<code>external_id</code>):</p>
+                <ul>
+                    <li>No article currently claims this identity → a new article is created. <strong>201</strong>.</li>
+                    <li>An article already claims this identity and is <code>in_sync</code> or <code>deleted_locally</code> → it is updated (a re-publish of a locally-deleted article un-deletes it). <strong>200</strong>.</li>
+                    <li>An article already claims this identity but is <code>locally_modified</code> → the write is rejected. The central system must resolve the conflict out-of-band before writing again. <strong>409</strong>, body <code>{"error":{"code":"sync_conflict","message":"..."}}</code>.</li>
+                    <li><code>PUT /api/articles/{id}</code> only: if <code>{id}</code> is already linked to a <em>different</em> <code>sync_source</code>/<code>external_id</code> pair than the one supplied, the write is rejected the same way (re-pointing an existing link is not allowed). <strong>409</strong>.</li>
+                </ul>
+                <p>
+                    A plain admin-UI or API write (no <code>sync_source</code>/<code>external_id</code> in the
+                    request body) on an article that already has a sync connection always succeeds, but flips
+                    <code>sync_state</code> to <code>locally_modified</code> — local edits are never blocked, only
+                    the next central write onto that identity is.
+                </p>
+
+                <p><strong>Reconciliation listing</strong> — <code>GET /api/articles?sync_source=...</code>:</p>
+                <ul>
+                    <li><code>sync_source</code> — <strong>required</strong> to activate this mode; identifies the central system.</li>
+                    <li><code>external_id</code> — narrow to one article's identity.</li>
+                    <li><code>sync_state</code> — <code>in_sync</code>, <code>locally_modified</code>, or <code>deleted_locally</code>.</li>
+                    <li><code>changed_since</code> — RFC3339 timestamp; returns articles whose <code>last_synced_at</code>, <code>local_modified_at</code>, or soft-deletion time is at or after this instant. This is the primary mechanism for incremental polling.</li>
+                    <li><code>limit</code> / <code>offset</code> — same as the default listing.</li>
+                </ul>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Unlike the default article listing, this mode includes soft-deleted articles (so
+                    <code>deleted_locally</code> stays discoverable) and is not restricted to published content.
+                </div>
+                <p class="mb-1"><strong>curl — claim/update an article from the central system:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title":       "Wire Story: Example",
+    "content":     "## Lead\n\nBody text…",
+    "sync_source": "ivr",
+    "external_id": "ivr-article-98765",
+    "published":   true,
+    "ai_content_disclosure": "none"
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles</code></pre>
+                <p class="mb-1"><strong>curl — poll for changes since the last reconciliation run:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles?sync_source=ivr&changed_since=2025-06-01T00:00:00Z"</code></pre>
             </section>
 
             <!-- Article stats -->
