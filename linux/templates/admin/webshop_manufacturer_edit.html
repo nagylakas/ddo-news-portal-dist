@@ -1,0 +1,24 @@
+{{define "admin/webshop_manufacturer_edit"}}
+{{template "admin-header" .}}
+<div class="container">
+    {{template "admin-flash" .}}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {{template "admin-page-header" dict "Title" (t .Lang "ws.man_edit_title") "Icon" "building" "Actions" (list (dict "URL" "/admin/webshop/manufacturers" "Label" (t .Lang "common.back") "Icon" "arrow-left" "Class" "btn-outline-secondary btn-sm"))}}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="POST" action="/admin/webshop/manufacturers/edit/{{.Manufacturer.ID.Hex}}">
+                        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                        {{template "webshop-manufacturer-form" .}}
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="/admin/webshop/manufacturers" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg me-1"></i>{{t .Lang "common.save"}}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}

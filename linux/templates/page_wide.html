@@ -1,0 +1,12 @@
+{{define "page_wide"}}
+{{template "header" .}}
+{{template "page_hero" .}}
+<div class="container-fluid px-0 py-0">
+    <article class="page-article page-article-wide">
+        <div class="page-article-content article-content page-article-content-wide px-0">
+            {{.ContentHTML}}
+        </div>
+    </article>
+</div>
+{{template "footer" .}}
+{{end}}

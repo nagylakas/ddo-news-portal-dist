@@ -1,0 +1,370 @@
+{{define "marketplace/sell"}}
+{{template "header" .}}
+<section class="container py-5" style="margin-top:90px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Hirdetés feladása</h1>
+                    <p class="text-muted mb-0">Add meg a termék alapadatait, specifikációit, képeit és árát.</p>
+                </div>
+                <a href="/marketplace" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Vissza
+                </a>
+            </div>
+
+            {{if .ErrorMessage}}
+            <div class="alert alert-danger">{{.ErrorMessage}}</div>
+            {{end}}
+
+            {{if .MarketCategories}}
+            <form method="POST" action="/marketplace/sell" enctype="multipart/form-data">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Alapadatok</h2>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="title">Hirdetés címe <span class="text-danger">*</span></label>
+                                <input class="form-control form-control-lg" id="title" name="title" maxlength="140" required value="{{.Form.Title}}" placeholder="Pl. ASUS ROG Strix RTX 3080 10GB OC">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="category_id">Kategória <span class="text-danger">*</span></label>
+                                <select class="form-select" id="category_id" name="category_id" required>
+                                    <option value="">Válassz kategóriát</option>
+                                    {{range .MarketCategories}}
+                                    <option value="{{.ID.Hex}}"
+                                            data-parent="{{.ParentName}}"
+                                            {{if eq $.Form.CategoryID .ID.Hex}}selected{{end}}>
+                                        {{if .ParentName}}{{.Name}}{{else}}◆ {{.Name}}{{end}}
+                                    </option>
+                                    {{end}}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="condition">Állapot</label>
+                                <select class="form-select" id="condition" name="condition">
+                                    {{$condition := .Form.Condition}}
+                                    <option value="Új" {{if eq $condition "Új"}}selected{{end}}>Új</option>
+                                    <option value="Újszerű" {{if eq $condition "Újszerű"}}selected{{end}}>Újszerű</option>
+                                    <option value="Használt" {{if eq $condition "Használt"}}selected{{end}}>Használt</option>
+                                    <option value="Hibás" {{if eq $condition "Hibás"}}selected{{end}}>Hibás</option>
+                                    <option value="Alkatrésznek" {{if eq $condition "Alkatrésznek"}}selected{{end}}>Alkatrésznek</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="listing_type">Típus</label>
+                                <select class="form-select" id="listing_type" name="listing_type">
+                                    {{$listingType := .Form.ListingType}}
+                                    <option value="sell" {{if eq $listingType "sell"}}selected{{end}}>Eladás</option>
+                                    <option value="buy" {{if eq $listingType "buy"}}selected{{end}}>Keresek</option>
+                                    <option value="trade" {{if eq $listingType "trade"}}selected{{end}}>Csere</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Részletek</h2>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="description">Leírás <span class="text-danger">*</span></label>
+                            <div class="md-toolbar mb-1 d-flex gap-1 flex-wrap align-items-center">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('description','**','**')" title="Félkövér"><b>B</b></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary fst-italic" onclick="mdWrap('description','*','*')" title="Dőlt">I</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-decoration-line-through" onclick="mdWrap('description','~~','~~')" title="Áthúzott">S</button>
+                                <span class="text-muted" style="font-size:0.8rem;">|</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('description','## ')" title="Címsor">H2</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdLine('description','- ')" title="Lista">&#8226; Lista</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdWrap('description','`','`')" title="Kód"><code>code</code></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="mdInsertLink('description')" title="Link">&#128279; Link</button>
+                                <div class="ms-auto">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn-preview-description" onclick="togglePreview('description','md-preview-description','btn-preview-description')">&#128065; Előnézet</button>
+                                </div>
+                            </div>
+                            <div class="md-editor-wrap">
+                                <textarea class="form-control font-monospace" id="description" name="description" rows="10" required placeholder="Írd le a termék állapotát, tartozékait, garanciáját..." oninput="livePreview('description','md-preview-description')">{{.Form.Description}}</textarea>
+                                <div id="md-preview-description" class="md-preview d-none article-content border rounded p-3 bg-white"></div>
+                            </div>
+                            <div class="form-text">Markdown formátum: **félkövér**, *dőlt*, ## Cím, - lista, [szöveg](url)</div>
+                        </div>
+
+                        {{range .MarketCategories}}
+                        <div class="marketplace-spec-group border rounded-3 p-3 mb-3" data-category-id="{{.ID.Hex}}" hidden>
+                            <h3 class="h6 mb-3">{{.Name}} specifikációk</h3>
+                            {{if .Fields}}
+                            <div class="row g-3">
+                                {{range .Fields}}
+                                {{$value := index $.Form.Specs .Key}}
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" for="spec_{{.Key}}">{{.Label}}{{if .Required}} <span class="text-danger">*</span>{{end}}</label>
+                                    {{if eq .Type "select"}}
+                                    <select class="form-select spec-field" id="spec_{{.Key}}" name="spec_{{.Key}}" disabled>
+                                        <option value="">Válassz</option>
+                                        {{range .Options}}
+                                        <option value="{{.}}" {{if eq $value .}}selected{{end}}>{{.}}</option>
+                                        {{end}}
+                                    </select>
+                                    {{else if eq .Type "boolean"}}
+                                    <select class="form-select spec-field" id="spec_{{.Key}}" name="spec_{{.Key}}" disabled>
+                                        <option value="">Válassz</option>
+                                        <option value="Igen" {{if eq $value "Igen"}}selected{{end}}>Igen</option>
+                                        <option value="Nem" {{if eq $value "Nem"}}selected{{end}}>Nem</option>
+                                    </select>
+                                    {{else}}
+                                    <input class="form-control spec-field" id="spec_{{.Key}}" name="spec_{{.Key}}" value="{{$value}}" {{if eq .Type "number"}}type="number"{{else}}type="text"{{end}} disabled>
+                                    {{end}}
+                                </div>
+                                {{end}}
+                            </div>
+                            {{else}}
+                            <p class="text-muted mb-0">Ehhez a kategóriához még nincs specifikációs mező beállítva.</p>
+                            {{end}}
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">Média és ár</h2>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="price">Eladási ár (Ft)</label>
+                                <input class="form-control" id="price" name="price" inputmode="numeric" value="{{.Form.Price}}" placeholder="165000">
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mt-4 pt-2">
+                                    <input class="form-check-input" type="checkbox" id="negotiable" name="negotiable" {{if .Form.Negotiable}}checked{{end}}>
+                                    <label class="form-check-label fw-semibold" for="negotiable">Alkudható ár</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="location">Helyszín</label>
+                                <input class="form-control" id="location" name="location" list="hu-locations" value="{{.Form.Location}}" placeholder="Pl. Budapest, XI. Kerület" autocomplete="off">
+                                <datalist id="hu-locations">
+                                    <option value="Budapest, I. Kerület">
+                                    <option value="Budapest, II. Kerület">
+                                    <option value="Budapest, III. Kerület">
+                                    <option value="Budapest, IV. Kerület">
+                                    <option value="Budapest, V. Kerület">
+                                    <option value="Budapest, VI. Kerület">
+                                    <option value="Budapest, VII. Kerület">
+                                    <option value="Budapest, VIII. Kerület">
+                                    <option value="Budapest, IX. Kerület">
+                                    <option value="Budapest, X. Kerület">
+                                    <option value="Budapest, XI. Kerület">
+                                    <option value="Budapest, XII. Kerület">
+                                    <option value="Budapest, XIII. Kerület">
+                                    <option value="Budapest, XIV. Kerület">
+                                    <option value="Budapest, XV. Kerület">
+                                    <option value="Budapest, XVI. Kerület">
+                                    <option value="Budapest, XVII. Kerület">
+                                    <option value="Budapest, XVIII. Kerület">
+                                    <option value="Budapest, XIX. Kerület">
+                                    <option value="Budapest, XX. Kerület">
+                                    <option value="Budapest, XXI. Kerület">
+                                    <option value="Budapest, XXII. Kerület">
+                                    <option value="Budapest, XXIII. Kerület">
+                                    <option value="Békéscsaba">
+                                    <option value="Debrecen">
+                                    <option value="Eger">
+                                    <option value="Győr">
+                                    <option value="Kaposvár">
+                                    <option value="Kecskemét">
+                                    <option value="Miskolc">
+                                    <option value="Nyíregyháza">
+                                    <option value="Pécs">
+                                    <option value="Salgótarján">
+                                    <option value="Sopron">
+                                    <option value="Székesfehérvár">
+                                    <option value="Szekszárd">
+                                    <option value="Szolnok">
+                                    <option value="Szombathely">
+                                    <option value="Tatabánya">
+                                    <option value="Veszprém">
+                                    <option value="Zalaegerszeg">
+                                </datalist>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="warranty_enabled" name="warranty_enabled"
+                                           {{if .Form.WarrantyEnabled}}checked{{end}}>
+                                    <label class="form-check-label fw-semibold" for="warranty_enabled">Garanciális-e még?</label>
+                                </div>
+                                <div id="warranty-panel" {{if not .Form.WarrantyEnabled}}hidden{{end}}>
+                                    <div class="border rounded-3 p-3 bg-light">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="warranty_lifetime" name="warranty_lifetime"
+                                                   {{if .Form.WarrantyLifetime}}checked{{end}}>
+                                            <label class="form-check-label" for="warranty_lifetime">Élettartam garancia</label>
+                                        </div>
+                                        {{/* Új állapot: hónapok */}}
+                                        <div id="warranty-months-row" {{if ne .Form.Condition "Új"}}hidden{{end}}>
+                                            <label class="form-label small fw-semibold" for="warranty_months">Gyári garancia (hónapokban)</label>
+                                            <input class="form-control form-control-sm" style="max-width:180px;"
+                                                   id="warranty_months" name="warranty_months" type="number" min="1" max="360"
+                                                   value="{{.Form.WarrantyMonths}}" placeholder="pl. 24">
+                                        </div>
+                                        {{/* Nem új: dátum */}}
+                                        <div id="warranty-until-row" {{if eq .Form.Condition "Új"}}hidden{{end}}>
+                                            <label class="form-label small fw-semibold" for="warranty_until">Garancia lejárata</label>
+                                            <input class="form-control form-control-sm" style="max-width:220px;"
+                                                   id="warranty_until" name="warranty_until" type="date"
+                                                   value="{{.Form.WarrantyUntil}}"
+                                                   min="{{/* JS tölti fel */}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Átvétel / szállítás</label>
+                                {{if .DeliveryTypes}}
+                                <div class="border rounded-3 p-3">
+                                    {{range .DeliveryTypes}}
+                                    {{$typeID := .ID.Hex}}
+                                    {{$checked := index $.Form.DeliveryIDSet $typeID}}
+                                    <div class="delivery-option mb-3">
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input delivery-checkbox" type="checkbox"
+                                                   id="delivery_{{$typeID}}" name="delivery" value="{{$typeID}}"
+                                                   data-target="price_{{$typeID}}"
+                                                   {{if $checked}}checked{{end}}>
+                                            <label class="form-check-label fw-semibold" for="delivery_{{$typeID}}">
+                                                {{if .Icon}}<i class="bi bi-{{.Icon}} me-1"></i>{{end}}{{.Name}}
+                                            </label>
+                                            {{if .Description}}<div class="small text-muted ms-4">{{.Description}}</div>{{end}}
+                                        </div>
+                                        <div class="ms-4 delivery-price-row" id="price_{{$typeID}}" hidden>
+                                            <label class="form-label small text-muted" for="delivery_price_{{$typeID}}">Szállítási díj (Ft) — 0 vagy üresen hagyva: egyéni megállapodás</label>
+                                            <input class="form-control form-control-sm" style="max-width:200px;"
+                                                   id="delivery_price_{{$typeID}}" name="delivery_price_{{$typeID}}"
+                                                   type="number" min="0" placeholder="0">
+                                        </div>
+                                    </div>
+                                    {{end}}
+                                </div>
+                                {{else}}
+                                <div class="alert alert-info mb-0">
+                                    <i class="bi bi-info-circle me-1"></i>Nincs elérhető szállítási mód konfigurálva. Az admin felületen adj hozzá szállítási módokat.
+                                </div>
+                                {{end}}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="images">Képek feltöltése</label>
+                                <input class="form-control" id="images" name="images" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple {{if not .S3Enabled}}disabled{{end}}>
+                                <div class="form-text">
+                                    {{if .S3Enabled}}
+                                    Maximum 5 kép, képenként legfeljebb 5 MB.
+                                    {{else}}
+                                    A közvetlen képfeltöltéshez S3 konfiguráció szükséges. Addig használj kép URL-eket.
+                                    {{end}}
+                                </div>
+                                <div class="form-text text-muted">
+                                    Kijelentem, hogy a feltöltött kép jogtisztaságát ellenőriztem: a kép felhasználási jogosultságával rendelkezem (ha forrásmegjelölés szükséges, azt megteszem). A kép feltöltéséért a teljes jogi és anyagi felelősséget vállalom.
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="image_urls">Kép URL-ek</label>
+                                <textarea class="form-control" id="image_urls" name="image_urls" rows="3" placeholder="Egy URL soronként, maximum 5 kép">{{.Form.ImageURLs}}</textarea>
+                                <div class="form-text">Külső vagy már médiatárban lévő kép URL-ek. A feltöltött képek a lista elejére kerülnek.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="/marketplace" class="btn btn-outline-secondary">Mégse</a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-lg me-1"></i>Hirdetés közzététele
+                    </button>
+                </div>
+            </form>
+            {{else}}
+            <div class="alert alert-warning">
+                Még nincs olyan aktív marketplace kategória, amelybe közvetlenül feladható hirdetés. Az admin felületen engedélyezd a "Hirdetés feladható közvetlenül ebbe a kategóriába" kapcsolót legalább egy alkategórián.
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+<script>
+(function() {
+    // Build <optgroup> structure from data-parent attributes
+    var select = document.getElementById('category_id');
+    if (select) {
+        var options = Array.prototype.slice.call(select.querySelectorAll('option[data-parent]'));
+        var groups = {};
+        var groupOrder = [];
+        options.forEach(function(opt) {
+            var parent = opt.getAttribute('data-parent') || '';
+            if (!groups[parent]) { groups[parent] = []; groupOrder.push(parent); }
+            groups[parent].push(opt);
+            opt.parentNode.removeChild(opt);
+        });
+        groupOrder.forEach(function(parent) {
+            if (parent) {
+                var og = document.createElement('optgroup');
+                og.label = parent;
+                groups[parent].forEach(function(opt) { og.appendChild(opt); });
+                select.appendChild(og);
+            } else {
+                groups[parent].forEach(function(opt) { select.appendChild(opt); });
+            }
+        });
+    }
+
+    // Spec group show/hide on category select; disabled controls excluded from POST
+    var specGroups = Array.prototype.slice.call(document.querySelectorAll('.marketplace-spec-group'));
+    function syncSpecs() {
+        var selected = select ? select.value : '';
+        specGroups.forEach(function(g) {
+            var isActive = g.getAttribute('data-category-id') === selected;
+            g.hidden = !isActive;
+            g.querySelectorAll('.spec-field').forEach(function(f) {
+                f.disabled = !isActive;
+            });
+        });
+    }
+    if (select) { select.addEventListener('change', syncSpecs); syncSpecs(); }
+
+    // Delivery price row show/hide on checkbox toggle
+    document.querySelectorAll('.delivery-checkbox').forEach(function(cb) {
+        var target = document.getElementById(cb.getAttribute('data-target'));
+        function syncPrice() { if (target) target.hidden = !cb.checked; }
+        cb.addEventListener('change', syncPrice);
+        syncPrice();
+    });
+
+    // Warranty panel
+    var warrantyEnabled = document.getElementById('warranty_enabled');
+    var warrantyPanel   = document.getElementById('warranty-panel');
+    var warrantyLifetime = document.getElementById('warranty_lifetime');
+    var monthsRow = document.getElementById('warranty-months-row');
+    var untilRow  = document.getElementById('warranty-until-row');
+    var conditionSel = document.getElementById('condition');
+    var untilInput = document.getElementById('warranty_until');
+
+    // Set min date to today
+    if (untilInput) untilInput.min = new Date().toISOString().split('T')[0];
+
+    function syncWarrantyRows() {
+        var isNew = conditionSel && conditionSel.value === 'Új';
+        var isLifetime = warrantyLifetime && warrantyLifetime.checked;
+        if (monthsRow) monthsRow.hidden = !isNew || isLifetime;
+        if (untilRow)  untilRow.hidden  = isNew || isLifetime;
+    }
+    function syncWarrantyPanel() {
+        if (warrantyPanel) warrantyPanel.hidden = !(warrantyEnabled && warrantyEnabled.checked);
+        syncWarrantyRows();
+    }
+    if (warrantyEnabled) warrantyEnabled.addEventListener('change', syncWarrantyPanel);
+    if (warrantyLifetime) warrantyLifetime.addEventListener('change', syncWarrantyRows);
+    if (conditionSel) conditionSel.addEventListener('change', syncWarrantyRows);
+    syncWarrantyPanel();
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/js/md-editor.js"></script>
+{{template "footer" .}}
+{{end}}

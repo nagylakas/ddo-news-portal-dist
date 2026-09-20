@@ -1,0 +1,7 @@
+* text=auto
+
+# Binary files - prevent text conversion and diffing
+*.exe binary
+*.tar.gz binary
+*.zip binary
+linux/server binary

@@ -1,0 +1,55 @@
+{{define "admin/webshop_manufacturer_create"}}
+{{template "admin-header" .}}
+<div class="container">
+    {{template "admin-flash" .}}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {{template "admin-page-header" dict "Title" (t .Lang "ws.man_create_title") "Icon" "building-add" "Actions" (list (dict "URL" "/admin/webshop/manufacturers" "Label" (t .Lang "common.back") "Icon" "arrow-left" "Class" "btn-outline-secondary btn-sm"))}}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="POST" action="/admin/webshop/manufacturers/create">
+                        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                        {{template "webshop-manufacturer-form" .}}
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="/admin/webshop/manufacturers" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i>{{t .Lang "common.create"}}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}
+
+{{define "webshop-manufacturer-form"}}
+<div class="row g-3">
+    <div class="col-md-8">
+        <label class="form-label fw-semibold" for="name">{{t .Lang "common.name"}} <span class="text-danger">*</span></label>
+        <input class="form-control" id="name" name="name" required value="{{if .Manufacturer}}{{.Manufacturer.Name}}{{end}}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-semibold" for="display_order">{{t .Lang "cat.field_order"}}</label>
+        <input class="form-control" id="display_order" name="display_order" type="number" value="{{if .Manufacturer}}{{.Manufacturer.DisplayOrder}}{{else}}0{{end}}">
+    </div>
+    <div class="col-12">
+        <label class="form-label fw-semibold" for="description">{{t .Lang "common.description"}}</label>
+        <textarea class="form-control" id="description" name="description" rows="4">{{if .Manufacturer}}{{.Manufacturer.Description}}{{end}}</textarea>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label fw-semibold" for="logo_url">{{t .Lang "ws.man_logo_url"}}</label>
+        <input class="form-control" id="logo_url" name="logo_url" type="url" value="{{if .Manufacturer}}{{.Manufacturer.LogoURL}}{{end}}">
+    </div>
+    <div class="col-md-6">
+        <label class="form-label fw-semibold" for="website_url">{{t .Lang "ws.man_website_url"}}</label>
+        <input class="form-control" id="website_url" name="website_url" type="url" value="{{if .Manufacturer}}{{.Manufacturer.WebsiteURL}}{{end}}">
+    </div>
+    <div class="col-12">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="active" name="active" {{if .Manufacturer}}{{if .Manufacturer.Active}}checked{{end}}{{else}}checked{{end}}>
+            <label class="form-check-label fw-semibold" for="active">{{t .Lang "common.active"}}</label>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,31 @@
+{{define "forum/my"}}
+{{template "header" .}}
+{{template "module/hero" dict "Title" "Saját fórum aktivitás" "Description" "Témáid és legutóbbi hozzászólásaid." "Crumb" "FÓRUM"}}
+<section class="forum-page module-page container-fluid px-4 px-lg-5 py-4">
+    <div class="row g-4">
+        {{template "forum/sidebar" .}}
+        <main class="col-lg-9 col-xl-10">
+            {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+            {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+            {{template "forum/topic_list" .}}
+            <h2 class="h4 mt-5 mb-3">Legutóbbi hozzászólásaid</h2>
+            <div class="forum-topic-list">
+                {{range .UserPosts}}
+                <div class="forum-topic-row">
+                    <div>
+                        <strong>{{truncate .Content 120}}</strong>
+                        <small>{{formatDateTime .CreatedAt}}</small>
+                    </div>
+                    <form method="POST" action="/forum/post/{{.ID.Hex}}/delete" onsubmit="return confirm('Biztosan törlöd ezt a hozzászólást?')">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Törlés</button>
+                    </form>
+                </div>
+                {{else}}
+                <div class="forum-empty">Még nincs hozzászólásod.</div>
+                {{end}}
+            </div>
+        </main>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}

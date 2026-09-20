@@ -1,0 +1,152 @@
+{{define "admin/audit"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4" id="auditRoot" data-enabled="{{if .Enabled}}1{{else}}0{{end}}">
+    {{template "admin-page-header" dict "Title" (t .Lang "audit.title") "Icon" "shield-lock" "Subtitle" (t .Lang "audit.subtitle") "Actions" (list (dict "URL" "/admin/audit/alerts" "Label" (t .Lang "audit.alerts_title") "Icon" "bell" "Class" "btn-outline-secondary btn-sm") (dict "URL" "/admin/audit/rules" "Label" (t .Lang "audit.rules_title") "Icon" "sliders2" "Class" "btn-outline-secondary btn-sm"))}}
+
+    {{template "admin-flash" .}}
+
+    {{if not .Enabled}}
+    <div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "audit.disabled"}}</div>
+    {{else}}
+
+    <!-- Integrity card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body d-flex flex-wrap align-items-center gap-3">
+            <div class="fw-semibold"><i class="bi bi-link-45deg me-1"></i>{{t .Lang "audit.integrity_title"}}</div>
+            <span id="auditVerifyChip" class="badge bg-secondary">{{t .Lang "audit.integrity_unknown"}}</span>
+            <span id="auditVerifyInfo" class="text-muted small"></span>
+            <button type="button" id="auditVerifyBtn" class="btn btn-sm btn-outline-primary ms-auto">
+                <i class="bi bi-shield-check me-1"></i>{{t .Lang "audit.verify_now"}}
+            </button>
+            <span class="text-muted small">
+                {{t .Lang "audit.retention_info"}}:
+                {{if eq .RetentionDays 0}}{{t .Lang "audit.retention_forever"}}{{else}}{{.RetentionDays}} {{t .Lang "audit.days"}}{{end}}
+            </span>
+        </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <div class="btn-group btn-group-sm" id="auditRangeGroup" role="group">
+                    <button type="button" class="btn btn-outline-secondary" data-range="today">{{t .Lang "audit.range_today"}}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-range="yesterday">{{t .Lang "audit.range_yesterday"}}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-range="24h">{{t .Lang "audit.range_24h"}}</button>
+                    <button type="button" class="btn btn-outline-secondary active" data-range="7d">{{t .Lang "audit.range_7d"}}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-range="30d">{{t .Lang "audit.range_30d"}}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-range="90d">{{t .Lang "audit.range_90d"}}</button>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                    <input type="date" id="auditFrom" class="form-control form-control-sm" style="width:auto">
+                    <span class="text-muted">–</span>
+                    <input type="date" id="auditTo" class="form-control form-control-sm" style="width:auto">
+                </div>
+                <div class="ms-auto d-flex gap-2">
+                    <a href="#" id="auditExportCsv" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-csv me-1"></i>{{t .Lang "audit.export_csv"}}</a>
+                    <a href="#" id="auditExportNdjson" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-json me-1"></i>{{t .Lang "audit.export_ndjson"}}</a>
+                </div>
+            </div>
+            <div class="row g-2">
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="auditModule">{{t .Lang "audit.filter_module"}}</label>
+                    <select id="auditModule" class="form-select form-select-sm" data-filter="module">
+                        <option value="">{{t .Lang "audit.filter_all"}}</option>
+                        {{range .Modules}}<option value="{{.}}">{{.}}</option>{{end}}
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="auditAction">{{t .Lang "audit.filter_action"}}</label>
+                    <select id="auditAction" class="form-select form-select-sm" data-filter="action">
+                        <option value="">{{t .Lang "audit.filter_all"}}</option>
+                        {{range .Actions}}<option value="{{.}}">{{.}}</option>{{end}}
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="auditOutcome">{{t .Lang "audit.filter_outcome"}}</label>
+                    <select id="auditOutcome" class="form-select form-select-sm" data-filter="outcome">
+                        <option value="">{{t .Lang "audit.filter_all"}}</option>
+                        <option value="success">{{t .Lang "audit.outcome_success"}}</option>
+                        <option value="failure">{{t .Lang "audit.outcome_failure"}}</option>
+                        <option value="denied">{{t .Lang "audit.outcome_denied"}}</option>
+                        <option value="attempt">{{t .Lang "audit.outcome_attempt"}}</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="auditActor">{{t .Lang "audit.filter_actor"}}</label>
+                    <input type="text" id="auditActor" class="form-control form-control-sm" data-filter="actor">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="auditIP">{{t .Lang "audit.filter_ip"}}</label>
+                    <input type="text" id="auditIP" class="form-control form-control-sm" data-filter="ip">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="auditQ">{{t .Lang "audit.filter_q"}}</label>
+                    <input type="search" id="auditQ" class="form-control form-control-sm" data-filter="q">
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+                <button type="button" id="auditApply" class="btn btn-sm btn-primary"><i class="bi bi-funnel me-1"></i>{{t .Lang "audit.apply"}}</button>
+                <button type="button" id="auditReset" class="btn btn-sm btn-outline-secondary">{{t .Lang "audit.reset"}}</button>
+                <div id="auditFacets" class="d-flex flex-wrap align-items-center gap-2 ms-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event table -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="auditTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-nowrap">{{t .Lang "audit.col_time"}}</th>
+                        <th>{{t .Lang "audit.col_actor"}}</th>
+                        <th>{{t .Lang "audit.col_action"}}</th>
+                        <th>{{t .Lang "audit.col_target"}}</th>
+                        <th class="text-center">{{t .Lang "audit.col_outcome"}}</th>
+                        <th class="text-nowrap">{{t .Lang "audit.col_ip"}}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                    <tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-transparent d-flex align-items-center">
+            <span id="auditTotal" class="text-muted small"></span>
+            <button type="button" id="auditLoadMore" class="btn btn-sm btn-outline-secondary ms-auto d-none">
+                <i class="bi bi-arrow-down-circle me-1"></i>{{t .Lang "audit.load_more"}}
+            </button>
+        </div>
+    </div>
+    {{end}}
+</div>
+
+<script>
+window.auditI18n = {
+    noEvents: {{t .Lang "audit.no_events"}},
+    loadError: {{t .Lang "audit.load_error"}},
+    totalEvents: {{t .Lang "audit.total_events"}},
+    detailTitle: {{t .Lang "audit.detail_title"}},
+    detailRequest: {{t .Lang "audit.detail_request"}},
+    detailHash: {{t .Lang "audit.detail_hash"}},
+    detailPrevHash: {{t .Lang "audit.detail_prev_hash"}},
+    detailDuration: {{t .Lang "audit.detail_duration"}},
+    integrityOk: {{t .Lang "audit.integrity_ok"}},
+    integrityBroken: {{t .Lang "audit.integrity_broken"}},
+    integrityUnknown: {{t .Lang "audit.integrity_unknown"}},
+    integrityRunning: {{t .Lang "audit.integrity_running"}},
+    verifyChecked: {{t .Lang "audit.verify_checked"}},
+    outcomes: {
+        success: {{t .Lang "audit.outcome_success"}},
+        failure: {{t .Lang "audit.outcome_failure"}},
+        denied: {{t .Lang "audit.outcome_denied"}},
+        attempt: {{t .Lang "audit.outcome_attempt"}}
+    },
+    locale: {{if eq .Lang "hu"}}"hu-HU"{{else}}"en-GB"{{end}}
+};
+</script>
+<script src="/static/js/admin-audit.js"></script>
+{{template "admin-footer" .}}
+{{end}}
