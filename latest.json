@@ -1,0 +1,12 @@
+{
+  "version": "0.6.90",
+  "source_commit": "913d0ad",
+  "build_time_utc": "2026-09-20T05:34:31Z",
+  "linux_archive": "linux.tar.gz",
+  "artifacts": [
+    {
+      "name": "linux-amd64",
+      "url": "linux.tar.gz"
+    }
+  ]
+}

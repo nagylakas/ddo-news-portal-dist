@@ -1,0 +1,159 @@
+{
+    "schema_version":  1,
+    "packages":  [
+                     {
+                         "id":  "moddinglife",
+                         "version":  "1.0.1",
+                         "name":  "moddinglife",
+                         "primary_color":  "#FF006C",
+                         "logo_width":  570,
+                         "logo_height":  120,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-moddinglife-1.0.1.zip",
+                         "sha256":  "0e50e75f6a987cab2f64ba3f2669fea0fa861b77a48a8eed80f57a71d17a6026"
+                     },
+                     {
+                         "id":  "fakultativ",
+                         "version":  "1.0.1",
+                         "name":  "fakultativ",
+                         "primary_color":  "#eb5822",
+                         "logo_width":  1547,
+                         "logo_height":  330,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-fakultativ-1.0.1.zip",
+                         "sha256":  "9aaefaa4ee0f61a3ec4babb77756aff6c78d130ce839a90e1128b4d5d573b8a2"
+                     },
+                     {
+                         "id":  "realfluencer",
+                         "version":  "1.0.1",
+                         "name":  "realfluencer",
+                         "primary_color":  "#000000",
+                         "logo_width":  1200,
+                         "logo_height":  453,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-realfluencer-1.0.1.zip",
+                         "sha256":  "acb58efdc76d5327b9d4a466f0f42f011776032b3a521ea5eebc4eac9060a7bd"
+                     },
+                     {
+                         "id":  "walletone",
+                         "version":  "1.0.1",
+                         "name":  "walletone",
+                         "primary_color":  "#ff0056",
+                         "logo_width":  863,
+                         "logo_height":  193,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-walletone-1.0.1.zip",
+                         "sha256":  "2261c70854486e0d1e61109924aedf2d17964a48f2bf6ac11c5576e528f367c4"
+                     },
+                     {
+                         "id":  "gamerlife",
+                         "version":  "1.0.1",
+                         "name":  "gamerlife",
+                         "primary_color":  "#00ff01",
+                         "logo_width":  1134,
+                         "logo_height":  342,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-gamerlife-1.0.1.zip",
+                         "sha256":  "3a912615baf696da4b429792a21add8438fc61fead136fd6674e5d766d9a308f"
+                     },
+                     {
+                         "id":  "streamlife",
+                         "version":  "1.0.1",
+                         "name":  "streamlife",
+                         "primary_color":  "#1f54c5",
+                         "logo_width":  1003,
+                         "logo_height":  152,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-streamlife-1.0.1.zip",
+                         "sha256":  "20ad2ff4d96026ac00533a4d95d758dd0f6b6ccf6234ba909f6bc60793a855f3"
+                     },
+                     {
+                         "id":  "brothers",
+                         "version":  "1.0.1",
+                         "name":  "brothers",
+                         "primary_color":  "#ff3900",
+                         "logo_width":  1200,
+                         "logo_height":  437,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-brothers-1.0.1.zip",
+                         "sha256":  "4b1d9e67cb27205890682d3a18fb518987e3e834698961fd59f654fa9d9692df"
+                     },
+                     {
+                         "id":  "connectedhome",
+                         "version":  "1.0.1",
+                         "name":  "connectedhome",
+                         "primary_color":  "#00ff72",
+                         "logo_width":  1835,
+                         "logo_height":  457,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-connectedhome-1.0.1.zip",
+                         "sha256":  "7fd40a104c1f65342ac770db7d4bcdef47ca85ee9b93c273b9853dfc8d51830b"
+                     },
+                     {
+                         "id":  "hublife",
+                         "version":  "1.0.1",
+                         "name":  "hublife",
+                         "primary_color":  "#00fcde",
+                         "logo_width":  1556,
+                         "logo_height":  360,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-hublife-1.0.1.zip",
+                         "sha256":  "4c19af8e6612ff52c5a02d7b82add012aa730e5124b759ce67bb907aa7b84d8e"
+                     },
+                     {
+                         "id":  "spacelife",
+                         "version":  "1.0.1",
+                         "name":  "spacelife",
+                         "primary_color":  "#0215d3",
+                         "logo_width":  1609,
+                         "logo_height":  367,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-spacelife-1.0.1.zip",
+                         "sha256":  "277dadfc59c20f352d9487af9f0b1f3deb5d87a80cb12d77651b23514e824587"
+                     },
+                     {
+                         "id":  "driveandride",
+                         "version":  "1.0.1",
+                         "name":  "driveandride",
+                         "primary_color":  "#ff0002",
+                         "logo_width":  1650,
+                         "logo_height":  358,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-driveandride-1.0.1.zip",
+                         "sha256":  "9cfb31b4c00e52491a42f25bd34b3c7757ba090b559c9029d8473a5447424575"
+                     },
+                     {
+                         "id":  "itlife",
+                         "version":  "1.1.1",
+                         "name":  "itlife",
+                         "primary_color":  "#00ff00",
+                         "logo_width":  391,
+                         "logo_height":  120,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-itlife-1.1.1.zip",
+                         "sha256":  "8329bd90ddd1beb7384e75c5412fbc68c775be507c51d23d4424869d92f26005"
+                     },
+                     {
+                         "id":  "mobilelife",
+                         "version":  "1.1.1",
+                         "name":  "mobilelife",
+                         "primary_color":  "#ff073a",
+                         "logo_width":  3614,
+                         "logo_height":  671,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-mobilelife-1.1.1.zip",
+                         "sha256":  "95e1f0be59b45b2006f807d5a134f658ca00ffdb9ea058e69fa9ecde06e5bd67"
+                     },
+                     {
+                         "id":  "hardverlife",
+                         "version":  "1.1.1",
+                         "name":  "hardverlife",
+                         "primary_color":  "#2cffdb",
+                         "logo_width":  708,
+                         "logo_height":  120,
+                         "min_app_version":  "0.6.11",
+                         "asset":  "icon-pack-hardverlife-1.1.1.zip",
+                         "sha256":  "79f28c899bcf1a77344f7bbe0516f26dc8f1d13268a078cd4bcd963ddbf70d99"
+                     }
+                 ]
+}

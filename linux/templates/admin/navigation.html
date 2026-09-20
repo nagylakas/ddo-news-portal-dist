@@ -1,0 +1,69 @@
+{{define "admin/navigation"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-page-header" dict "Title" (t .Lang "navmenu.manage_title") "Icon" "list-nested" "Actions" (list (dict "URL" "/admin/navigation/create" "Label" (t .Lang "navmenu.create_btn") "Icon" "plus-lg"))}}
+
+    {{template "admin-flash" .}}
+
+    {{if .Items}}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{t .Lang "navmenu.col_label"}}</th>
+                        <th>{{t .Lang "navmenu.col_kind"}}</th>
+                        <th>{{t .Lang "navmenu.col_target"}}</th>
+                        <th class="text-center">{{t .Lang "navmenu.col_order"}}</th>
+                        <th class="text-center">{{t .Lang "navmenu.col_enabled"}}</th>
+                        <th class="text-center">{{t .Lang "navmenu.col_effective"}}</th>
+                        <th class="text-end">{{t .Lang "common.actions"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Items}}
+                    <tr>
+                        <td class="fw-semibold">{{.Label}}{{if .IsBuiltIn}} <span class="badge text-bg-light ms-1">{{t $.Lang "navmenu.builtin"}}</span>{{end}}</td>
+                        <td><code class="text-muted">{{.Kind}}</code></td>
+                        <td class="text-muted small">
+                            {{if eq .Kind "module"}}{{.Module}}{{else if eq .Kind "categories"}}/{{else}}{{.URL}}{{end}}
+                            {{if navMenuItemNewTab .}}<i class="bi bi-box-arrow-up-right ms-1"></i>{{end}}
+                        </td>
+                        <td class="text-center text-muted small">{{.DisplayOrder}}</td>
+                        <td class="text-center">
+                            {{if .Enabled}}<span class="badge text-bg-success">{{t $.Lang "common.active"}}</span>{{else}}<span class="badge text-bg-secondary">{{t $.Lang "common.inactive"}}</span>{{end}}
+                        </td>
+                        <td class="text-center">
+                            {{if navMenuItemVisible .}}<span class="badge text-bg-success">{{t $.Lang "navmenu.visible"}}</span>{{else}}<span class="badge text-bg-warning">{{t $.Lang "navmenu.hidden"}}</span>{{end}}
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <a href="/admin/navigation/edit/{{.ID.Hex}}" class="btn btn-sm btn-outline-secondary" title="{{t $.Lang "common.edit"}}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {{if not .IsBuiltIn}}
+                            <form action="/admin/navigation/delete/{{.ID.Hex}}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm(this.dataset.confirm)"
+                                        data-confirm="{{t $.Lang "navmenu.confirm_delete"}}"
+                                        title="{{t $.Lang "common.delete"}}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {{end}}
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-list-nested text-muted" style="font-size:4rem;"></i>
+        <h5 class="mt-3 text-muted">{{t .Lang "navmenu.empty_title"}}</h5>
+        <p class="text-muted">{{t .Lang "navmenu.empty_text"}}</p>
+    </div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}

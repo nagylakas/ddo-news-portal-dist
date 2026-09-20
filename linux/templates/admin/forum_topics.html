@@ -1,0 +1,34 @@
+{{define "admin/forum_topics"}}
+{{template "admin-header" .}}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Fórum témák</h1>
+        <a href="/admin/forum" class="btn btn-outline-secondary">Vissza</a>
+    </div>
+    {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+    <div class="card border-0 shadow-sm"><div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Téma</th><th>Kategória</th><th>Állapot</th><th>Aktivitás</th><th></th></tr></thead>
+            <tbody>
+                {{range .Topics}}
+                <tr>
+                    <td><a href="/forum/topic/{{.Slug}}" target="_blank">{{.Title}}</a><br><small class="text-muted">{{.CreatedByName}}</small></td>
+                    <td>{{.CategoryName}}</td>
+                    <td>{{.Status}}{{if .Pinned}} · kiemelt{{end}}</td>
+                    <td>{{formatDateTime .LastPostAt}}<br><small>{{.LastPostUser}}</small></td>
+                    <td class="text-end">
+                        <form method="POST" action="/admin/forum/topics/{{.ID.Hex}}/{{if .Pinned}}unpin{{else}}pin{{end}}" class="d-inline"><button class="btn btn-sm btn-outline-secondary" type="submit">{{if .Pinned}}Kiemelés le{{else}}Kiemel{{end}}</button></form>
+                        <form method="POST" action="/admin/forum/topics/{{.ID.Hex}}/{{if eq .Status "locked"}}open{{else}}lock{{end}}" class="d-inline"><button class="btn btn-sm btn-outline-primary" type="submit">{{if eq .Status "locked"}}Nyit{{else}}Zár{{end}}</button></form>
+                        <form method="POST" action="/admin/forum/topics/{{.ID.Hex}}/{{if eq .Status "hidden"}}open{{else}}hide{{end}}" class="d-inline"><button class="btn btn-sm btn-outline-warning" type="submit">{{if eq .Status "hidden"}}Visszaállít{{else}}Rejt{{end}}</button></form>
+                    </td>
+                </tr>
+                {{else}}
+                <tr><td colspan="5" class="text-center text-muted py-4">Nincs téma.</td></tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div></div>
+</div>
+{{template "admin-footer" .}}
+{{end}}

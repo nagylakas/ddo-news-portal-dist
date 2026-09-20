@@ -1,0 +1,31 @@
+{{define "personal"}}
+{{template "header" .}}
+{{template "listing/hero" dict "Crumb" "SZEMÉLYES" "Title" "Neked" "Description" "A követéseidhez kapcsolódó friss tartalmak."}}
+<div class="container-fluid px-4 px-lg-5 py-5">
+  <div class="search-layout search-layout-left">
+    <aside class="search-sidebar search-sidebar-left">
+      <div class="search-sidebar-inner">
+        <div class="section-header mb-3"><h2 class="h5 section-title" style="font-size:1rem;">Saját <span class="text-primary">tartalmaid</span></h2></div>
+        <div class="search-cat-list">
+          <a class="search-cat-item text-decoration-none {{if eq .ActiveTab "feed"}}search-cat-active{{end}}" href="/neked"><i class="bi bi-stars text-primary me-2"></i><span>Feed</span></a>
+          <a class="search-cat-item text-decoration-none {{if eq .ActiveTab "follows"}}search-cat-active{{end}}" href="/neked?tab=follows"><i class="bi bi-rss text-primary me-2"></i><span>Követések</span><span class="search-cat-count ms-auto">{{len .Follows}}</span></a>
+          <a class="search-cat-item text-decoration-none {{if eq .ActiveTab "saved"}}search-cat-active{{end}}" href="/neked?tab=saved"><i class="bi bi-bookmark text-primary me-2"></i><span>Mentések</span></a>
+        </div>
+      </div>
+    </aside>
+    <div class="search-results">
+  {{if eq .ActiveTab "follows"}}
+    {{if .Follows}}<div class="list-group">{{range .Follows}}<div class="list-group-item d-flex justify-content-between align-items-center"><span><span class="badge text-bg-secondary me-2">{{.TargetKind}}</span>{{.Label}}</span><form method="POST" action="/api/personal/follow"><input type="hidden" name="kind" value="{{.TargetKind}}"><input type="hidden" name="id" value="{{.TargetID}}"><input type="hidden" name="label" value="{{.Label}}"><input type="hidden" name="return" value="/neked?tab=follows"><button class="btn btn-sm btn-outline-danger">Követés leállítása</button></form></div>{{end}}</div>{{else}}<div class="alert alert-light border">Még nincs követésed. Kövess egy kategóriát vagy a cikkekhez kötött témát.</div>{{end}}
+  {{else if eq .ActiveTab "saved"}}
+    {{if .SavedArticles}}<div class="row g-3">{{range .SavedArticles}}<div class="col-md-6"><a class="card h-100 text-decoration-none text-dark" href="/article/{{.Slug}}"><div class="card-body"><span class="badge text-bg-primary mb-2">{{.Category}}</span><h2 class="h5">{{.Title}}</h2><p class="mb-0 text-muted">{{.Summary}}</p></div></a></div>{{end}}</div>{{else}}<div class="alert alert-light border">Még nem mentettél el cikket későbbre.</div>{{end}}
+  {{else}}
+    {{if not .Follows}}<div class="alert alert-primary">Kövess egy cikk témáját, kategóriáját, szerzőjét vagy tagjét, és itt jelennek meg a neked fontos friss tartalmak.</div>{{end}}
+    <section class="mb-5"><h2 class="h3">Friss cikkek</h2>{{if .Articles}}<div class="row g-3">{{range .Articles}}<div class="col-md-6"><a class="card h-100 text-decoration-none text-dark" href="/article/{{.Slug}}"><div class="card-body"><span class="badge text-bg-primary mb-2">{{.Category}}</span><h3 class="h5">{{.Title}}</h3><p class="mb-0 text-muted">{{.Summary}}</p></div></a></div>{{end}}</div>{{else}}<p class="text-muted">Még nincs új, követéseidhez kapcsolódó cikk.</p>{{end}}</section>
+    <section class="mb-5"><h2 class="h3">Fórum</h2>{{if .Topics}}<div class="list-group">{{range .Topics}}<a class="list-group-item list-group-item-action" href="/forum/topic/{{.Slug}}"><strong>{{.Title}}</strong><span class="text-muted ms-2">{{.ReplyCount}} válasz</span></a>{{end}}</div>{{else}}<p class="text-muted">Még nincs új kapcsolódó fórumszál.</p>{{end}}</section>
+    <section><h2 class="h3">Apróhirdetések</h2>{{if .Listings}}<div class="row g-3">{{range .Listings}}<div class="col-md-6"><a class="card h-100 text-decoration-none text-dark" href="/marketplace/listing/{{.Slug}}"><div class="card-body"><span class="badge text-bg-secondary mb-2">{{.CategoryName}}</span><h3 class="h5">{{.Title}}</h3><p class="mb-0">{{.PriceFormatted}}</p></div></a></div>{{end}}</div>{{else}}<p class="text-muted">Még nincs új kapcsolódó hirdetés.</p>{{end}}</section>
+  {{end}}
+    </div>
+  </div>
+</div>
+{{template "footer" .}}
+{{end}}
