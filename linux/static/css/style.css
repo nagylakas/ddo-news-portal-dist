@@ -3883,4 +3883,15 @@ body:not(.admin-body) .btn-outline-primary:hover {
 .gallery-editor-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gallery-media-choice { overflow:hidden; border:1px solid var(--bs-border-color); }
 .gallery-media-choice img { height:100px; width:100%; object-fit:cover; }
+.aggregator-layout { display:grid; gap:1.25rem; }
+.aggregator-magazine { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.aggregator-magazine .aggregator-card:first-child { grid-column:span 2; grid-row:span 2; }
+.aggregator-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.aggregator-timeline { grid-template-columns:1fr; max-width:62rem; }
+.aggregator-timeline .aggregator-card { border-width:0 0 1px; border-radius:0; }
+.aggregator-image,.aggregator-placeholder { height:12rem; width:100%; object-fit:cover; background:var(--bs-tertiary-bg); }
+.aggregator-magazine .aggregator-card:first-child .aggregator-image,.aggregator-magazine .aggregator-card:first-child .aggregator-placeholder { height:28rem; }
+.aggregator-placeholder { display:grid; place-items:center; font-size:3rem; color:var(--bs-secondary); }
+@media (max-width:991.98px) { .aggregator-magazine,.aggregator-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .aggregator-magazine .aggregator-card:first-child { grid-column:span 2; } }
+@media (max-width:575.98px) { .aggregator-magazine,.aggregator-grid { grid-template-columns:1fr; } .aggregator-magazine .aggregator-card:first-child { grid-column:auto; } .aggregator-magazine .aggregator-card:first-child .aggregator-image,.aggregator-magazine .aggregator-card:first-child .aggregator-placeholder { height:18rem; } }
 @media (max-width: 767.98px) { .content-gallery { width:100%; } .content-gallery-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .content-gallery-8 .content-gallery-item:nth-child(7),.content-gallery-7 .content-gallery-item:last-child { grid-column:auto; } .gallery-overlay { padding:1rem; gap:.25rem; } .gallery-overlay button { font-size:2rem; padding:.25rem .5rem; } }

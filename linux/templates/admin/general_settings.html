@@ -35,6 +35,7 @@
                         <div><div class="d-flex justify-content-between"><label class="form-label" for="site_name_long">{{t .Lang "settings.site_name_long"}}</label><small class="text-muted" data-character-count="site_name_long">0 / 120</small></div><input class="form-control" id="site_name_long" name="site_name_long" maxlength="120" required value="{{.Values.SiteNameLong}}"></div>
                         <div><label class="form-label" for="site_url">{{t .Lang "settings.site_url"}}</label><input class="form-control" id="site_url" name="site_url" type="url" required placeholder="https://example.com" value="{{.Values.SiteURL}}"></div>
                         <div><label class="form-label" for="contact_email">{{t .Lang "settings.contact_email"}}</label><input class="form-control" id="contact_email" name="contact_email" type="email" value="{{.Values.ContactEmail}}"></div>
+						<div><label class="form-label" for="homepage_module">Nyitólap</label><select class="form-select" id="homepage_module" name="homepage_module">{{range .HomepageOptions}}<option value="{{.ID}}" {{if eq $.Values.HomepageModule .ID}}selected{{end}}>{{.Label}}</option>{{end}}</select><div class="form-text">Mindig pontosan egy modul kezeli a <code>/</code> útvonalat. Ha nem a Hírek az aktív nyitólap, a saját hírek a <code>/news</code> címen érhetők el.</div>{{range .HomepageOptions}}{{if eq $.Values.HomepageModule .ID}}<div class="small text-muted mt-2">{{.Description}}</div>{{end}}{{end}}</div>
                     </div>
                 </div></div>
 

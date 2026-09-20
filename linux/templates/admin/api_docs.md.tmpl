@@ -10,6 +10,7 @@ REST API reference for authenticated administrative access to this news portal.
 - [Deletion safeguards](#deletion-safeguards)
 - [Version](#version)
 - [Plugin status](#plugin-status)
+- [News aggregator](#news-aggregator)
 - [System and updates](#system-and-updates)
   - [System identity](#system-identity)
   - [Check for updates](#check-for-updates)
@@ -281,6 +282,37 @@ management UI is available.
 
 Only `GET` is allowed (`405` for other methods). The MCP tool
 `get_plugin_status` returns the same `plugins` collection for AI clients.
+
+## News aggregator
+
+The optional RSS/Atom aggregator is managed through authenticated endpoints.
+With `AGGREGATOR_API_ENABLED=true`, these endpoints and the admin management
+screen are available without replacing the public home page. With full
+`AGGREGATOR_ENABLED=true`, the **General settings / Home page** selector can
+make the aggregator own `/`; the portal's own news then remains at `/news`.
+
+| Method | URL | Description |
+| --- | --- | --- |
+| GET, POST | `/api/aggregator/sources` | List or create RSS/Atom sources. |
+| GET, PUT, DELETE | `/api/aggregator/sources/{id}` | Get, update or delete a source and its cached items. |
+| POST | `/api/aggregator/sources/{id}/refresh` | Fetch one source immediately. |
+| GET, PUT | `/api/aggregator/settings` | Read or set `layout`: `magazine`, `grid`, or `timeline`. |
+| GET | `/api/aggregator/items` | List cached items; optional `tag`, `source_id`, `include_hidden`. |
+| GET | `/api/aggregator/items/{id}` | Get one cached item. |
+| PUT | `/api/aggregator/items/{id}/visibility` | Set `{"hidden":true|false}`. |
+
+Source body: `{"name":"Example","feed_url":"https://example.com/feed.xml","site_url":"https://example.com","tags":["Tech","Mobile"],"active":true}`.
+Only public HTTP(S) feed URLs are accepted. RSS data is refreshed in the
+background every 15 minutes and cached for 30 days. Failed sources are hidden
+from the public aggregator until a successful refresh. Duplicate original
+URLs/GUIDs are stored only once; manual hiding survives later imports.
+
+MCP tools: `list_aggregator_sources`, `get_aggregator_source`,
+`create_aggregator_source`, `update_aggregator_source`,
+`delete_aggregator_source`, `refresh_aggregator_source`,
+`list_aggregator_items`, `get_aggregator_item`,
+`set_aggregator_item_visibility`, `get_aggregator_settings`, and
+`update_aggregator_settings`.
 
 ## Site Statistics
 
@@ -1177,7 +1209,9 @@ Everything an external client needs to build a banner-targeting UI in one round 
 {
   "slots": [
     {"ID": "article-sidebar", "Label": "Cikk oldalsáv (desktop)", "WidthPx": 300, "HeightPx": 600, "Description": "Jobb oldali sáv, cikkoldalakon, csak desktopn (>=xl)."},
-    {"ID": "article-horizontal", "Label": "Cikk vízszintes (mobil)", "WidthPx": 728, "HeightPx": 90, "Description": "Vízszintes sáv, cikkoldalakon, csak mobilon (<xl)."}
+    {"ID": "article-horizontal", "Label": "Cikk vízszintes (mobil)", "WidthPx": 728, "HeightPx": 90, "Description": "Vízszintes sáv, cikkoldalakon, csak mobilon (<xl)."},
+    {"ID": "aggregator-sidebar", "Label": "Aggregated-news sidebar (desktop)", "WidthPx": 300, "HeightPx": 600},
+    {"ID": "aggregator-horizontal", "Label": "Aggregated-news horizontal (mobile)", "WidthPx": 728, "HeightPx": 90}
   ],
   "statuses": ["active", "paused"],
   "devices": ["desktop", "mobile", "tablet"],
@@ -1191,7 +1225,7 @@ Everything an external client needs to build a banner-targeting UI in one round 
 }
 ```
 
-`slots` is the fixed, code-defined list of ad placements the site supports (currently `article-sidebar` 300x600 desktop, `article-horizontal` 728x90 mobile) — new placements require a code change and a template wire-up, so this list only changes with a deployment. `categories`/`authors`/`tags` reflect current portal content and can change at any time.
+`slots` is the fixed, code-defined list of ad placements the site supports, including native article and aggregated-news sidebar/horizontal placements — new placements require a code change and a template wire-up, so this list only changes with a deployment. `categories`/`authors`/`tags` reflect current portal content and can change at any time.
 
 ### Single banner stats
 

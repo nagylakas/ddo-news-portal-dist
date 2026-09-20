@@ -13,7 +13,7 @@
                 <div class="search-cat-list mb-4">
                     {{range .AvailableScopes}}
                     <a class="search-cat-item text-decoration-none {{if eq $.ActiveScope .ID}}search-cat-active{{end}}" href="{{.URL}}">
-                        <i class="bi {{if eq .ID "articles"}}bi-newspaper{{else if eq .ID "pages"}}bi-file-earmark-text{{else if eq .ID "marketplace"}}bi-shop{{else if eq .ID "webshop"}}bi-bag-check{{else}}bi-chat-square-text{{end}} text-primary me-2"></i>
+                        <i class="bi {{if eq .ID "articles"}}bi-newspaper{{else if eq .ID "aggregator"}}bi-rss{{else if eq .ID "pages"}}bi-file-earmark-text{{else if eq .ID "marketplace"}}bi-shop{{else if eq .ID "webshop"}}bi-bag-check{{else}}bi-chat-square-text{{end}} text-primary me-2"></i>
                         <span>{{.Label}}</span>
                         <span class="search-cat-count ms-auto">{{.Count}}</span>
                     </a>
@@ -106,7 +106,20 @@
                 &ldquo;<strong>{{.Query}}</strong>&rdquo; keresésre
             </p>
 
-            {{if eq .ActiveScope "articles"}}
+            {{if eq .ActiveScope "aggregator"}}
+                {{if .AggregatorItems}}
+                <div class="listing-list">
+                    {{range .AggregatorItems}}
+                    <article class="article-row">
+                        {{if .ImageURL}}<a class="article-row-img" href="/aggregated/{{.ID.Hex}}"><img src="{{.ImageURL}}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>{{end}}
+                        <div class="article-row-body"><div class="small text-muted mb-1">{{.SourceName}} · {{formatDate .PublishedAt}}</div><h2 class="article-row-title"><a href="/aggregated/{{.ID.Hex}}">{{.Title}}</a></h2>{{if .Summary}}<p class="article-row-summary">{{truncate .Summary 180}}</p>{{end}}<a class="article-row-more" href="/aggregated/{{.ID.Hex}}">Előnézet</a></div>
+                    </article>
+                    {{end}}
+                </div>
+                {{else}}
+                {{template "search-empty" dict "Text" "Nincs aggregált hír találat. Próbálj más kulcsszót."}}
+                {{end}}
+            {{else if eq .ActiveScope "articles"}}
                 {{if .Articles}}
                 <div class="listing-list">
                     {{range .Articles}}

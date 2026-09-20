@@ -1,0 +1,9 @@
+{{define "aggregator_home"}}
+{{template "header" .}}
+<main class="container-fluid px-4 px-lg-5 py-5">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4"><h1 class="mb-0">Hírfigyelő</h1><a class="btn btn-outline-primary" href="/news">Saját hírek</a></div>
+  {{if .Tags}}<div class="mb-4"><a class="btn btn-sm {{if not .Tag}}btn-primary{{else}}btn-outline-secondary{{end}} me-1" href="/">Összes</a>{{range .Tags}}<a class="btn btn-sm {{if eq $.Tag .}}btn-primary{{else}}btn-outline-secondary{{end}} me-1" href="/?tag={{.}}">{{.}}</a>{{end}}</div>{{end}}
+  {{if .Items}}<div class="aggregator-layout aggregator-{{.Layout}}">{{range .Items}}<article class="card h-100 aggregator-card"><a class="text-decoration-none text-dark" href="/aggregated/{{.ID.Hex}}">{{if .ImageURL}}<img src="{{.ImageURL}}" class="card-img-top aggregator-image" alt="" loading="lazy" referrerpolicy="no-referrer">{{else}}<div class="aggregator-placeholder"><i class="bi bi-rss"></i></div>{{end}}<div class="card-body"><div class="small text-muted mb-2">{{.SourceName}} · {{formatDate .PublishedAt}}</div><h2 class="h5">{{.Title}}</h2><p class="mb-0">{{truncate .Summary 220}}</p></div></a></article>{{end}}</div>{{else}}<div class="alert alert-info">Jelenleg nincs megjeleníthető aggregált hír.</div>{{end}}
+</main>
+{{template "footer" .}}
+{{end}}

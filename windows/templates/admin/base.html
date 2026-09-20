@@ -86,7 +86,7 @@
                             <li><a class="dropdown-item" href="/admin/banners"><i class="bi bi-badge-ad me-2"></i>{{t .Lang "nav.banners"}}</a></li>
                         </ul>
                     </li>
-                {{if or webshopEnabled webshopCatalogAPIEnabled marketplaceEnabled marketplaceAPIEnabled forumEnabled forumAPIEnabled}}
+                {{if or webshopEnabled webshopCatalogAPIEnabled marketplaceEnabled marketplaceAPIEnabled forumEnabled forumAPIEnabled aggregatorEnabled aggregatorAPIEnabled}}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-grid me-1"></i>{{t .Lang "nav.modules"}}
@@ -100,6 +100,9 @@
                             {{end}}
                             {{if or forumEnabled forumAPIEnabled}}
                             <li><a class="dropdown-item" href="/admin/forum"><i class="bi bi-chat-square-text me-2"></i>{{t .Lang "nav.forum"}}</a></li>
+                            {{end}}
+                            {{if or aggregatorEnabled aggregatorAPIEnabled}}
+                            <li><a class="dropdown-item" href="/admin/aggregator"><i class="bi bi-rss me-2"></i>Híraggregátor</a></li>
                             {{end}}
                         </ul>
                     </li>
