@@ -1,0 +1,13 @@
+{{/*
+admin-tag-input is a reusable, JavaScript-enhanced chip input. Pass ID, Name,
+Value (a comma-separated string), Label, Placeholder, and optionally MaxItems.
+*/}}
+{{define "admin-tag-input"}}
+<div class="admin-tag-input" data-tag-input data-max-items="{{.MaxItems}}">
+    <div class="admin-tag-input__surface" role="group" aria-label="{{.Label}}">
+        <div class="admin-tag-input__chips" aria-live="polite"></div>
+        <input class="admin-tag-input__entry" type="text" autocomplete="off" placeholder="{{.Placeholder}}" aria-describedby="{{.ID}}_help">
+    </div>
+    <input type="hidden" id="{{.ID}}" name="{{.Name}}" value="{{.Value}}">
+</div>
+{{end}}

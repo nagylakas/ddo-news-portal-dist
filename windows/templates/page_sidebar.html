@@ -1,0 +1,78 @@
+{{define "page_sidebar"}}
+{{template "header" .}}
+{{template "page_hero" .}}
+<div class="container-fluid px-4 px-lg-5 py-5">
+    {{template "page_sidebar_mobile_navigation" .}}
+    <div class="row g-4">
+        <aside class="col-lg-3 d-none d-lg-block">
+            {{template "page_sidebar_navigation" .}}
+        </aside>
+        <main class="col-lg-9">
+            <article class="page-article">
+                <div class="page-article-content article-content">
+                    {{.ContentHTML}}
+                </div>
+            </article>
+        </main>
+    </div>
+</div>
+{{template "footer" .}}
+{{end}}
+
+{{define "page_sidebar_navigation"}}
+<nav class="page-sidebar-nav sticky-lg-top">
+    <div class="section-header mb-3">
+        <h2 class="h5 section-title" style="font-size:1rem;">Egyedi <span class="text-primary">oldalak</span></h2>
+    </div>
+    {{template "page_sidebar_tree" .}}
+</nav>
+{{end}}
+
+{{define "page_sidebar_tree"}}
+    {{if .SidebarTree}}
+    <div class="page-sidebar-tree">
+        {{template "page_sidebar_tree_nodes" dict "Nodes" .SidebarTree "Data" .}}
+    </div>
+    {{end}}
+{{end}}
+
+{{define "page_sidebar_mobile_navigation"}}
+<div class="page-sidebar-mobile d-lg-none">
+    <button class="page-sidebar-mobile-trigger" type="button" data-bs-toggle="offcanvas" data-bs-target="#pageSidebarMobileMenu" aria-controls="pageSidebarMobileMenu">
+        <span class="page-sidebar-mobile-label"><i class="bi bi-diagram-3 me-2" aria-hidden="true"></i>Oldalak</span>
+        <span class="page-sidebar-mobile-current">{{.Page.Title}}</span>
+        <i class="bi bi-chevron-up ms-2" aria-hidden="true"></i>
+    </button>
+</div>
+<div class="offcanvas offcanvas-bottom page-sidebar-mobile-panel d-lg-none" tabindex="-1" id="pageSidebarMobileMenu" aria-labelledby="pageSidebarMobileMenuTitle">
+    <div class="offcanvas-header">
+        <h2 class="offcanvas-title h5 mb-0" id="pageSidebarMobileMenuTitle"><i class="bi bi-diagram-3 me-2 text-primary" aria-hidden="true"></i>Egyedi oldalak</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Bezárás"></button>
+    </div>
+    <div class="offcanvas-body pt-0">
+        {{template "page_sidebar_tree" .}}
+    </div>
+</div>
+{{end}}
+
+{{define "page_sidebar_tree_nodes"}}
+{{$data := .Data}}
+{{range .Nodes}}
+    {{if .Children}}
+    <details class="page-sidebar-folder" {{if .Expanded}}open{{end}}>
+        <summary class="{{if eq .Page.ID $data.Page.ID}}page-sidebar-current{{end}}">
+            <i class="bi bi-folder2 me-2" aria-hidden="true"></i>
+            <a href="{{$data.URLPrefix}}/{{.Page.Path}}" onclick="event.stopPropagation()">{{.Page.Title}}</a>
+            <i class="bi bi-chevron-down page-sidebar-chevron" aria-hidden="true"></i>
+        </summary>
+        <div class="page-sidebar-tree-children">
+            {{template "page_sidebar_tree_nodes" dict "Nodes" .Children "Data" $data}}
+        </div>
+    </details>
+    {{else}}
+    <a href="{{$data.URLPrefix}}/{{.Page.Path}}" class="page-sidebar-leaf {{if eq .Page.ID $data.Page.ID}}page-sidebar-current{{end}}">
+        <i class="bi bi-file-earmark me-2" aria-hidden="true"></i>{{.Page.Title}}
+    </a>
+    {{end}}
+{{end}}
+{{end}}

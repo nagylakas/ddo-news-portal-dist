@@ -1,0 +1,2027 @@
+{{define "admin/api_docs"}}
+{{template "admin-header" .}}
+<div class="container-fluid">
+    <div class="row g-4">
+
+        <!-- Sidebar TOC -->
+        <div class="col-lg-3 col-xl-2 d-none d-lg-block">
+            <div class="api-docs-toc sticky-top pt-2">
+                <div class="list-group list-group-flush small">
+                    <a href="#auth"       class="list-group-item list-group-item-action py-1 px-2">Authentication</a>
+                    <a href="#version"    class="list-group-item list-group-item-action py-1 px-2">Version</a>
+                    <a href="#system"     class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">System &amp; updates</a>
+                    <a href="#system-info" class="list-group-item list-group-item-action py-1 px-2 ms-2">System identity</a>
+                    <a href="#update-check" class="list-group-item list-group-item-action py-1 px-2 ms-2">Check for updates</a>
+                    <a href="#update-start" class="list-group-item list-group-item-action py-1 px-2 ms-2">Start update</a>
+                    <a href="#update-status" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update status</a>
+                    <a href="#restart" class="list-group-item list-group-item-action py-1 px-2 ms-2">Restart portal</a>
+                    <a href="#mcp" class="list-group-item list-group-item-action py-1 px-2 ms-2">MCP server</a>
+                    <a href="#stats"      class="list-group-item list-group-item-action py-1 px-2">Site Statistics</a>
+                    <a href="#analytics"  class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Analytics</a>
+                    <a href="#an-params"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Query parameters</a>
+                    <a href="#an-report"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Full report</a>
+                    <a href="#an-summary"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Summary</a>
+                    <a href="#an-timeseries" class="list-group-item list-group-item-action py-1 px-2 ms-2">Time series</a>
+                    <a href="#an-breakdowns" class="list-group-item list-group-item-action py-1 px-2 ms-2">Breakdowns</a>
+                    <a href="#an-heatmap"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Heatmap</a>
+                    <a href="#an-realtime"   class="list-group-item list-group-item-action py-1 px-2 ms-2">Realtime</a>
+                    <a href="#articles"   class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Articles</a>
+                    <a href="#art-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#art-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
+                    <a href="#art-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
+                    <a href="#art-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
+                    <a href="#art-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#art-stats"  class="list-group-item list-group-item-action py-1 px-2 ms-2">Article stats</a>
+                    <a href="#art-trash"   class="list-group-item list-group-item-action py-1 px-2 ms-2">Trash</a>
+                    <a href="#art-restore" class="list-group-item list-group-item-action py-1 px-2 ms-2">Restore</a>
+                    <a href="#categories" class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Categories</a>
+                    <a href="#cat-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#cat-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
+                    <a href="#cat-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
+                    <a href="#cat-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
+                    <a href="#cat-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#authors"    class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Authors</a>
+                    <a href="#aut-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#aut-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
+                    <a href="#aut-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
+                    <a href="#aut-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
+                    <a href="#aut-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#banners"    class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Banners</a>
+                    <a href="#ban-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#ban-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
+                    <a href="#ban-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
+                    <a href="#ban-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
+                    <a href="#ban-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#ban-meta"   class="list-group-item list-group-item-action py-1 px-2 ms-2">Targeting metadata</a>
+                    <a href="#ban-stats"  class="list-group-item list-group-item-action py-1 px-2 ms-2">Single banner stats</a>
+                    <a href="#ban-stats-agg" class="list-group-item list-group-item-action py-1 px-2 ms-2">Aggregate stats</a>
+                    <a href="#pages"      class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Pages</a>
+                    <a href="#page-list"       class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#page-get"        class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
+                    <a href="#page-get-by-path" class="list-group-item list-group-item-action py-1 px-2 ms-2">Get by path</a>
+                    <a href="#page-create"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
+                    <a href="#page-update"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
+                    <a href="#page-delete"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#comments"   class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Comment moderation</a>
+                    <a href="#comment-list" class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#comment-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#polls"      class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Polls</a>
+                    <a href="#poll-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
+                    <a href="#poll-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
+                    <a href="#poll-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
+                    <a href="#poll-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
+                    <a href="#poll-status" class="list-group-item list-group-item-action py-1 px-2 ms-2">Set status</a>
+                    <a href="#poll-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#galleries" class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Galleries</a>
+                    <a href="#webshop-catalog" class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Webshop catalog sync</a>
+                    <a href="#webshop-catalog-mode" class="list-group-item list-group-item-action py-1 px-2 ms-2">Hidden catalog mode</a>
+                    <a href="#webshop-catalog-endpoints" class="list-group-item list-group-item-action py-1 px-2 ms-2">Categories</a>
+                    <a href="#webshop-catalog-ownership" class="list-group-item list-group-item-action py-1 px-2 ms-2">Sync ownership</a>
+                    <a href="#audit-api" class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Audit &amp; security alerts</a>
+                    <a href="#audit-events" class="list-group-item list-group-item-action py-1 px-2 ms-2">Events &amp; export</a>
+                    <a href="#audit-integrity" class="list-group-item list-group-item-action py-1 px-2 ms-2">Integrity</a>
+                    <a href="#audit-alerts" class="list-group-item list-group-item-action py-1 px-2 ms-2">Alerts</a>
+                    <a href="#audit-rules" class="list-group-item list-group-item-action py-1 px-2 ms-2">Rules</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-lg-9 col-xl-10">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
+                <h2 class="mb-0">{{t .Lang "nav.api_docs"}}</h2>
+                <a href="/admin/api-docs/download" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-download me-1"></i>Download as Markdown
+                </a>
+            </div>
+            <p class="text-muted mb-4">REST API reference for authenticated administrative access to this news portal.</p>
+
+            <!-- ── Authentication ──────────────────────────────────────── -->
+            <section id="auth" class="mb-5">
+                <h4 class="border-bottom pb-2"><i class="bi bi-key me-2"></i>Authentication</h4>
+                <p>Every administrative API endpoint documented on this page requires authentication. Two methods are accepted:</p>
+                <ul>
+                    <li><strong>Session cookie</strong> — automatically used when you are logged in to the admin panel.</li>
+                    <li><strong>API key header</strong> — send
+                        {{if .APIKey}}<code>X-API-Key: {{.APIKey}}</code>{{else}}<code>X-API-Key: &lt;your-key&gt;</code>{{end}}
+                        in the request. The key is set via the <code>API_KEY</code> environment variable.</li>
+                </ul>
+                {{if eq .APIKey ""}}
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Az <code>API_KEY</code> környezeti változó ezen az oldalon nincs beállítva. Az API-t kulcsos hitelesítéssel nem lehet használni.
+                </div>
+                {{end}}
+                <p class="mb-1">Unauthenticated requests receive:</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{"error":"Hitelesítés szükséges"}</code></pre>
+                <p class="mt-3 mb-1"><strong>curl example (API key):</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles</code></pre>
+            </section>
+
+            <!-- ── Version ────────────────────────────────────────────── -->
+            <section id="version" class="mb-5">
+                <h4 class="border-bottom pb-2"><i class="bi bi-info-circle me-2"></i>Version</h4>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th><th>Description</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/version</code></td>
+                            <td>None</td>
+                            <td>Returns application version</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{"version":"{{.AppVersion}}"}</code></pre>
+            </section>
+
+            <!-- ── System and updates ───────────────────────────────── -->
+            <section id="system" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-cpu me-2"></i>System &amp; updates
+                </h3>
+                <p class="text-muted">Protected endpoints for a trusted external administration service. They require an admin session or <code>X-API-Key</code>.</p>
+            </section>
+
+            <section id="system-info" class="mb-5 ps-3">
+                <h5>System identity</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/system</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <p>Returns the running portal engine version and the active icon package. <code>icon_pack.loaded</code> is true only when the selected package version is installed and active locally.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "engine_version": "{{.AppVersion}}",
+  "icon_pack": {"id": "itlife", "version": "1.2.0", "loaded": true}
+}</code></pre>
+            </section>
+
+            <section id="update-check" class="mb-5 ps-3">
+                <h5>Check for updates</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-primary">POST</span></td><td><code>/api/system/update/check</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <p>Fetches and validates the distribution manifest without installing it. Use <code>update_available</code> from the response before starting an update.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" +  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/system/update/check</code></pre>
+                <p class="mb-0"><strong>Errors:</strong> <code>409</code> self-update unavailable; <code>502</code> update manifest unavailable.</p>
+            </section>
+
+            <section id="update-start" class="mb-5 ps-3">
+                <h5>Start update</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-primary">POST</span></td><td><code>/api/system/update</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Starts the same asynchronous download, installation, and restart as the admin UI's <strong>Install update</strong> button. Start it only when the preceding check reports <code>update_available: true</code>.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" +  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/system/update</code></pre>
+                <p class="mb-0"><strong>Response 202:</strong> <code>{"message":"Update started","version":"0.6.38"}</code>. A <code>409</code> means already current, unsupported, or already running.</p>
+            </section>
+
+            <section id="update-status" class="mb-5 ps-3">
+                <h5>Update status</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/system/update/status</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <p>Returns <code>in_progress</code>, <code>step</code>, <code>message</code>, <code>error</code>, and version fields. The portal restarts shortly after a successful install; clients should retry after its temporary unavailability.</p>
+            </section>
+
+            <section id="restart" class="mb-5 ps-3">
+                <h5>Restart portal</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead><tbody><tr><td><span class="badge bg-primary">POST</span></td><td><code>/api/system/restart</code></td><td>Required</td></tr></tbody></table></div>
+                <p>Starts the same graceful process restart as the admin UI. The portal briefly becomes unavailable after the accepted response.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{"message":"Restart started"}</code></pre>
+            </section>
+
+            <section id="mcp" class="mb-5 ps-3">
+                <h5>MCP server</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th><th>Description</th></tr></thead><tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/mcp</code></td><td>Required</td><td>Running and configured MCP state, plus published tools when active.</td></tr><tr><td><span class="badge bg-warning text-dark">PUT</span></td><td><code>/api/mcp</code></td><td>Required</td><td>Persist MCP enablement for the next restart.</td></tr></tbody></table></div>
+                <p><code>enabled</code> and <code>oauth_enabled</code> describe the running process; <code>configured_*</code> values are read from <code>.env</code>. A pending difference sets <code>restart_required</code>. <code>tools</code> is populated only while MCP is active.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "enabled": true,
+  "oauth_enabled": false,
+  "configured_enabled": true,
+  "configured_oauth_enabled": false,
+  "restart_required": false,
+  "endpoint": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/mcp",
+  "tools": [{"name":"list_banners","description":"List every banner...","read_only":true}]
+}</code></pre>
+                <p class="mb-1"><strong>Update request:</strong> <code>enabled</code> is required. <code>oauth_enabled</code> is optional and unchanged when omitted.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" -d '{"enabled":true,"oauth_enabled":true}' {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/mcp</code></pre>
+                <p class="mb-0"><strong>Errors:</strong> <code>400</code> missing <code>enabled</code> or OAuth enabled while MCP is disabled; <code>500</code> unreadable or unwritable configuration.</p>
+            </section>
+
+            <!-- ── Site Statistics ────────────────────────────────────── -->
+            <section id="stats" class="mb-5">
+                <h4 class="border-bottom pb-2"><i class="bi bi-bar-chart me-2"></i>Site Statistics</h4>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th><th>Description</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/stats</code></td>
+                            <td>Required</td>
+                            <td>Site-wide statistics (same data as the dashboard)</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total_articles":     142,
+  "published_articles": 130,
+  "draft_articles":     12,
+  "total_categories":   8,
+  "total_authors":      5,
+  "views_today":        47,
+  "views_7days":        312,
+  "views_30days":       1240,
+  "top_today":   { &lt;article object or null&gt; },
+  "top_7days":   { &lt;article object or null&gt; },
+  "top_30days":  { &lt;article object or null&gt; }
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    The <code>top_today</code>, <code>top_7days</code>, <code>top_30days</code> fields each contain the
+                    full article object (same shape as in <a href="#art-list">List articles</a>) with the most unique
+                    readers in the given period, or <code>null</code> if there is no data yet.
+                </p>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/stats</code></pre>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- ANALYTICS                                               -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <section id="analytics" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-graph-up-arrow me-2"></i>Analytics
+                </h3>
+                <p class="text-muted">
+                    The complete data set behind the <a href="/admin/analytics">Analytics dashboard</a> — cookie-free,
+                    first-party traffic measurement stored in your own database. All endpoints are <code>GET</code>,
+                    require authentication and return JSON.
+                </p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics</code></td><td>Full report (every section at once)</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/summary</code></td><td>Headline KPIs</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/timeseries</code></td><td>Views / visitors / sessions over time</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/breakdowns</code></td><td>Every dimension table</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/breakdowns/{dimension}</code></td><td>A single dimension table</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/heatmap</code></td><td>Weekday × hour matrix</td></tr>
+                            <tr><td><span class="badge bg-success">GET</span></td><td><code>/api/analytics/realtime</code></td><td>Traffic in the last N minutes</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-light border py-2 small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    If the built-in analytics is switched off (<code>ANALYTICS_ENABLED=false</code>) or the database is
+                    unavailable, every endpoint answers <code>503</code>.
+                </div>
+            </section>
+
+            <!-- Query parameters -->
+            <section id="an-params" class="mb-5 ps-3">
+                <h5>Query parameters</h5>
+                <p class="small text-muted">The period and filters are interpreted identically by every endpoint.</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>range</code></td><td>string</td><td><code>7d</code></td><td><code>today</code>, <code>yesterday</code>, <code>24h</code>, <code>7d</code>, <code>28d</code>, <code>30d</code>, <code>90d</code>, <code>mtd</code>, <code>ytd</code>, <code>12mo</code>, <code>custom</code></td></tr>
+                            <tr><td><code>from</code></td><td>date</td><td>—</td><td><code>YYYY-MM-DD</code>, with <code>range=custom</code></td></tr>
+                            <tr><td><code>to</code></td><td>date</td><td>—</td><td><code>YYYY-MM-DD</code>, inclusive</td></tr>
+                            <tr><td><code>granularity</code></td><td>string</td><td>auto</td><td><code>hour</code>, <code>day</code> or <code>month</code> — overrides the bucket size</td></tr>
+                            <tr><td><code>compare</code></td><td>boolean</td><td><code>true</code></td><td><code>false</code> skips the previous-period aggregations</td></tr>
+                            <tr><td><code>limit</code></td><td>integer</td><td><code>15</code></td><td>Rows per breakdown table, max <code>500</code></td></tr>
+                            <tr><td><code>minutes</code></td><td>integer</td><td><code>30</code></td><td>Realtime endpoint only, max <code>180</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Filters</strong> — any combination, all exact matches:</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Parameter</th><th>Values</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>page_type</code></td><td><code>home</code>, <code>article</code>, <code>category</code>, <code>author</code>, <code>tag</code>, <code>search</code>, <code>page</code>, <code>forum</code>, <code>marketplace</code>, <code>webshop</code>, <code>other</code></td></tr>
+                            <tr><td><code>path</code></td><td>Exact URL path, e.g. <code>/article/rtx-5090-teszt</code></td></tr>
+                            <tr><td><code>channel</code></td><td><code>direct</code>, <code>organic</code>, <code>social</code>, <code>referral</code>, <code>campaign</code>, <code>internal</code>, <code>ai</code></td></tr>
+                            <tr><td><code>device</code></td><td><code>desktop</code>, <code>mobile</code>, <code>tablet</code></td></tr>
+                            <tr><td><code>country</code></td><td>ISO 3166-1 alpha-2 code, e.g. <code>HU</code></td></tr>
+                            <tr><td><code>ref_host</code></td><td>Referrer host, e.g. <code>google.hu</code></td></tr>
+                            <tr><td><code>category</code></td><td>Category name</td></tr>
+                            <tr><td><code>author</code></td><td>Author name</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-muted mb-0">
+                    A filter applies to <em>every</em> section of the response: summary, time series, breakdowns and heatmap.
+                    An unknown <code>range</code> silently falls back to <code>7d</code>.
+                </p>
+            </section>
+
+            <!-- Full report -->
+            <section id="an-report" class="mb-5 ps-3">
+                <h5>Full report</h5>
+                <p class="small text-muted">
+                    Everything in one request: summary, previous period, time series, all breakdowns and the heatmap.
+                    This is the most expensive endpoint — use the section endpoints when you need only one part.
+                </p>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics?range=28d&amp;channel=organic&amp;limit=20</code></pre>
+                <p class="mb-1"><strong>Response (abridged):</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range": {
+    "key":           "28d",
+    "from":          "2026-06-29T00:00:00+02:00",
+    "to":            "2026-07-27T00:00:00+02:00",
+    "previous_from": "2026-06-01T00:00:00+02:00",
+    "previous_to":   "2026-06-29T00:00:00+02:00",
+    "granularity":   "day",
+    "timezone":      "Europe/Budapest"
+  },
+  "filter":  { "channel": "organic" },
+  "summary": { &lt;summary object&gt; },
+  "previous":{ &lt;summary object&gt; },
+  "series":         [ { "bucket": "2026-06-29", "views": 2612, "visitors": 1620, "sessions": 1854 } ],
+  "previous_series":[ { "bucket": "2026-06-01", "views": 2280, "visitors": 1410, "sessions": 1602 } ],
+  "breakdowns":     { "pages": [...], "channels": [...], "referrers": [...], ... },
+  "heatmap":        [ { "weekday": 2, "hour": 9, "views": 187 } ]
+}</code></pre>
+                <div class="alert alert-light border py-2 small">
+                    <i class="bi bi-lightbulb me-1"></i>
+                    Sections that were not requested are <strong>absent</strong> from the JSON rather than empty.
+                    <code>range</code> and <code>filter</code> are always present. With <code>compare=false</code> the
+                    <code>previous</code>, <code>previous_series</code>, <code>range.previous_from</code> and
+                    <code>range.previous_to</code> fields are omitted.
+                </div>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/analytics?range=28d"</code></pre>
+            </section>
+
+            <!-- Summary -->
+            <section id="an-summary" class="mb-5 ps-3">
+                <h5>Summary</h5>
+                <p class="small text-muted">The headline KPIs plus the same numbers for the previous period. Fastest endpoint.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/summary?range=today&amp;compare=false</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range":   { "key": "today", "granularity": "hour", "timezone": "Europe/Budapest", ... },
+  "filter":  {},
+  "summary": {
+    "views":             1204,
+    "visitors":          812,
+    "sessions":          903,
+    "views_per_session": 1.3333,
+    "avg_engagement_ms": 88000,
+    "bounce_rate":       44.2,
+    "engagement_rate":   55.8,
+    "outbound":          31
+  }
+}</code></pre>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>views</code></td><td>integer</td><td>Page views</td></tr>
+                            <tr><td><code>visitors</code></td><td>integer</td><td>Unique visitors (see the note below)</td></tr>
+                            <tr><td><code>sessions</code></td><td>integer</td><td>Visits; 30 minutes of inactivity starts a new one</td></tr>
+                            <tr><td><code>views_per_session</code></td><td>float</td><td><code>views / sessions</code></td></tr>
+                            <tr><td><code>avg_engagement_ms</code></td><td>integer</td><td>Average time actually spent on the page, in milliseconds</td></tr>
+                            <tr><td><code>bounce_rate</code></td><td>float</td><td>Percentage of single-page sessions without engagement</td></tr>
+                            <tr><td><code>engagement_rate</code></td><td>float</td><td>Percentage of sessions longer than 10s or scrolled past 50%</td></tr>
+                            <tr><td><code>outbound</code></td><td>integer</td><td>Outbound link clicks and downloads</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    <strong>Reading <code>visitors</code>:</strong> the visitor identifier is a hash salted with a key that
+                    is regenerated every day, so the same person receives a new identifier each day. Over a multi-day range
+                    <code>visitors</code> is therefore the <em>sum of daily uniques</em>, not the true unique count for the
+                    period. This is the price of consent-free, cookie-less measurement; <code>sessions</code> and
+                    <code>views</code> are exact.
+                </div>
+            </section>
+
+            <!-- Time series -->
+            <section id="an-timeseries" class="mb-5 ps-3">
+                <h5>Time series</h5>
+                <p class="small text-muted">
+                    Bucket size is chosen automatically (<code>hour</code> up to 48 hours, <code>day</code> up to 120 days,
+                    <code>month</code> above that) and can be overridden with <code>granularity</code>.
+                </p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Granularity</th><th>Bucket format</th><th>Example</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>hour</code></td><td><code>YYYY-MM-DDTHH</code></td><td><code>2026-07-27T14</code></td></tr>
+                            <tr><td><code>day</code></td><td><code>YYYY-MM-DD</code></td><td><code>2026-07-27</code></td></tr>
+                            <tr><td><code>month</code></td><td><code>YYYY-MM</code></td><td><code>2026-07</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/timeseries?range=90d&amp;granularity=month&amp;compare=false</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range":  { "key": "90d", "granularity": "month", "timezone": "Europe/Budapest", ... },
+  "filter": {},
+  "series": [
+    { "bucket": "2026-05", "views": 41200, "visitors": 25600, "sessions": 29100 },
+    { "bucket": "2026-06", "views": 44870, "visitors": 27340, "sessions": 31020 }
+  ]
+}</code></pre>
+                <p class="small text-muted mb-0">
+                    Buckets are in the <code>ANALYTICS_TIMEZONE</code> local time, and <strong>only buckets with traffic
+                    are returned</strong> — fill the gaps with zeroes client-side if you draw a continuous chart.
+                </p>
+            </section>
+
+            <!-- Breakdowns -->
+            <section id="an-breakdowns" class="mb-5 ps-3">
+                <h5>Breakdowns</h5>
+                <p class="small text-muted">
+                    Without a dimension every table is returned at once; with one, only that table.
+                </p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Dimension</th><th>Contents</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>pages</code></td><td>Most viewed pages (<code>key</code> = path, <code>label</code> = page title)</td></tr>
+                            <tr><td><code>entry_pages</code></td><td>Landing pages — first page of each session</td></tr>
+                            <tr><td><code>exit_pages</code></td><td>Exit pages — last page of each session</td></tr>
+                            <tr><td><code>channels</code></td><td>GA4-style default channel grouping</td></tr>
+                            <tr><td><code>referrers</code></td><td>Referrer hosts (<code>label</code> = recognised brand name)</td></tr>
+                            <tr><td><code>utm_sources</code>, <code>utm_mediums</code>, <code>utm_campaigns</code></td><td>Campaign parameters</td></tr>
+                            <tr><td><code>devices</code>, <code>browsers</code>, <code>os</code></td><td>Technology</td></tr>
+                            <tr><td><code>countries</code>, <code>languages</code></td><td>Geography (country needs a CDN country header)</td></tr>
+                            <tr><td><code>page_types</code>, <code>categories</code>, <code>authors</code></td><td>Editorial performance</td></tr>
+                            <tr><td><code>outbound</code></td><td>Outbound links and downloads (<code>key</code> = target URL)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Row object:</strong></p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>key</code></td><td>string</td><td>Raw dimension value — pass it back as a filter</td></tr>
+                            <tr><td><code>label</code></td><td>string</td><td>Display name when one exists, otherwise empty</td></tr>
+                            <tr><td><code>views</code></td><td>integer</td><td>Page views</td></tr>
+                            <tr><td><code>visitors</code></td><td>integer</td><td>Unique visitors — <strong>session count</strong> for entry/exit pages</td></tr>
+                            <tr><td><code>avg_engagement_ms</code></td><td>integer</td><td>Average time on page in milliseconds</td></tr>
+                            <tr><td><code>bounce_rate</code></td><td>float</td><td>Percentage; only meaningful for <code>entry_pages</code> and <code>exit_pages</code>, <code>0</code> elsewhere</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/breakdowns/referrers?range=7d&amp;limit=5</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range":     { "key": "7d", "granularity": "day", "timezone": "Europe/Budapest", ... },
+  "filter":    {},
+  "dimension": "referrers",
+  "rows": [
+    { "key": "google.hu",    "label": "Google",   "views": 6120, "visitors": 4284, "avg_engagement_ms": 100000, "bounce_rate": 0 },
+    { "key": "facebook.com", "label": "Facebook", "views": 2410, "visitors": 1687, "avg_engagement_ms": 62000,  "bounce_rate": 0 },
+    { "key": "chatgpt.com",  "label": "ChatGPT",  "views": 410,  "visitors": 287,  "avg_engagement_ms": 154000, "bounce_rate": 0 }
+  ]
+}</code></pre>
+                <p class="mb-1"><strong>How did people find one specific article?</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/analytics/breakdowns/channels?range=7d&amp;path=/article/rtx-5090-teszt"</code></pre>
+                <p class="small text-muted mb-0">An unknown dimension name returns <code>404</code> listing the valid names.</p>
+            </section>
+
+            <!-- Heatmap -->
+            <section id="an-heatmap" class="mb-5 ps-3">
+                <h5>Heatmap</h5>
+                <p class="small text-muted">Traffic by weekday and hour. Only non-zero cells are returned.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/heatmap?range=90d</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "range":   { "key": "90d", "timezone": "Europe/Budapest", ... },
+  "filter":  {},
+  "heatmap": [
+    { "weekday": 2, "hour": 9,  "views": 187 },
+    { "weekday": 2, "hour": 10, "views": 204 }
+  ]
+}</code></pre>
+                <div class="table-responsive mb-0">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>weekday</code></td><td><code>1</code> = Sunday … <code>7</code> = Saturday (MongoDB <code>$dayOfWeek</code> convention)</td></tr>
+                            <tr><td><code>hour</code></td><td><code>0</code>–<code>23</code> in the <code>ANALYTICS_TIMEZONE</code> local time</td></tr>
+                            <tr><td><code>views</code></td><td>Page views in that weekday + hour cell</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Realtime -->
+            <section id="an-realtime" class="mb-5 ps-3">
+                <h5>Realtime</h5>
+                <p class="small text-muted">
+                    Traffic over the last <code>minutes</code> minutes (default 30, max 180). Period and filter
+                    parameters do <strong>not</strong> apply to this endpoint.
+                </p>
+<pre class="bg-dark text-light p-3 rounded small"><code>GET /api/analytics/realtime?minutes=5</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "minutes":         30,
+  "active_visitors": 47,
+  "views":           312,
+  "per_minute":    [ { "bucket": "2026-07-27T18:41", "views": 9, "visitors": 7, "sessions": 0 } ],
+  "top_pages":     [ { "key": "/article/rtx-5090-teszt", "label": "RTX 5090 teszt", "views": 18, "visitors": 12, ... } ],
+  "top_channels":  [ { "key": "organic", "label": "organic", "views": 22, "visitors": 15, ... } ],
+  "top_countries": [ { "key": "HU", "label": "HU", "views": 41, "visitors": 28, ... } ],
+  "devices":       [ { "key": "mobile", "label": "mobile", "views": 28, "visitors": 19, ... } ]
+}</code></pre>
+                <p class="small text-muted mb-0">
+                    <code>per_minute[].bucket</code> is a <strong>UTC</strong> timestamp in <code>YYYY-MM-DDTHH:MM</code> form,
+                    unlike the other endpoints which bucket in local time.
+                </p>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- ARTICLES                                                -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <section id="articles" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-file-earmark-text me-2"></i>Articles
+                </h3>
+            </section>
+
+            <!-- List articles -->
+            <section id="art-list" class="mb-5 ps-3">
+                <h5>List articles</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/articles</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Query parameters:</strong></p>
+                <ul>
+                    <li><code>limit</code> — number of results (default: <code>20</code>, max: <code>100</code>)</li>
+                    <li><code>offset</code> — zero-based skip (default: <code>0</code>)</li>
+                    <li><code>published</code> — <code>true</code> to return only published articles; omit for all</li>
+                </ul>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total": 142,
+  "limit": 20,
+  "offset": 0,
+  "articles": [
+    {
+      "id":           "664a1b2c3d4e5f6789abcdef",
+      "title":        "Example Article",
+      "slug":         "example-article",
+      "summary":      "Short summary…",
+      "content":      "Markdown content…",
+      "author":       "Jane Doe",
+      "author_id":    "664a000000000000000000aa",
+      "category":     "Technology",
+      "category_id":  "664a000000000000000000bb",
+      "tags":         ["go", "api"],
+      "image_url":    "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/photo.jpg",
+		"ai_content_disclosure": "none",
+		"ai_image_disclosure": "unmodified",
+      "published":    true,
+      "published_at": "2025-06-01T10:00:00Z",
+      "created_at":   "2025-06-01T09:55:00Z",
+      "updated_at":   "2025-06-01T10:00:00Z"
+    }
+  ]
+}</code></pre>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles?limit=10&offset=0&published=true"</code></pre>
+            </section>
+
+            <!-- Get one article -->
+            <section id="art-get" class="mb-5 ps-3">
+                <h5>Get one article</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/articles/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><code>{id}</code> is the MongoDB ObjectID (24-char hex string).</p>
+                <p class="mb-1"><strong>Response 200:</strong> article object (same shape as in list).<br>
+                   <strong>Response 404:</strong> <code>{"error":"A cikk nem található"}</code></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef</code></pre>
+            </section>
+
+            <!-- Create article -->
+            <section id="art-create" class="mb-5 ps-3">
+                <h5>Create article</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/articles</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Request body (JSON):</strong></p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>title</code></td><td>string</td><td>Yes</td><td>Article title. Slug is auto-generated.</td></tr>
+                            <tr><td><code>summary</code></td><td>string</td><td></td><td>Short excerpt shown in listings.</td></tr>
+                            <tr><td><code>content</code></td><td>string</td><td></td><td>Markdown body.</td></tr>
+                            <tr><td><code>author</code></td><td>string</td><td></td><td>Display name (used when <code>author_id</code> is absent).</td></tr>
+                            <tr><td><code>author_id</code></td><td>string</td><td></td><td>ObjectID of an existing author.</td></tr>
+                            <tr><td><code>category</code></td><td>string</td><td></td><td>Display name.</td></tr>
+                            <tr><td><code>category_id</code></td><td>string</td><td></td><td>ObjectID of an existing category.</td></tr>
+                            <tr><td><code>tags</code></td><td>string[]</td><td></td><td>Tag list.</td></tr>
+                            <tr><td><code>image_url</code></td><td>string</td><td></td><td>Featured image URL. If S3 is configured, external URLs are auto-imported to the media library.</td></tr>
+							<tr><td><code>seo_title</code></td><td>string</td><td></td><td>Optional SEO title (maximum 70 characters). When omitted, <code>title</code> is used.</td></tr>
+							<tr><td><code>meta_description</code></td><td>string</td><td></td><td>Optional meta description (maximum 160 characters). When omitted, <code>summary</code> is used.</td></tr>
+							<tr><td><code>image_alt_text</code></td><td>string</td><td></td><td>Optional featured-image alternative text (maximum 150 characters). When omitted, <code>title</code> is used.</td></tr>
+							<tr><td><code>ai_content_disclosure</code></td><td>string</td><td>Yes</td><td>AI declaration for the article content: <code>none</code>, <code>assisted</code>, or <code>generated</code>. For backward compatibility only, omitted values are stored as <code>none</code>.</td></tr>
+							<tr><td><code>ai_image_disclosure</code></td><td>string</td><td>Yes, if image_url is set</td><td>AI declaration for the featured image: <code>unmodified</code>, <code>modified</code>, or <code>generated</code>. For backward compatibility only, an omitted value is stored as <code>unmodified</code> when <code>image_url</code> is set.</td></tr>
+                            <tr><td><code>published</code></td><td>bool</td><td></td><td>Publish immediately (default: <code>false</code>).</td></tr>
+                            <tr><td><code>publish_at</code></td><td>string (RFC3339)</td><td></td><td>Scheduled publish time. Null or omit to use the current time when <code>published=true</code>.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title":      "My New Article",
+    "summary":    "A short summary.",
+    "content":    "## Introduction\n\nHello world.",
+    "category":   "Technology",
+    "category_id":"664a000000000000000000bb",
+    "tags":       ["go", "tutorial"],
+    "ai_content_disclosure": "none",
+    "published":  true
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 201:</strong> the created article object.<br>
+                   <strong>Response 400:</strong> <code>{"error":"A cím megadása kötelező"}</code></p>
+            </section>
+
+            <!-- Update article -->
+            <section id="art-update" class="mb-5 ps-3">
+                <h5>Update article</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-warning text-dark">PUT</span></td>
+                            <td><code>/api/articles/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Same body fields as <a href="#art-create">Create article</a>, plus:</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>update_slug</code></td><td>bool</td><td>When <code>true</code> the slug is regenerated from the title (default: <code>false</code> — existing URLs stay stable).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Omit <code>update_slug</code> (or set it to <code>false</code>) to keep the existing URL intact.
+                    Setting it to <code>true</code> will break any external links to the old URL.
+                </div>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title":     "Updated Title",
+    "content":   "New content.",
+    "ai_content_disclosure": "none",
+    "published": true
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated article object.</p>
+            </section>
+
+            <!-- Delete article -->
+            <section id="art-delete" class="mb-5 ps-3">
+                <h5>Delete article</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/articles/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message":"A cikk sikeresen törölve"}</code><br>
+                   <strong>Response 404:</strong> <code>{"error":"..."}</code></p>
+            </section>
+
+            <!-- Article stats -->
+            <section id="art-stats" class="mb-5 ps-3">
+                <h5>Article statistics</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/articles/{id}/stats</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Query parameters:</strong></p>
+                <ul>
+                    <li><code>days</code> — how many days of daily data to include (default: <code>30</code>, max: <code>365</code>)</li>
+                </ul>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "article_id":  "664a1b2c3d4e5f6789abcdef",
+  "total_views": 842,
+  "days":        30,
+  "daily_stats": [
+    {"date": "2025-05-01", "views": 12},
+    {"date": "2025-05-02", "views": 9}
+  ]
+}</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef/stats?days=7"</code></pre>
+            </section>
+
+            <!-- Article trash -->
+            <section id="art-trash" class="mb-5 ps-3">
+                <h5>List deleted articles (trash)</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/articles/trash</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>
+                    Deleting an article (via the admin UI, this API, or MCP) is always a soft delete — the article
+                    is hidden from every public and admin listing but kept in the database with a
+                    <code>deleted_at</code> timestamp for <strong>60 days</strong>, exactly like the admin
+                    <em>Articles → Trash</em> page. This endpoint returns that same set.
+                </p>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total": 1,
+  "retention_days": 60,
+  "articles": [
+    {
+      "id":         "664a1b2c3d4e5f6789abcdef",
+      "title":      "Example Article",
+      "slug":       "example-article",
+      "deleted_at": "2025-06-10T08:00:00Z",
+      "updated_at": "2025-06-10T08:00:00Z"
+    }
+  ]
+}</code></pre>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/trash</code></pre>
+            </section>
+
+            <!-- Article restore -->
+            <section id="art-restore" class="mb-5 ps-3">
+                <h5>Restore a deleted article</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/articles/{id}/restore</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Undoes a soft delete, exactly like the "Restore" button on the admin trash page. Only articles
+                   still within the 60-day retention window can be restored.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef/restore</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> the restored article object.<br>
+                   <strong>Response 404:</strong> <code>{"error":"A cikk nem található a lomtárban, vagy lejárt a visszaállítási időablak"}</code>
+                   — either the ID doesn't exist, the article isn't deleted, or the 60-day window has passed.</p>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- CATEGORIES                                              -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <section id="categories" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-folder2-open me-2"></i>Categories
+                </h3>
+            </section>
+
+            <!-- List categories -->
+            <section id="cat-list" class="mb-5 ps-3">
+                <h5>List categories</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/categories</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total": 8,
+  "categories": [
+    {
+      "id":            "664a000000000000000000bb",
+      "name":          "Technology",
+      "slug":          "technology",
+      "description":   "Tech news and reviews",
+      "icon":          "cpu",
+      "og_image":      "https://cdn.example.com/category.png",
+      "display_order": 1,
+      "created_at":    "2025-01-01T00:00:00Z",
+      "updated_at":    "2025-01-01T00:00:00Z",
+      "article_count": 12,
+      "deletable":     false
+    }
+  ]
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    <code>article_count</code> is the number of non-deleted articles (including drafts and
+                    scheduled ones) currently referencing this category. <code>deletable</code> is
+                    <code>true</code> only when <code>article_count</code> is <code>0</code> — see
+                    <a href="#cat-delete">Delete category</a>.
+                </p>
+            </section>
+
+            <!-- Get one category -->
+            <section id="cat-get" class="mb-5 ps-3">
+                <h5>Get one category</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/authors/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response 200:</strong> single category object, including
+                   <code>article_count</code> and <code>deletable</code> as above.<br>
+                   <strong>Response 404:</strong> <code>{"error":"..."}</code></p>
+            </section>
+
+            <!-- Create category -->
+            <section id="cat-create" class="mb-5 ps-3">
+                <h5>Create category</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/categories</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>name</code></td><td>string</td><td>Yes</td><td>Slug is auto-generated from name (Hungarian accents handled).</td></tr>
+                            <tr><td><code>description</code></td><td>string</td><td></td><td></td></tr>
+                            <tr><td><code>icon</code></td><td>string</td><td></td><td>Bootstrap Icons name without the <code>bi-</code> prefix, e.g. <code>cpu</code>.</td></tr>
+                            <tr><td><code>og_image</code></td><td>string</td><td></td><td>Public Open Graph image URL for the category page.</td></tr>
+                            <tr><td><code>display_order</code></td><td>int</td><td></td><td>Lower = shown first (default: <code>0</code>).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Technology","icon":"cpu","og_image":"https://cdn.example.com/category.png","display_order":1}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 201:</strong> created category object.</p>
+            </section>
+
+            <!-- Update category -->
+            <section id="cat-update" class="mb-5 ps-3">
+                <h5>Update category</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-warning text-dark">PUT</span></td>
+                            <td><code>/api/categories/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Same fields as Create. Slug is always regenerated from the updated name.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Tech & Gadgets","icon":"cpu","display_order":1}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated category object.</p>
+            </section>
+
+            <!-- Delete category -->
+            <section id="cat-delete" class="mb-5 ps-3">
+                <h5>Delete category</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/categories/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    A category cannot be deleted while any non-deleted article still references it
+                    (by <code>category_id</code> or by its cached name), including drafts and scheduled
+                    articles. Reassign or delete those articles first.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message": "..."}</code>.</p>
+                <p class="mt-2 mb-1"><strong>Response 409:</strong> <code>resource_in_use</code> with the referencing article count and a suggested action. Personal category follows are removed automatically and never block deletion.</p>
+                <p class="mt-2 mb-1"><strong>Response 404:</strong> category not found.</p>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- AUTHORS                                                 -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <section id="authors" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-people me-2"></i>Authors
+                </h3>
+            </section>
+
+            <!-- List authors -->
+            <section id="aut-list" class="mb-5 ps-3">
+                <h5>List authors</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/authors</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total": 5,
+  "authors": [
+    {
+      "id":         "664a000000000000000000aa",
+      "name":       "Jane Doe",
+      "slug":       "jane-doe",
+      "bio":        "Senior writer covering technology.",
+      "avatar_url": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/jane.jpg",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z",
+      "article_count": 12,
+      "deletable": false
+    }
+  ]
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted"><code>article_count</code> includes every non-deleted article, including drafts and scheduled articles. <code>deletable</code> is <code>true</code> only when this count is <code>0</code>.</p>
+            </section>
+
+            <!-- Get one author -->
+            <section id="aut-get" class="mb-5 ps-3">
+                <h5>Get one author</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/authors/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response 200:</strong> single author object, including <code>article_count</code> and <code>deletable</code> as above.<br>
+                   <strong>Response 404:</strong> <code>{"error":"..."}</code></p>
+            </section>
+
+            <!-- Create author -->
+            <section id="aut-create" class="mb-5 ps-3">
+                <h5>Create author</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/authors</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>name</code></td><td>string</td><td>Yes</td><td>Slug is auto-generated.</td></tr>
+                            <tr><td><code>bio</code></td><td>string</td><td></td><td></td></tr>
+                            <tr><td><code>avatar_url</code></td><td>string</td><td></td><td>URL to avatar image. If S3 is configured, external URLs are auto-imported to the media library.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Jane Doe","bio":"Senior writer.","avatar_url":"{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/jane.jpg"}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/authors</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 201:</strong> created author object.</p>
+            </section>
+
+            <!-- Update author -->
+            <section id="aut-update" class="mb-5 ps-3">
+                <h5>Update author</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-warning text-dark">PUT</span></td>
+                            <td><code>/api/authors/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Same fields as Create. Slug is always regenerated from the updated name.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Jane Doe","bio":"Updated bio."}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/authors/664a000000000000000000aa</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated author object.</p>
+            </section>
+
+            <!-- Delete author -->
+            <section id="aut-delete" class="mb-5 ps-3">
+                <h5>Delete author</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/authors/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    An author cannot be deleted while non-deleted articles reference it. Author follows are non-blocking and are cleaned up automatically. A blocked request returns <code>409 resource_in_use</code> with the article count.
+                </div>
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Deleting an author does not delete their articles.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/authors/664a000000000000000000aa</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message": "..."}</code>.</p>
+                <p class="mt-2 mb-1"><strong>Response 409:</strong> <code>resource_in_use</code> with the referencing article count.</p>
+            </section>
+
+            <!-- ── Banners ────────────────────────────────────────────── -->
+            <section id="banners" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-badge-ad me-2"></i>Banners
+                </h3>
+                <p class="text-muted">
+                    Ad placements assigned to one of the fixed <code>slot_id</code> values under
+                    <code>/admin/banners</code>. Each banner has optional article-level targeting
+                    (categories, tags, authors, devices, URL path patterns), scheduling, daily
+                    impression/click limits, weighted rotation, and campaign/advertiser metadata for
+                    reporting. See <a href="#ban-meta">Targeting metadata</a> for the full set of
+                    selectable slots, statuses, devices, categories, authors and tags, and
+                    <a href="#ban-stats">Single banner stats</a> / <a href="#ban-stats-agg">Aggregate stats</a>
+                    for impression/click/CTR reporting.
+                </p>
+            </section>
+
+            <!-- List banners -->
+            <section id="ban-list" class="mb-5 ps-3">
+                <h5>List banners</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response:</strong> a bare JSON array (not wrapped in <code>{"banners": [...]}</code>), ordered by <code>slot_id</code>, then priority descending.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>[
+  {
+    "id":                     "664a000000000000000000cc",
+    "slot_id":                "article-sidebar",
+    "name":                   "Spring campaign sidebar",
+    "image_url":              "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg",
+    "target_url":             "https://advertiser.example.com/",
+    "alt_text":                "Spring sale",
+    "active_from":            "2025-03-01T00:00:00Z",
+    "active_until":           "2025-04-01T00:00:00Z",
+    "priority":               10,
+    "active":                 true,
+    "impressions":            18234,
+    "clicks":                 312,
+    "campaign_name":          "Spring 2025",
+    "advertiser":             "Acme Corp",
+    "status":                 "active",
+    "weight":                 2,
+    "notes":                  "Internal note, never shown publicly.",
+    "targeting": {
+      "categories":   ["Technology"],
+      "tags":         ["ai"],
+      "authors":      [],
+      "devices":      ["desktop"],
+      "url_patterns": ["/article/*"]
+    },
+    "daily_impression_limit": 5000,
+    "daily_click_limit":      200,
+    "archived":               false,
+    "created_at":             "2025-01-01T00:00:00Z",
+    "updated_at":             "2025-01-01T00:00:00Z",
+    "delivery_state":         "active",
+    "ctr":                    1.71,
+    "effective_status":       "active",
+    "effective_campaign_name": "Spring 2025",
+    "effective_weight":       2
+  }
+]</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    The last five fields (<code>delivery_state</code>, <code>ctr</code>,
+                    <code>effective_status</code>, <code>effective_campaign_name</code>,
+                    <code>effective_weight</code>) are computed, not stored — they exist so a client
+                    doesn't have to reimplement the fallback rules. <code>delivery_state</code> is one of
+                    <code>scheduled</code>, <code>active</code>, <code>expired</code>, <code>paused</code>,
+                    <code>archived</code>. <code>effective_campaign_name</code> falls back to
+                    <code>name</code> when <code>campaign_name</code> is empty; <code>effective_weight</code>
+                    falls back to <code>1</code> when <code>weight</code> is unset or below 1.
+                </p>
+            </section>
+
+            <!-- Get one banner -->
+            <section id="ban-get" class="mb-5 ps-3">
+                <h5>Get one banner</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong>Response 200:</strong> single banner object, same shape as one array entry above.<br>
+                   <strong>Response 404:</strong> <code>{"error":"not found"}</code></p>
+            </section>
+
+            <!-- Create banner -->
+            <section id="ban-create" class="mb-5 ps-3">
+                <h5>Create banner</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/banners</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>slot_id</code></td><td>string</td><td>Yes</td><td>Must be one of the slots listed by <a href="#ban-meta">Targeting metadata</a>.</td></tr>
+                            <tr><td><code>name</code></td><td>string</td><td>Yes</td><td>Internal label, not shown publicly. Used as the campaign name fallback.</td></tr>
+                            <tr><td><code>image_url</code></td><td>string</td><td>Yes</td><td>Creative image URL.</td></tr>
+                            <tr><td><code>target_url</code></td><td>string</td><td>Yes</td><td>Must be an absolute <code>http(s)</code> URL — anything else is rejected to prevent open redirects.</td></tr>
+                            <tr><td><code>alt_text</code></td><td>string</td><td></td><td></td></tr>
+                            <tr><td><code>active_from</code></td><td>datetime</td><td>Yes</td><td>RFC 3339.</td></tr>
+                            <tr><td><code>active_until</code></td><td>datetime</td><td>Yes</td><td>Must be after <code>active_from</code>.</td></tr>
+                            <tr><td><code>priority</code></td><td>int</td><td></td><td>0–100. Higher wins when multiple banners are eligible for the same slot at the same time.</td></tr>
+                            <tr><td><code>active</code></td><td>bool</td><td></td><td>Forced to <code>false</code> when <code>status</code> is <code>paused</code>.</td></tr>
+                            <tr><td><code>campaign_name</code></td><td>string</td><td></td><td>Defaults to <code>name</code> when empty. Snapshotted onto daily stats — see <a href="#ban-stats-agg">Aggregate stats</a>.</td></tr>
+                            <tr><td><code>advertiser</code></td><td>string</td><td></td><td>Snapshotted onto daily stats.</td></tr>
+                            <tr><td><code>status</code></td><td>string</td><td></td><td><code>active</code> or <code>paused</code>. Defaults from <code>active</code> when omitted.</td></tr>
+                            <tr><td><code>weight</code></td><td>int</td><td></td><td>≥ 1. Used for weighted random rotation among same-priority banners in a slot.</td></tr>
+                            <tr><td><code>notes</code></td><td>string</td><td></td><td>Internal only, never rendered publicly.</td></tr>
+                            <tr><td><code>targeting.categories</code></td><td>string[]</td><td></td><td>Category display names. Empty = eligible for every category.</td></tr>
+                            <tr><td><code>targeting.tags</code></td><td>string[]</td><td></td><td>Article tags. Empty = eligible for every tag.</td></tr>
+                            <tr><td><code>targeting.authors</code></td><td>string[]</td><td></td><td>Author display names. Empty = eligible for every author.</td></tr>
+                            <tr><td><code>targeting.devices</code></td><td>string[]</td><td></td><td>One or more of <code>desktop</code>, <code>mobile</code>, <code>tablet</code>. Empty = every device.</td></tr>
+                            <tr><td><code>targeting.url_patterns</code></td><td>string[]</td><td></td><td>Matched against the request path. A trailing <code>*</code> matches by prefix; otherwise exact or substring match. Empty = every path.</td></tr>
+                            <tr><td><code>daily_impression_limit</code></td><td>int64</td><td></td><td>0 = unlimited.</td></tr>
+                            <tr><td><code>daily_click_limit</code></td><td>int64</td><td></td><td>0 = unlimited.</td></tr>
+                            <tr><td><code>archived</code></td><td>bool</td><td></td><td>Archived banners are never eligible for delivery regardless of <code>active</code>/<code>status</code>.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "slot_id": "article-sidebar",
+    "name": "Spring campaign sidebar",
+    "image_url": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg",
+    "target_url": "https://advertiser.example.com/",
+    "active_from": "2025-03-01T00:00:00Z",
+    "active_until": "2025-04-01T00:00:00Z",
+    "priority": 10,
+    "active": true,
+    "campaign_name": "Spring 2025",
+    "advertiser": "Acme Corp",
+    "weight": 2,
+    "targeting": {"categories": ["Technology"], "devices": ["desktop"]}
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 201:</strong> created banner object (plain, not the computed-fields shape from List/Get).</p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> unknown <code>slot_id</code>, missing required field, invalid <code>target_url</code>, or <code>active_until</code> not after <code>active_from</code>.</p>
+            </section>
+
+            <!-- Update banner -->
+            <section id="ban-update" class="mb-5 ps-3">
+                <h5>Update banner</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-warning text-dark">PUT</span></td>
+                            <td><code>/api/banners/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Same fields as Create — a full replacement of the mutable fields, not a partial patch.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"slot_id":"article-sidebar","name":"Spring campaign sidebar","image_url":"{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg","target_url":"https://advertiser.example.com/","active_from":"2025-03-01T00:00:00Z","active_until":"2025-04-15T00:00:00Z","active":true}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated banner object.</p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> same validation as Create.</p>
+            </section>
+
+            <!-- Delete banner -->
+            <section id="ban-delete" class="mb-5 ps-3">
+                <h5>Delete banner</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/banners/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Deleting a banner does not delete its recorded daily stats — see
+                    <a href="#ban-stats-agg">Aggregate stats</a> for how historical campaign/advertiser
+                    reporting behaves after a banner is deleted.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 204:</strong> no body.</p>
+            </section>
+
+            <!-- Banner targeting metadata -->
+            <section id="ban-meta" class="mb-5 ps-3">
+                <h5>Targeting metadata</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners/meta</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Everything an external client needs to build a banner-targeting UI in one round trip:
+                   every known slot with its pixel size, the selectable statuses and device values, and the
+                   categories/authors/tags currently available on the portal to target against.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "slots": [
+    {"ID": "article-sidebar", "Label": "Cikk oldalsáv (desktop)", "WidthPx": 300, "HeightPx": 600, "Description": "Jobb oldali sáv, cikkoldalakon, csak desktopn (≥xl)."},
+    {"ID": "article-horizontal", "Label": "Cikk vízszintes (mobil)", "WidthPx": 728, "HeightPx": 90, "Description": "Vízszintes sáv, cikkoldalakon, csak mobilon (&lt;xl)."}
+  ],
+  "statuses": ["active", "paused"],
+  "devices": ["desktop", "mobile", "tablet"],
+  "categories": ["Technology", "Gaming"],
+  "authors": ["Jane Doe"],
+  "tags": ["ai", "review"],
+  "targeting": {
+    "empty_list": "An empty targeting list for a dimension (categories, tags, authors, devices, url_patterns) means the banner is eligible for every value of that dimension — targeting is opt-in, not opt-out.",
+    "url_patterns": "Each pattern matches the request path (not the full URL). A trailing '*' matches by prefix (e.g. \"/category/tech*\"); otherwise an exact match or substring match is used."
+  }
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    <code>slots</code> is the fixed, code-defined list of ad placements the site supports
+                    (currently <code>article-sidebar</code> 300×600 desktop, <code>article-horizontal</code>
+                    728×90 mobile) — new placements require a code change and a template wire-up, so this
+                    list only changes with a deployment. <code>categories</code>/<code>authors</code>/<code>tags</code>
+                    reflect current portal content and can change at any time.
+                </p>
+            </section>
+
+            <!-- Single banner stats -->
+            <section id="ban-stats" class="mb-5 ps-3">
+                <h5>Single banner stats</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners/{id}/stats</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Query param</th><th>Default</th><th>Range</th></tr></thead>
+                        <tbody><tr><td><code>days</code></td><td>30</td><td>1–366</td></tr></tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc/stats?days=30"</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "banner_id": "664a000000000000000000cc",
+  "days": 30,
+  "totals":  {"impressions": 18234, "clicks": 312, "ctr": 1.71},
+  "series": [
+    {"date": "2025-03-01", "impressions": 640, "clicks": 12, "ctr": 1.88},
+    {"date": "2025-03-02", "impressions": 712, "clicks": 9,  "ctr": 1.26}
+  ]
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted"><code>series</code> only contains days with at least one recorded impression or click — pad missing days with zero on the client if a continuous calendar is needed.</p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> missing/invalid banner ID, or <code>days</code> outside 1–366.<br>
+                   <strong>Response 404:</strong> banner not found.<br>
+                   <strong>Response 500:</strong> database error.</p>
+            </section>
+
+            <!-- Aggregate banner stats -->
+            <section id="ban-stats-agg" class="mb-5 ps-3">
+                <h5>Aggregate stats</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/banners/stats</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Query param</th><th>Default</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>days</code></td><td>30</td><td>1–366.</td></tr>
+                            <tr><td><code>group_by</code></td><td>(all three)</td><td>Optional. One of <code>campaign</code>, <code>advertiser</code>, <code>slot</code> — when given, only that grouping is computed (the other two are omitted from the response). Omit to get all three.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/stats?days=30"</code></pre>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "days": 30,
+  "totals": {"impressions": 52310, "clicks": 601, "ctr": 1.15},
+  "series": [
+    {"date": "2025-03-01", "impressions": 1820, "clicks": 22, "ctr": 1.21}
+  ],
+  "by_campaign": [
+    {"key": "Spring 2025",  "impressions": 18234, "clicks": 312, "ctr": 1.71},
+    {"key": "(unknown)",    "impressions": 400,   "clicks": 3,   "ctr": 0.75}
+  ],
+  "by_advertiser": [
+    {"key": "Acme Corp", "impressions": 18234, "clicks": 312, "ctr": 1.71}
+  ],
+  "by_slot": [
+    {"key": "article-sidebar", "impressions": 30120, "clicks": 470, "ctr": 1.56}
+  ]
+}</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    Every daily stat row keeps a <strong>snapshot</strong> of its banner's
+                    <code>campaign_name</code>/<code>advertiser</code> taken on the day it was recorded, so
+                    renaming a campaign, reassigning an advertiser, or deleting the banner entirely never
+                    rewrites or drops historical rows from these reports — a same-day rename only affects
+                    future days. Rows predating this snapshot, or whose banner no longer exists, are grouped
+                    under the key <code>"(unknown)"</code> rather than being dropped.
+                </p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> <code>days</code> outside 1–366, or invalid <code>group_by</code>.<br>
+                   <strong>Response 500:</strong> database error.</p>
+            </section>
+
+            <!-- ── Pages ──────────────────────────────────────────────── -->
+            <section id="pages" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-file-earmark-richtext me-2"></i>Pages
+                </h3>
+                <p class="text-muted">
+                    Custom static (evergreen) pages under <code>/admin/pages</code> — e.g. "About us" or
+                    "Service → Repairs" — fully manageable from a remote program the same way as articles.
+                    Pages are hierarchical via <code>parent_id</code> and each has a unique <code>path</code>
+                    (the full URL path, without a leading slash and without the optional
+                    <code>PAGE_URL_PREFIX</code>).
+                </p>
+            </section>
+
+            <!-- List pages -->
+            <section id="page-list" class="mb-5 ps-3">
+                <h5>List pages</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/pages</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Query parameters:</strong></p>
+                <ul>
+                    <li><code>published</code> — <code>true</code> to return only published pages; omit for all</li>
+                </ul>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total": 2,
+  "pages": [
+    {
+      "id":              "664a1b2c3d4e5f6789abcd10",
+      "title":           "Service",
+      "slug":             "szerviz",
+      "path":             "szerviz",
+      "parent_id":        null,
+      "layout":           "default",
+      "content":          "Markdown content…",
+      "summary":          "Short summary…",
+      "seo_title":        "",
+      "seo_description":  "",
+      "og_image":         "",
+      "published":        true,
+      "published_at":     "2025-06-01T10:00:00Z",
+      "menu_order":       0,
+      "show_in_nav":      true,
+      "created_at":       "2025-06-01T09:55:00Z",
+      "updated_at":       "2025-06-01T09:55:00Z"
+    },
+    {
+      "id":              "664a1b2c3d4e5f6789abcd11",
+      "title":           "Repairs",
+      "slug":             "javitas",
+      "path":             "szerviz/javitas",
+      "parent_id":        "664a1b2c3d4e5f6789abcd10",
+      "layout":           "default",
+      "published":        true,
+      "menu_order":       0,
+      "show_in_nav":      false
+    }
+  ]
+}</code></pre>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages?published=true"</code></pre>
+            </section>
+
+            <!-- Get one page -->
+            <section id="page-get" class="mb-5 ps-3">
+                <h5>Get one page</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/pages/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><code>{id}</code> is the MongoDB ObjectID (24-char hex string).</p>
+                <p class="mb-1"><strong>Response 200:</strong> page object (same shape as in list).<br>
+                   <strong>Response 404:</strong> <code>{"error":"Az oldal nem található"}</code></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/664a1b2c3d4e5f6789abcd11</code></pre>
+            </section>
+
+            <!-- Get page by path -->
+            <section id="page-get-by-path" class="mb-5 ps-3">
+                <h5>Get a page by URL path</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/pages/by-path?path={path}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>
+                    Looks a page up by its canonical URL path instead of its ObjectID — the same lookup the public
+                    site uses to serve a page. <code>{path}</code> is the full path without a leading slash and
+                    without <code>PAGE_URL_PREFIX</code> (e.g. <code>szerviz/javitas</code>), URL-encoded as a
+                    query parameter. Useful when a remote program knows a page's URL but not its ID.
+                </p>
+                <p class="mb-1"><strong>Response 200:</strong> page object.<br>
+                   <strong>Response 400:</strong> missing <code>path</code> parameter.<br>
+                   <strong>Response 404:</strong> <code>{"error":"Az oldal nem található"}</code></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/by-path?path=szerviz/javitas"</code></pre>
+            </section>
+
+            <!-- Create page -->
+            <section id="page-create" class="mb-5 ps-3">
+                <h5>Create page</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/pages</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Request body (JSON):</strong></p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>title</code></td><td>string</td><td>Yes</td><td></td></tr>
+                            <tr><td><code>slug</code></td><td>string</td><td></td><td>Auto-generated from <code>title</code> when omitted; must be unique among siblings under the same parent.</td></tr>
+                            <tr><td><code>content</code></td><td>string</td><td></td><td>Markdown body.</td></tr>
+                            <tr><td><code>summary</code></td><td>string</td><td></td><td></td></tr>
+                            <tr><td><code>layout</code></td><td>string</td><td></td><td>One of <code>default</code>, <code>landing</code>, <code>sidebar</code>, <code>wide</code>, <code>plain</code>, <code>sidebar-plain</code>.</td></tr>
+                            <tr><td><code>parent_id</code></td><td>string</td><td></td><td>ObjectID of an existing page; omit or empty for a top-level page.</td></tr>
+                            <tr><td><code>seo_title</code> / <code>seo_description</code> / <code>og_image</code></td><td>string</td><td></td><td></td></tr>
+                            <tr><td><code>published</code></td><td>bool</td><td></td><td></td></tr>
+                            <tr><td><code>publish_at</code></td><td>string (RFC3339)</td><td></td><td>Optional scheduled publish time.</td></tr>
+                            <tr><td><code>menu_order</code></td><td>int</td><td></td><td>Ordering among sibling pages.</td></tr>
+                            <tr><td><code>show_in_nav</code></td><td>bool</td><td></td><td>Only relevant for top-level pages.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title": "Repairs",
+    "content": "## Service and repairs\n\nContact us for a quote.",
+    "parent_id": "664a1b2c3d4e5f6789abcd10",
+    "published": true,
+    "show_in_nav": false
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 201:</strong> created page object.</p>
+            </section>
+
+            <!-- Update page -->
+            <section id="page-update" class="mb-5 ps-3">
+                <h5>Update page</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-warning text-dark">PUT</span></td>
+                            <td><code>/api/pages/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Same fields as Create.</p>
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    The slug (and therefore <code>path</code>) only changes when <code>update_slug: true</code> is
+                    sent — otherwise the existing URL stays stable even if <code>title</code> changes. Changing
+                    <code>parent_id</code> cascades the new <code>path</code> down to every descendant page.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"title":"Repairs","content":"Updated content.","published":true}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/664a1b2c3d4e5f6789abcd11</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated page object.</p>
+            </section>
+
+            <!-- Delete page -->
+            <section id="page-delete" class="mb-5 ps-3">
+                <h5>Delete page</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/pages/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    A page with children cannot be deleted — remove or re-parent its child pages first.
+                    <strong>Response 409 Conflict</strong> otherwise.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/664a1b2c3d4e5f6789abcd11</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message":"Az oldal sikeresen törölve"}</code></p>
+            </section>
+
+            <!-- Comment moderation -->
+            <section id="comments" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-chat-left-text me-2"></i>Comment moderation
+                </h3>
+                <p class="text-muted">
+                    Protected endpoints for an external administration interface. They are separate from the public
+                    <code>/api/comments</code> endpoints: an admin session or <code>X-API-Key</code> is required.
+                </p>
+            </section>
+
+            <!-- List comments -->
+            <section id="comment-list" class="mb-5 ps-3">
+                <h5>List comments for moderation</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/admin/comments</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Query parameters:</strong></p>
+                <ul>
+                    <li><code>article_id</code> — optional article ID filter</li>
+                    <li><code>limit</code> — 1–500, default 100</li>
+                    <li><code>offset</code> — zero-based pagination offset, default 0</li>
+                </ul>
+                <p>Only comments that have not already been deleted are returned. Each item includes the article and user IDs required by an external moderation UI.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/admin/comments?limit=100&amp;offset=0"</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total": 1,
+  "limit": 100,
+  "offset": 0,
+  "comments": [{
+    "id": "664a1b2c3d4e5f6789abcd11",
+    "article_id": "664a1b2c3d4e5f6789abcd12",
+    "user_id": "664a1b2c3d4e5f6789abcd13",
+    "user_name": "Jane Doe",
+    "content": "Useful article.",
+    "created_at": "2026-09-19T10:00:00Z"
+  }]
+}</code></pre>
+            </section>
+
+            <!-- Delete comment -->
+            <section id="comment-delete" class="mb-5 ps-3">
+                <h5>Delete a comment as moderator</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/admin/comments/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-shield-check me-1"></i>
+                    This performs the same soft delete as admin moderation and records the action in the audit log.
+                    It does not require the commenting user's session.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/admin/comments/664a1b2c3d4e5f6789abcd11</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message":"Comment deleted successfully"}</code></p>
+                <p class="mb-0"><strong>Errors:</strong> <code>400</code> invalid ID; <code>404</code> unknown or already deleted comment.</p>
+            </section>
+
+            <!-- ── Polls ──────────────────────────────────────────────── -->
+            <section id="polls" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-bar-chart-steps me-2"></i>Polls
+                </h3>
+                <p class="text-muted">
+                    Management endpoints for remotely creating and administering polls, the same way a remote
+                    program manages articles or authors. These are separate from the public
+                    <code>GET /api/polls/{id}</code> and <code>POST /api/polls/{id}/vote</code> endpoints, which use
+                    a logged-in portal user's session (not an API key) and power the poll widget embedded in
+                    articles — see <code>docs/polls.md</code> for embedding and voting.
+                </p>
+            </section>
+
+            <!-- List polls -->
+            <section id="poll-list" class="mb-5 ps-3">
+                <h5>List polls</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/polls/manage</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Query parameters:</strong></p>
+                <ul>
+                    <li><code>status</code> — <code>draft</code>, <code>active</code>, <code>closed</code> or
+                        <code>archived</code>; omit for all polls</li>
+                </ul>
+                <p class="mb-1"><strong>Response:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "total": 2,
+  "polls": [
+    {
+      "id":          "664a1b2c3d4e5f6789abcd01",
+      "title":       "Which feature should we build next?",
+      "description": "Optional context shown above the options.",
+      "options": [
+        { "id": "664a1b2c3d4e5f6789abcd02", "text": "Dark mode" },
+        { "id": "664a1b2c3d4e5f6789abcd03", "text": "RSS reader" }
+      ],
+      "mode":         "single",
+      "min_choices":  1,
+      "max_choices":  1,
+      "status":       "active",
+      "starts_at":    null,
+      "ends_at":      "2025-07-01T12:00:00Z",
+      "created_at":   "2025-06-01T09:55:00Z",
+      "updated_at":   "2025-06-01T09:55:00Z"
+    }
+  ]
+}</code></pre>
+                <p class="mb-1"><strong>curl:</strong></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage?status=active"</code></pre>
+            </section>
+
+            <!-- Get one poll -->
+            <section id="poll-get" class="mb-5 ps-3">
+                <h5>Get one poll</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-success">GET</span></td>
+                            <td><code>/api/polls/manage/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><code>{id}</code> is the MongoDB ObjectID (24-char hex string).</p>
+                <p class="mb-1"><strong>Response 200:</strong> single poll object (same shape as in list), including vote counts are <em>not</em> included here — use the admin results page for tallies.<br>
+                   <strong>Response 404:</strong> <code>{"error":"A szavazás nem található"}</code></p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage/664a1b2c3d4e5f6789abcd01</code></pre>
+            </section>
+
+            <!-- Create poll -->
+            <section id="poll-create" class="mb-5 ps-3">
+                <h5>Create poll</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/polls/manage</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Request body (JSON):</strong></p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>title</code></td><td>string</td><td>Yes</td><td>Max 200 characters.</td></tr>
+                            <tr><td><code>description</code></td><td>string</td><td></td><td>Max 1000 characters.</td></tr>
+                            <tr><td><code>option_texts</code></td><td>string[]</td><td>Yes</td><td>2–50 unique, non-empty options (max 200 chars each).</td></tr>
+                            <tr><td><code>mode</code></td><td>string</td><td>Yes</td><td><code>single</code> or <code>multiple</code>.</td></tr>
+                            <tr><td><code>min_choices</code> / <code>max_choices</code></td><td>int</td><td></td><td>Only used when <code>mode</code> is <code>multiple</code>; ignored (forced to 1/1) for <code>single</code>.</td></tr>
+                            <tr><td><code>status</code></td><td>string</td><td>Yes</td><td>Initial status: <code>draft</code> or <code>active</code>.</td></tr>
+                            <tr><td><code>starts_at</code></td><td>string (RFC3339)</td><td></td><td>Optional scheduled start; omit to allow voting immediately once active.</td></tr>
+                            <tr><td><code>ends_at</code></td><td>string (RFC3339)</td><td>Yes</td><td>Must be in the future and after <code>starts_at</code>.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title": "Which feature should we build next?",
+    "option_texts": ["Dark mode", "RSS reader"],
+    "mode": "single",
+    "status": "draft",
+    "ends_at": "2025-07-01T12:00:00Z"
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 201:</strong> created poll object.<br>
+                   <strong>Response 400:</strong> validation error, e.g. <code>{"error":"poll must have 2 to 50 options"}</code></p>
+            </section>
+
+            <!-- Update poll -->
+            <section id="poll-update" class="mb-5 ps-3">
+                <h5>Update poll</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-warning text-dark">PUT</span></td>
+                            <td><code>/api/polls/manage/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p>Same fields as Create.</p>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Once a poll has received at least one vote, its options, <code>mode</code> and
+                    <code>min_choices</code>/<code>max_choices</code> are locked — only <code>title</code>,
+                    <code>description</code>, <code>starts_at</code> and <code>ends_at</code> may still change.
+                    Attempting to change locked fields returns <strong>409 Conflict</strong>.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title": "Which feature should we build next? (updated)",
+    "option_texts": ["Dark mode", "RSS reader"],
+    "mode": "single",
+    "status": "active",
+    "ends_at": "2025-07-15T12:00:00Z"
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage/664a1b2c3d4e5f6789abcd01</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated poll object.<br>
+                   <strong>Response 409:</strong> structure is locked after the first vote.</p>
+            </section>
+
+            <!-- Set poll status -->
+            <section id="poll-status" class="mb-5 ps-3">
+                <h5>Set status</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-primary">POST</span></td>
+                            <td><code>/api/polls/manage/{id}/status</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Request body (JSON):</strong> <code>{"status": "active" | "closed" | "archived"}</code></p>
+                <p>Valid transitions mirror the admin panel's poll actions:</p>
+                <ul>
+                    <li><code>draft</code> → <code>active</code> (only while <code>ends_at</code> is still in the future)</li>
+                    <li><code>active</code> → <code>closed</code></li>
+                    <li><code>closed</code> or an expired <code>active</code> poll → <code>archived</code></li>
+                </ul>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"status":"active"}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage/664a1b2c3d4e5f6789abcd01/status</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> updated poll object.<br>
+                   <strong>Response 409:</strong> invalid transition for the poll's current state.</p>
+            </section>
+
+            <!-- Delete poll -->
+            <section id="poll-delete" class="mb-5 ps-3">
+                <h5>Delete poll</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr>
+                            <td><span class="badge bg-danger">DELETE</span></td>
+                            <td><code>/api/polls/manage/{id}</code></td>
+                            <td>Required</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Only <code>draft</code> polls with no votes can be deleted — close or archive a poll instead of
+                    deleting it once it has gone live.
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage/664a1b2c3d4e5f6789abcd01</code></pre>
+                <p class="mt-2 mb-1"><strong>Response 200:</strong> <code>{"message":"A szavazás sikeresen törölve"}</code>.<br>
+                   <strong>Response 409:</strong> the poll is not a vote-free draft.</p>
+            </section>
+
+            <section id="galleries" class="mb-5">
+                <h2>Galériák</h2>
+                <p>A <code>GET /api/galleries/{id}</code> nyilvános, a teljes rendezett képsort adja az overlayhez. A kezelés API-kulccsal vagy admin munkamenettel érhető el.</p>
+                <table class="table table-sm table-bordered"><thead><tr><th>Method</th><th>URL</th></tr></thead><tbody><tr><td>GET, POST</td><td><code>/api/galleries/manage</code></td></tr><tr><td>GET, PUT, DELETE</td><td><code>/api/galleries/manage/{id}</code></td></tr></tbody></table>
+                <p>Írási törzs: <code>{"title":"Nyári képek","image_ids":["&lt;media-id&gt;"]}</code>. Csak képfájl-médiák választhatók. A kezelő válaszok az <code>images</code>, <code>article_references</code>, <code>page_references</code> és <code>deletable</code> mezőket tartalmazzák.</p>
+                <p>Aktív cikk- vagy publikálható oldalhivatkozás esetén a törlés <strong>409 Conflict</strong>, <code>resource_in_use</code> kóddal tér vissza. Hibás ID: 400; hiányzó galéria: 404; adattári hiba: 500.</p>
+                <p>Markdown cikkbe és statikus oldalba:</p><pre class="bg-dark text-light p-3 rounded"><code>```gallery
+6aab40c08158ffeec624c2ff
+[1-4]
+```</code></pre>
+                <p>A tartomány 1-alapú, inkluzív, legfeljebb 9 képes; elhagyva <code>[1-4]</code>. A galéria többször is beilleszthető eltérő tartományokkal.</p>
+            </section>
+
+            <section id="webshop-catalog" class="mb-5">
+                <h2>Webshop category &amp; specification synchronization</h2>
+                <p>Authenticated IVR integration API for managing webshop categories and their category-specific <code>spec_schema</code>. It is an administrative API and is never public.</p>
+                <h3 id="webshop-catalog-mode" class="h5 mt-4">Hidden catalog mode</h3>
+                <p>Set <code>WEBSHOP_CATALOG_API_ENABLED=true</code> to synchronize catalog data before launch. With <code>WEBSHOP_ENABLED=false</code>, repositories and this API are available, but public webshop routes and navigation remain hidden.</p>
+                <h3 id="webshop-catalog-endpoints" class="h5 mt-4">Category endpoints</h3>
+                <table class="table table-sm table-bordered"><thead><tr><th>Method</th><th>URL</th><th>Purpose</th></tr></thead><tbody>
+                    <tr><td>GET</td><td><code>/api/webshop/categories</code></td><td>All categories, including inactive records; dependencies and sync cursor</td></tr>
+                    <tr><td>POST</td><td><code>/api/webshop/categories</code></td><td>Create from IVR</td></tr>
+                    <tr><td>GET</td><td><code>/api/webshop/categories/{id}</code></td><td>Full category and specification schema</td></tr>
+                    <tr><td>PUT</td><td><code>/api/webshop/categories/{id}</code></td><td>Replace category and schema from IVR</td></tr>
+                    <tr><td>DELETE</td><td><code>/api/webshop/categories/{id}</code></td><td>Delete an unused, childless category</td></tr>
+                </tbody></table>
+                <p><code>updated_since</code> accepts RFC3339, and the returned <code>sync_cursor</code> is used for the next reconciliation. Types: <code>text</code>, <code>number</code>, <code>select</code>, <code>multiselect</code>, <code>boolean</code>. Keys must match <code>^[a-z][a-z0-9_]{0,79}$</code>.</p>
+                <p>When <code>sync_source</code> and <code>external_id</code> are supplied together, <code>POST</code> is idempotent: it updates an existing matching category (<code>200</code>, <code>upserted:false</code>) or creates one (<code>201</code>, <code>upserted:true</code>). The pair is uniquely indexed.</p>
+                <pre class="bg-dark text-light p-3 rounded small"><code>{"name_hu":"Processzorok","slug":"processzorok","active":true,"sync_source":"ivr","external_id":"masterdata:65f…","sync_managed_fields":["name_hu","spec_schema"],"spec_schema":[{"key":"socket","label":"Foglalat","type":"select","options":["AM5"],"required":true}]}</code></pre>
+                <h3 id="webshop-catalog-ownership" class="h5 mt-4">Sync ownership</h3>
+                <p>IVR-managed categories store <code>sync_source</code>, <code>external_id</code>, <code>sync_managed_fields</code> and <code>last_synced_at</code>. Managed fields are disabled in the portal admin UI and server-side admin saves preserve them. The IVR API is their authoritative writer.</p>
+                <p>Invalid body/ID: <code>400</code>; unknown category: <code>404</code>; disabled catalog API: <code>503</code>; products or child categories: <code>409 resource_in_use</code> with dependency counts.</p>
+            </section>
+
+            <section id="audit-api" class="mb-2">
+                <h2>Audit &amp; security alerts</h2>
+                <p>Authenticated administration API for the tamper-evident audit trail, integrity checks, in-app alerts and built-in security rules. Audit events are immutable: they can be queried and exported, but never edited or deleted.</p>
+                <p><strong>Authentication:</strong> admin session or <code>X-API-Key</code>. <code>GET /api/audit/status</code> returns <code>{"enabled":false}</code> when auditing is disabled; every other endpoint then returns <code>503</code> with <code>audit_disabled</code>.</p>
+                <table class="table table-sm table-bordered"><thead><tr><th>Method</th><th>URL</th><th>Purpose</th></tr></thead><tbody>
+                    <tr><td>GET</td><td><code>/api/audit/status</code></td><td>Enabled state, retention and integrity status</td></tr>
+                    <tr><td>GET</td><td><code>/api/audit/events</code></td><td>Filtered, cursor-paginated audit events</td></tr>
+                    <tr><td>GET</td><td><code>/api/audit/events/export</code></td><td>CSV or NDJSON export</td></tr>
+                    <tr><td>GET / POST</td><td><code>/api/audit/integrity</code> / <code>/verify</code></td><td>Read or start hash-chain verification</td></tr>
+                    <tr><td>GET / POST</td><td><code>/api/audit/alerts</code> / <code>{id}/acknowledge</code></td><td>List and acknowledge alerts</td></tr>
+                    <tr><td>GET</td><td><code>/api/audit/alerts/unacknowledged-count</code></td><td>Open-alert badge count</td></tr>
+                    <tr><td>GET / PUT</td><td><code>/api/audit/rules/{key}</code></td><td>Read and configure built-in rules</td></tr>
+                </tbody></table>
+            </section>
+
+            <section id="audit-events" class="mb-5 ps-3">
+                <h5>Events and export</h5>
+                <p><code>GET /api/audit/events</code> and <code>GET /api/audit/events/export</code> accept the same filters: <code>range=today|yesterday|24h|7d|30d|90d|custom</code>, <code>from</code>, <code>to</code>, <code>module</code>, <code>action</code>, <code>outcome</code>, <code>actor</code>, <code>ip</code> and <code>q</code>. List requests also accept <code>limit</code> (1–200) and opaque <code>cursor</code>.</p>
+                <p>The list response includes <code>events</code>, <code>next_cursor</code>, <code>has_more</code> and the current verification state. Its first page also includes outcome/module facets and a capped total. Each event includes actor, target, request metadata, sanitized <code>detail</code>, and the <code>hash</code>/<code>prev_hash</code> chain fields.</p>
+                <p>Export accepts <code>format=csv|ndjson</code>, streams at most 100,000 matching records, and returns an attachment. Exports are audit logged; normal event reads are not.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/audit/events?range=7d&amp;outcome=denied&amp;limit=50"</code></pre>
+            </section>
+
+            <section id="audit-integrity" class="mb-5 ps-3">
+                <h5>Integrity verification</h5>
+                <p><code>GET /api/audit/integrity</code> returns <code>running</code>, <code>ran</code>, <code>ok</code>, <code>checked</code>, timestamps and, on failure, <code>broken_at_seq</code> and <code>reason</code>. <code>POST /api/audit/integrity/verify</code> starts the asynchronous job and returns <code>202 {"started":true}</code>; a concurrent job returns <code>409 verification_running</code>.</p>
+            </section>
+
+            <section id="audit-alerts" class="mb-5 ps-3">
+                <h5>Security alerts</h5>
+                <p><code>GET /api/audit/alerts?acknowledged=all|true|false&amp;limit=50&amp;cursor=...</code> returns cursor-paginated alerts with rule key, severity, title, message, triggering event sequences and acknowledgement fields. <code>POST /api/audit/alerts/{id}/acknowledge</code> is idempotent and returns the alert without replacing its first acknowledgement. API-key acknowledgements are attributed as <code>api_key</code>.</p>
+                <p>Invalid IDs return <code>400</code>; unknown alerts return <code>404</code>.</p>
+            </section>
+
+            <section id="audit-rules" class="mb-5 ps-3">
+                <h5>Built-in rule configuration</h5>
+                <p><code>GET /api/audit/rules</code> lists the fixed catalog and effective configuration; <code>GET /api/audit/rules/{key}</code> returns one rule. <code>PUT /api/audit/rules/{key}</code> accepts <code>enabled</code>, <code>cooldown_minutes</code>, <code>channels</code>, and for burst rules <code>threshold</code> and <code>window_minutes</code>. Allowed channels are <code>webhook</code> and <code>pushover</code>; changes take effect immediately.</p>
+                <p>The split rules are <code>manual_restart</code> (manual restart and icon-pack activation), <code>manual_update</code> (admin/API update), and <code>automatic_update_installed</code> (automatic installation). The automatic-install rule is disabled by default, so the existing informational Pushover message remains but no acknowledgement-required in-app alert is created unless this rule is enabled.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"enabled":true,"cooldown_minutes":30,"channels":["webhook"]}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/audit/rules/automatic_update_installed</code></pre>
+                <p>Invalid bodies return <code>400</code>; unknown rule keys return <code>404</code>. The rules themselves cannot be created or deleted.</p>
+            </section>
+
+        </div><!-- /col -->
+    </div><!-- /row -->
+</div><!-- /container -->
+{{template "admin-footer" .}}
+{{end}}

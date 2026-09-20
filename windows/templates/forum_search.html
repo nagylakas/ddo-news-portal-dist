@@ -1,0 +1,13 @@
+{{define "forum/search"}}
+{{template "header" .}}
+{{template "module/hero" dict "Title" "Fórum keresés" "Description" "Topikcímekben, tagekben és kategóriákban keres." "Crumb" "FÓRUM"}}
+<section class="forum-page module-page container-fluid px-4 px-lg-5 py-4">
+    <div class="row g-4">
+        {{template "forum/sidebar" .}}
+        <main class="col-lg-9 col-xl-10">
+            {{template "forum/topic_list" .}}
+        </main>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}

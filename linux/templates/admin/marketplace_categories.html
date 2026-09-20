@@ -1,0 +1,86 @@
+{{define "admin/marketplace_categories"}}
+{{template "admin-header" .}}
+<div class="container-fluid">
+    {{template "admin-flash" .}}
+    {{template "admin-page-header" dict "Title" (t .Lang "mkt.cat_title") "Subtitle" (t .Lang "mkt.cat_sub") "Icon" "folder2-open" "Actions" (list (dict "URL" "/admin/marketplace/categories/create" "Label" (t .Lang "mkt.cat_new") "Icon" "plus-lg"))}}
+
+    {{if .Categories}}
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>{{t .Lang "mkt.cat_col_name"}}</th>
+                    <th>{{t .Lang "mkt.cat_col_slug"}}</th>
+                    <th>{{t .Lang "mkt.cat_col_fields"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.cat_col_listing"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.cat_col_order"}}</th>
+                    <th class="text-center">{{t .Lang "mkt.cat_col_status"}}</th>
+                    <th class="text-end">{{t .Lang "mkt.cat_col_actions"}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Categories}}
+                {{$isChild := ne .ParentIDHex ""}}
+                <tr class="{{if $isChild}}table-light{{end}}">
+                    <td>
+                        {{if $isChild}}
+                        <span class="text-muted me-1" style="padding-left:1.25rem;">└</span>
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}tag{{end}} me-1 text-secondary"></i>
+                        <span class="small">{{.Name}}</span>
+                        {{if .Description}}<div class="small text-muted ms-4">{{.Description}}</div>{{end}}
+                        {{else}}
+                        <i class="bi bi-{{if .Icon}}{{.Icon}}{{else}}folder{{end}} me-2 text-primary"></i>
+                        <strong>{{.Name}}</strong>
+                        {{if .Description}}<div class="small text-muted ms-4">{{.Description}}</div>{{end}}
+                        {{end}}
+                    </td>
+                    <td><code class="small">{{.Slug}}</code></td>
+                    <td><span class="badge text-bg-secondary">{{len .Fields}}</span></td>
+                    <td class="text-center">
+                        {{if .AllowListings}}
+                        <span class="badge text-bg-primary">{{t $.Lang "mkt.cat_listing_allowed"}}</span>
+                        {{else}}
+                        <span class="badge text-bg-light border text-muted">{{t $.Lang "mkt.cat_listing_collector"}}</span>
+                        {{end}}
+                    </td>
+                    <td class="text-center">{{.DisplayOrder}}</td>
+                    <td class="text-center">
+                        {{if .Active}}
+                        <span class="badge text-bg-success">{{t $.Lang "common.active"}}</span>
+                        {{else}}
+                        <span class="badge text-bg-secondary">{{t $.Lang "common.inactive"}}</span>
+                        {{end}}
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a href="/admin/marketplace/categories/edit/{{.ID.Hex}}" class="btn btn-outline-secondary" title="{{t $.Lang "common.edit"}}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form action="/admin/marketplace/categories/delete/{{.ID.Hex}}" method="POST" class="d-inline"
+                                  onsubmit="return confirm('{{t $.Lang "mkt.cat_confirm_delete"}}')">
+                                <button type="submit" class="btn btn-outline-danger" title="{{t $.Lang "common.delete"}}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+        <i class="bi bi-folder2-open display-4 text-muted"></i>
+        <h5 class="mt-3 text-muted">{{t .Lang "mkt.cat_empty_title"}}</h5>
+        <p class="text-muted">{{t .Lang "mkt.cat_empty_sub"}}</p>
+        <a href="/admin/marketplace/categories/create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>{{t .Lang "mkt.cat_create_first"}}
+        </a>
+    </div>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}

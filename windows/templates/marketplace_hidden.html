@@ -1,0 +1,37 @@
+{{define "marketplace/hidden"}}
+{{template "header" .}}
+<section class="container py-5" style="margin-top:90px;">
+    <nav class="small mb-4" aria-label="breadcrumb">
+        <a href="/marketplace" class="text-decoration-none">Marketplace</a>
+        <span class="mx-2 text-muted">/</span>
+        <span class="text-muted">Rejtett hirdetés</span>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-xl-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-5">
+                    <div class="rounded-circle bg-secondary-subtle d-inline-flex align-items-center justify-content-center mb-4" style="width:72px;height:72px;">
+                        <i class="bi bi-eye-slash text-secondary" style="font-size:2rem;"></i>
+                    </div>
+                    <h1 class="h3 mb-3">Ez a hirdetés jelenleg rejtett</h1>
+                    <p class="text-muted mb-4">
+                        A hirdetést a feladó vagy az adminisztrátor elrejtette, ezért nyilvánosan nem böngészhető.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                        <a href="/marketplace" class="btn btn-primary">
+                            <i class="bi bi-grid me-1"></i>Marketplace megnyitása
+                        </a>
+                        {{if and .OIDCEnabled (not .CurrentUser)}}
+                        <a href="/auth/login?force=1&return=/marketplace/listing/{{.Listing.Slug}}" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Bejelentkezés
+                        </a>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{{template "footer" .}}
+{{end}}

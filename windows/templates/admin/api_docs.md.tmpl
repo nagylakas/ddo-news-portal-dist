@@ -1,0 +1,1706 @@
+# API Documentation
+
+Generated from {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}} — DDO News Portal v{{.AppVersion}}
+
+REST API reference for authenticated administrative access to this news portal.
+
+## Table of contents
+
+- [Authentication](#authentication)
+- [Deletion safeguards](#deletion-safeguards)
+- [Version](#version)
+- [System and updates](#system-and-updates)
+  - [System identity](#system-identity)
+  - [Check for updates](#check-for-updates)
+  - [Start an update](#start-an-update)
+  - [Update status](#update-status)
+  - [Restart portal](#restart-portal)
+  - [MCP server](#mcp-server)
+- [Site Statistics](#site-statistics)
+- [Analytics](#analytics)
+  - [Query parameters](#query-parameters)
+  - [Full report](#full-report)
+  - [Summary](#summary)
+  - [Time series](#time-series)
+  - [Breakdowns](#breakdowns)
+  - [Heatmap](#heatmap)
+  - [Realtime](#realtime)
+- [Articles](#articles)
+  - [List articles](#list-articles)
+  - [Get one article](#get-one-article)
+  - [Create article](#create-article)
+  - [Update article](#update-article)
+  - [Delete article](#delete-article)
+  - [Article statistics](#article-statistics)
+  - [List deleted articles (trash)](#list-deleted-articles-trash)
+  - [Restore a deleted article](#restore-a-deleted-article)
+- [Categories](#categories)
+  - [List categories](#list-categories)
+  - [Get one category](#get-one-category)
+  - [Create category](#create-category)
+  - [Update category](#update-category)
+  - [Delete category](#delete-category)
+- [Authors](#authors)
+  - [List authors](#list-authors)
+  - [Get one author](#get-one-author)
+  - [Create author](#create-author)
+  - [Update author](#update-author)
+  - [Delete author](#delete-author)
+- [Banners](#banners)
+  - [List banners](#list-banners)
+  - [Get one banner](#get-one-banner)
+  - [Create banner](#create-banner)
+  - [Update banner](#update-banner)
+  - [Delete banner](#delete-banner)
+  - [Targeting metadata](#targeting-metadata)
+  - [Single banner stats](#single-banner-stats)
+  - [Aggregate stats](#aggregate-stats)
+- [Pages](#pages)
+  - [List pages](#list-pages)
+  - [Get one page](#get-one-page)
+  - [Get a page by URL path](#get-a-page-by-url-path)
+  - [Create page](#create-page)
+  - [Update page](#update-page)
+  - [Delete page](#delete-page)
+- [Comment moderation](#comment-moderation)
+  - [List comments for moderation](#list-comments-for-moderation)
+  - [Delete a comment as moderator](#delete-a-comment-as-moderator)
+- [Polls](#polls)
+  - [List polls](#list-polls)
+  - [Get one poll](#get-one-poll)
+  - [Create poll](#create-poll)
+  - [Update poll](#update-poll)
+  - [Set status](#set-status)
+  - [Delete poll](#delete-poll)
+- [Galleries](#galleries)
+- [Webshop catalog synchronization](#webshop-catalog-synchronization)
+  - [Hidden catalog mode](#hidden-catalog-mode)
+  - [Category endpoints](#category-endpoints)
+  - [Sync ownership](#sync-ownership)
+- [Audit and security alerts](#audit-and-security-alerts)
+  - [Events and export](#events-and-export)
+  - [Integrity verification](#integrity-verification)
+  - [Security alerts](#security-alerts)
+  - [Built-in rule configuration](#built-in-rule-configuration)
+
+---
+
+## Authentication
+
+Every administrative API endpoint documented here requires authentication. Two methods are accepted:
+
+- **Session cookie** — automatically used when you are logged in to the admin panel.
+- **API key header** — send `X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}<your-key>{{end}}` in the request. The key is set via the `API_KEY` environment variable.
+
+{{if eq .APIKey ""}}
+> **Warning:** The `API_KEY` environment variable is not set on this page. The API cannot be used with key-based authentication.
+{{end}}
+
+Unauthenticated requests receive:
+
+```http
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{"error":"Hitelesítés szükséges"}
+```
+
+**curl example (API key):**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles
+```
+
+## Deletion safeguards
+
+Deletion is blocked only when it would orphan active content or break an active workflow. Personal preferences such as follows and saved articles never block an editorial deletion.
+
+Protected deletion requests return `409 Conflict` with an actionable payload:
+
+```json
+{
+  "error": {
+    "code": "resource_in_use",
+    "resource": {"type": "category", "id": "..."},
+    "dependencies": [{"type": "article", "count": 3}],
+    "suggested_action": "Rendeld át vagy távolítsd el a hivatkozó aktív tartalmat."
+  }
+}
+```
+
+| Resource | Blocks deletion | Does not block deletion |
+| --- | --- | --- |
+| Category | Any non-deleted article, including drafts and scheduled articles | Personal category follows; removed automatically |
+| Author | Any non-deleted article | Personal author follows; removed automatically |
+| Page | Direct child pages | — |
+| Article | —; articles are soft-deleted | Saved articles; removed automatically |
+
+The feature-flagged admin modules follow the same rule: forum and marketplace categories cannot be removed when they have children or live content; marketplace delivery types cannot be removed while live listings use them; webshop categories and manufacturers cannot be removed while still in use.
+
+## Version
+
+| Method | URL | Auth | Description |
+| --- | --- | --- | --- |
+| GET | `/api/version` | None | Returns application version |
+
+**Response:**
+
+```json
+{"version":"{{.AppVersion}}"}
+```
+
+## System and updates
+
+All endpoints in this section require an admin session or `X-API-Key`. They are intended for a trusted external administration service.
+
+### System identity
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/system` | Required |
+
+Returns the running portal engine version and the configured icon package. `icon_pack.loaded` is true only when that package version is available locally and is actually active.
+
+```json
+{
+  "engine_version": "{{.AppVersion}}",
+  "icon_pack": {
+    "id": "itlife",
+    "version": "1.2.0",
+    "loaded": true
+  }
+}
+```
+
+### Check for updates
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/system/update/check` | Required |
+
+Fetches and validates the distribution manifest but does not install anything. The response has the same `current_version`, `latest_version`, and `update_available` fields used by the update status endpoint.
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/system/update/check
+```
+
+`409 Conflict` means self-update is unavailable in this deployment; `502 Bad Gateway` means the update manifest could not be retrieved.
+
+### Start an update
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/system/update` | Required |
+
+Starts the same asynchronous download, installation, and restart procedure as the **Install update** button in the admin UI. Call this only after a successful check where `update_available` is true.
+
+**Response 202:**
+
+```json
+{"message":"Update started","version":"0.6.38"}
+```
+
+`409 Conflict` means the portal is already current, the updater is unavailable, or another update is in progress.
+
+### Update status
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/system/update/status` | Required |
+
+Returns the current asynchronous update state (`in_progress`, `step`, `message`, `error`, `current_version`, `latest_version`, and `update_available`). The portal restarts shortly after a successful install, so a client should tolerate a temporary connection failure and then query `/api/system` again.
+
+### Restart portal
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/system/restart` | Required |
+
+Starts the same graceful process restart as the admin UI. The portal briefly becomes unavailable after the accepted response.
+
+```json
+{"message":"Restart started"}
+```
+
+### MCP server
+
+| Method | URL | Auth | Description |
+| --- | --- | --- | --- |
+| GET | `/api/mcp` | Required | Running and configured MCP state, plus published tools when active. |
+| PUT | `/api/mcp` | Required | Persist MCP enablement for the next restart. |
+
+`enabled` and `oauth_enabled` describe the running process; `configured_enabled` and `configured_oauth_enabled` are read from `.env`. A pending difference sets `restart_required`. `tools` is populated only while MCP is active.
+
+```json
+{
+  "enabled": true,
+  "oauth_enabled": false,
+  "configured_enabled": true,
+  "configured_oauth_enabled": false,
+  "restart_required": false,
+  "endpoint": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/mcp",
+  "tools": [{"name":"list_banners","description":"List every banner...","read_only":true}]
+}
+```
+
+For `PUT`, `enabled` is required. `oauth_enabled` is optional and remains unchanged when omitted:
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"enabled":true,"oauth_enabled":true}' {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/mcp
+```
+
+Errors: `400` for a missing `enabled` field or enabling OAuth while MCP is disabled; `500` when the configuration cannot be read or written.
+
+## Site Statistics
+
+| Method | URL | Auth | Description |
+| --- | --- | --- | --- |
+| GET | `/api/stats` | Required | Site-wide statistics (same data as the dashboard) |
+
+**Response:**
+
+```json
+{
+  "total_articles":     142,
+  "published_articles": 130,
+  "draft_articles":     12,
+  "total_categories":   8,
+  "total_authors":      5,
+  "views_today":        47,
+  "views_7days":        312,
+  "views_30days":       1240,
+  "top_today":   { <article object or null> },
+  "top_7days":   { <article object or null> },
+  "top_30days":  { <article object or null> }
+}
+```
+
+The `top_today`, `top_7days`, `top_30days` fields each contain the full article object (same shape as in [List articles](#list-articles)) with the most unique readers in the given period, or `null` if there is no data yet.
+
+**curl:**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/stats
+```
+
+---
+
+## Analytics
+
+The complete data set behind the [Analytics dashboard](/admin/analytics) — cookie-free, first-party traffic measurement stored in your own database. All endpoints are `GET`, require authentication and return JSON.
+
+| Method | URL | Description |
+| --- | --- | --- |
+| GET | `/api/analytics` | Full report (every section at once) |
+| GET | `/api/analytics/summary` | Headline KPIs |
+| GET | `/api/analytics/timeseries` | Views / visitors / sessions over time |
+| GET | `/api/analytics/breakdowns` | Every dimension table |
+| GET | `/api/analytics/breakdowns/{dimension}` | A single dimension table |
+| GET | `/api/analytics/heatmap` | Weekday × hour matrix |
+| GET | `/api/analytics/realtime` | Traffic in the last N minutes |
+
+> **Note:** If the built-in analytics is switched off (`ANALYTICS_ENABLED=false`) or the database is unavailable, every endpoint answers `503`.
+
+### Query parameters
+
+The period and filters are interpreted identically by every endpoint.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `range` | string | `7d` | `today`, `yesterday`, `24h`, `7d`, `28d`, `30d`, `90d`, `mtd`, `ytd`, `12mo`, `custom` |
+| `from` | date | — | `YYYY-MM-DD`, with `range=custom` |
+| `to` | date | — | `YYYY-MM-DD`, inclusive |
+| `granularity` | string | auto | `hour`, `day` or `month` — overrides the bucket size |
+| `compare` | boolean | `true` | `false` skips the previous-period aggregations |
+| `limit` | integer | `15` | Rows per breakdown table, max `500` |
+| `minutes` | integer | `30` | Realtime endpoint only, max `180` |
+
+**Filters** — any combination, all exact matches:
+
+| Parameter | Values |
+| --- | --- |
+| `page_type` | `home`, `article`, `category`, `author`, `tag`, `search`, `page`, `forum`, `marketplace`, `webshop`, `other` |
+| `path` | Exact URL path, e.g. `/article/rtx-5090-teszt` |
+| `channel` | `direct`, `organic`, `social`, `referral`, `campaign`, `internal`, `ai` |
+| `device` | `desktop`, `mobile`, `tablet` |
+| `country` | ISO 3166-1 alpha-2 code, e.g. `HU` |
+| `ref_host` | Referrer host, e.g. `google.hu` |
+| `category` | Category name |
+| `author` | Author name |
+
+A filter applies to *every* section of the response: summary, time series, breakdowns and heatmap. An unknown `range` silently falls back to `7d`.
+
+### Full report
+
+Everything in one request: summary, previous period, time series, all breakdowns and the heatmap. This is the most expensive endpoint — use the section endpoints when you need only one part.
+
+```http
+GET /api/analytics?range=28d&channel=organic&limit=20
+```
+
+**Response (abridged):**
+
+```json
+{
+  "range": {
+    "key":           "28d",
+    "from":          "2026-06-29T00:00:00+02:00",
+    "to":            "2026-07-27T00:00:00+02:00",
+    "previous_from": "2026-06-01T00:00:00+02:00",
+    "previous_to":   "2026-06-29T00:00:00+02:00",
+    "granularity":   "day",
+    "timezone":      "Europe/Budapest"
+  },
+  "filter":  { "channel": "organic" },
+  "summary": { <summary object> },
+  "previous":{ <summary object> },
+  "series":         [ { "bucket": "2026-06-29", "views": 2612, "visitors": 1620, "sessions": 1854 } ],
+  "previous_series":[ { "bucket": "2026-06-01", "views": 2280, "visitors": 1410, "sessions": 1602 } ],
+  "breakdowns":     { "pages": [...], "channels": [...], "referrers": [...], ... },
+  "heatmap":        [ { "weekday": 2, "hour": 9, "views": 187 } ]
+}
+```
+
+> **Note:** Sections that were not requested are **absent** from the JSON rather than empty. `range` and `filter` are always present. With `compare=false` the `previous`, `previous_series`, `range.previous_from` and `range.previous_to` fields are omitted.
+
+**curl:**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/analytics?range=28d"
+```
+
+### Summary
+
+The headline KPIs plus the same numbers for the previous period. Fastest endpoint.
+
+```http
+GET /api/analytics/summary?range=today&compare=false
+```
+
+```json
+{
+  "range":   { "key": "today", "granularity": "hour", "timezone": "Europe/Budapest", ... },
+  "filter":  {},
+  "summary": {
+    "views":             1204,
+    "visitors":          812,
+    "sessions":          903,
+    "views_per_session": 1.3333,
+    "avg_engagement_ms": 88000,
+    "bounce_rate":       44.2,
+    "engagement_rate":   55.8,
+    "outbound":          31
+  }
+}
+```
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `views` | integer | Page views |
+| `visitors` | integer | Unique visitors (see the note below) |
+| `sessions` | integer | Visits; 30 minutes of inactivity starts a new one |
+| `views_per_session` | float | `views / sessions` |
+| `avg_engagement_ms` | integer | Average time actually spent on the page, in milliseconds |
+| `bounce_rate` | float | Percentage of single-page sessions without engagement |
+| `engagement_rate` | float | Percentage of sessions longer than 10s or scrolled past 50% |
+| `outbound` | integer | Outbound link clicks and downloads |
+
+> **Warning:** **Reading `visitors`:** the visitor identifier is a hash salted with a key that is regenerated every day, so the same person receives a new identifier each day. Over a multi-day range `visitors` is therefore the *sum of daily uniques*, not the true unique count for the period. This is the price of consent-free, cookie-less measurement; `sessions` and `views` are exact.
+
+### Time series
+
+Bucket size is chosen automatically (`hour` up to 48 hours, `day` up to 120 days, `month` above that) and can be overridden with `granularity`.
+
+| Granularity | Bucket format | Example |
+| --- | --- | --- |
+| `hour` | `YYYY-MM-DDTHH` | `2026-07-27T14` |
+| `day` | `YYYY-MM-DD` | `2026-07-27` |
+| `month` | `YYYY-MM` | `2026-07` |
+
+```http
+GET /api/analytics/timeseries?range=90d&granularity=month&compare=false
+```
+
+```json
+{
+  "range":  { "key": "90d", "granularity": "month", "timezone": "Europe/Budapest", ... },
+  "filter": {},
+  "series": [
+    { "bucket": "2026-05", "views": 41200, "visitors": 25600, "sessions": 29100 },
+    { "bucket": "2026-06", "views": 44870, "visitors": 27340, "sessions": 31020 }
+  ]
+}
+```
+
+Buckets are in the `ANALYTICS_TIMEZONE` local time, and **only buckets with traffic are returned** — fill the gaps with zeroes client-side if you draw a continuous chart.
+
+### Breakdowns
+
+Without a dimension every table is returned at once; with one, only that table.
+
+| Dimension | Contents |
+| --- | --- |
+| `pages` | Most viewed pages (`key` = path, `label` = page title) |
+| `entry_pages` | Landing pages — first page of each session |
+| `exit_pages` | Exit pages — last page of each session |
+| `channels` | GA4-style default channel grouping |
+| `referrers` | Referrer hosts (`label` = recognised brand name) |
+| `utm_sources`, `utm_mediums`, `utm_campaigns` | Campaign parameters |
+| `devices`, `browsers`, `os` | Technology |
+| `countries`, `languages` | Geography (country needs a CDN country header) |
+| `page_types`, `categories`, `authors` | Editorial performance |
+| `outbound` | Outbound links and downloads (`key` = target URL) |
+
+**Row object:**
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `key` | string | Raw dimension value — pass it back as a filter |
+| `label` | string | Display name when one exists, otherwise empty |
+| `views` | integer | Page views |
+| `visitors` | integer | Unique visitors — **session count** for entry/exit pages |
+| `avg_engagement_ms` | integer | Average time on page in milliseconds |
+| `bounce_rate` | float | Percentage; only meaningful for `entry_pages` and `exit_pages`, `0` elsewhere |
+
+```http
+GET /api/analytics/breakdowns/referrers?range=7d&limit=5
+```
+
+```json
+{
+  "range":     { "key": "7d", "granularity": "day", "timezone": "Europe/Budapest", ... },
+  "filter":    {},
+  "dimension": "referrers",
+  "rows": [
+    { "key": "google.hu",    "label": "Google",   "views": 6120, "visitors": 4284, "avg_engagement_ms": 100000, "bounce_rate": 0 },
+    { "key": "facebook.com", "label": "Facebook", "views": 2410, "visitors": 1687, "avg_engagement_ms": 62000,  "bounce_rate": 0 },
+    { "key": "chatgpt.com",  "label": "ChatGPT",  "views": 410,  "visitors": 287,  "avg_engagement_ms": 154000, "bounce_rate": 0 }
+  ]
+}
+```
+
+**How did people find one specific article?**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/analytics/breakdowns/channels?range=7d&path=/article/rtx-5090-teszt"
+```
+
+An unknown dimension name returns `404` listing the valid names.
+
+### Heatmap
+
+Traffic by weekday and hour. Only non-zero cells are returned.
+
+```http
+GET /api/analytics/heatmap?range=90d
+```
+
+```json
+{
+  "range":   { "key": "90d", "timezone": "Europe/Budapest", ... },
+  "filter":  {},
+  "heatmap": [
+    { "weekday": 2, "hour": 9,  "views": 187 },
+    { "weekday": 2, "hour": 10, "views": 204 }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `weekday` | `1` = Sunday … `7` = Saturday (MongoDB `$dayOfWeek` convention) |
+| `hour` | `0`–`23` in the `ANALYTICS_TIMEZONE` local time |
+| `views` | Page views in that weekday + hour cell |
+
+### Realtime
+
+Traffic over the last `minutes` minutes (default 30, max 180). Period and filter parameters do **not** apply to this endpoint.
+
+```http
+GET /api/analytics/realtime?minutes=5
+```
+
+```json
+{
+  "minutes":         30,
+  "active_visitors": 47,
+  "views":           312,
+  "per_minute":    [ { "bucket": "2026-07-27T18:41", "views": 9, "visitors": 7, "sessions": 0 } ],
+  "top_pages":     [ { "key": "/article/rtx-5090-teszt", "label": "RTX 5090 teszt", "views": 18, "visitors": 12, ... } ],
+  "top_channels":  [ { "key": "organic", "label": "organic", "views": 22, "visitors": 15, ... } ],
+  "top_countries": [ { "key": "HU", "label": "HU", "views": 41, "visitors": 28, ... } ],
+  "devices":       [ { "key": "mobile", "label": "mobile", "views": 28, "visitors": 19, ... } ]
+}
+```
+
+`per_minute[].bucket` is a **UTC** timestamp in `YYYY-MM-DDTHH:MM` form, unlike the other endpoints which bucket in local time.
+
+---
+
+## Articles
+
+### List articles
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/articles` | Required |
+
+**Query parameters:**
+
+- `limit` — number of results (default: `20`, max: `100`)
+- `offset` — zero-based skip (default: `0`)
+- `published` — `true` to return only published articles; omit for all
+
+**Response:**
+
+```json
+{
+  "total": 142,
+  "limit": 20,
+  "offset": 0,
+  "articles": [
+    {
+      "id":           "664a1b2c3d4e5f6789abcdef",
+      "title":        "Example Article",
+      "slug":         "example-article",
+      "summary":      "Short summary…",
+      "content":      "Markdown content…",
+      "author":       "Jane Doe",
+      "author_id":    "664a000000000000000000aa",
+      "category":     "Technology",
+      "category_id":  "664a000000000000000000bb",
+      "tags":         ["go", "api"],
+      "image_url":    "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/photo.jpg",
+      "ai_content_disclosure": "none",
+      "ai_image_disclosure": "unmodified",
+      "published":    true,
+      "published_at": "2025-06-01T10:00:00Z",
+      "created_at":   "2025-06-01T09:55:00Z",
+      "updated_at":   "2025-06-01T10:00:00Z"
+    }
+  ]
+}
+```
+
+**curl:**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles?limit=10&offset=0&published=true"
+```
+
+### Get one article
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/articles/{id}` | Required |
+
+`{id}` is the MongoDB ObjectID (24-char hex string).
+
+**Response 200:** article object (same shape as in list).
+**Response 404:** `{"error":"A cikk nem található"}`
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef
+```
+
+### Create article
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/articles` | Required |
+
+**Request body (JSON):**
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | Yes | Article title. Slug is auto-generated. |
+| `summary` | string | | Short excerpt shown in listings. |
+| `content` | string | | Markdown body. |
+| `author` | string | | Display name (used when `author_id` is absent). |
+| `author_id` | string | | ObjectID of an existing author. |
+| `category` | string | | Display name. |
+| `category_id` | string | | ObjectID of an existing category. |
+| `tags` | string[] | | Tag list. |
+| `image_url` | string | | Featured image URL. If S3 is configured, external URLs are auto-imported to the media library. |
+| `seo_title` | string | | Optional SEO title (maximum 70 characters). When omitted, `title` is used. |
+| `meta_description` | string | | Optional meta description (maximum 160 characters). When omitted, `summary` is used. |
+| `image_alt_text` | string | | Optional featured-image alternative text (maximum 150 characters). When omitted, `title` is used. |
+| `ai_content_disclosure` | string | Yes | AI declaration for the article content: `none`, `assisted`, or `generated`. For backward compatibility only, omitted values are stored as `none`. |
+| `ai_image_disclosure` | string | Yes, if image_url is set | AI declaration for the featured image: `unmodified`, `modified`, or `generated`. For backward compatibility only, an omitted value is stored as `unmodified` when `image_url` is set. |
+| `published` | bool | | Publish immediately (default: `false`). |
+| `publish_at` | string (RFC3339) | | Scheduled publish time. Null or omit to use the current time when `published=true`. |
+
+**curl:**
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title":      "My New Article",
+    "summary":    "A short summary.",
+    "content":    "## Introduction\n\nHello world.",
+    "category":   "Technology",
+    "category_id":"664a000000000000000000bb",
+    "tags":       ["go", "tutorial"],
+    "ai_content_disclosure": "none",
+    "published":  true
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles
+```
+
+**Response 201:** the created article object.
+**Response 400:** `{"error":"A cím megadása kötelező"}`
+
+### Update article
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| PUT | `/api/articles/{id}` | Required |
+
+Same body fields as [Create article](#create-article), plus:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `update_slug` | bool | When `true` the slug is regenerated from the title (default: `false` — existing URLs stay stable). |
+
+> **Warning:** Omit `update_slug` (or set it to `false`) to keep the existing URL intact. Setting it to `true` will break any external links to the old URL.
+
+**curl:**
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title":     "Updated Title",
+    "content":   "New content.",
+    "ai_content_disclosure": "none",
+    "published": true
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef
+```
+
+**Response 200:** updated article object.
+
+### Delete article
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/articles/{id}` | Required |
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef
+```
+
+**Response 200:**
+
+```json
+{
+  "message": "A cikk sikeresen törölve",
+  "cleanup": {"saved_articles": 2}
+}
+```
+
+`cleanup.saved_articles` is the number of personal saved-article records removed during deletion. Saved articles never prevent a soft delete.
+**Response 404:** `{"error":"..."}`
+
+### Article statistics
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/articles/{id}/stats` | Required |
+
+**Query parameters:**
+
+- `days` — how many days of daily data to include (default: `30`, max: `365`)
+
+**Response:**
+
+```json
+{
+  "article_id":  "664a1b2c3d4e5f6789abcdef",
+  "total_views": 842,
+  "days":        30,
+  "daily_stats": [
+    {"date": "2025-05-01", "views": 12},
+    {"date": "2025-05-02", "views": 9}
+  ]
+}
+```
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef/stats?days=7"
+```
+
+### List deleted articles (trash)
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/articles/trash` | Required |
+
+Deleting an article (via the admin UI, this API, or MCP) is always a soft delete — the article is hidden from every public and admin listing but kept in the database with a `deleted_at` timestamp for **60 days**, exactly like the admin *Articles → Trash* page. This endpoint returns that same set.
+
+**Response:**
+
+```json
+{
+  "total": 1,
+  "retention_days": 60,
+  "articles": [
+    {
+      "id":         "664a1b2c3d4e5f6789abcdef",
+      "title":      "Example Article",
+      "slug":       "example-article",
+      "deleted_at": "2025-06-10T08:00:00Z",
+      "updated_at": "2025-06-10T08:00:00Z"
+    }
+  ]
+}
+```
+
+**curl:**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/trash
+```
+
+### Restore a deleted article
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/articles/{id}/restore` | Required |
+
+Undoes a soft delete, exactly like the "Restore" button on the admin trash page. Only articles still within the 60-day retention window can be restored.
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/664a1b2c3d4e5f6789abcdef/restore
+```
+
+**Response 200:** the restored article object.
+**Response 404:** `{"error":"A cikk nem található a lomtárban, vagy lejárt a visszaállítási időablak"}` — either the ID doesn't exist, the article isn't deleted, or the 60-day window has passed.
+
+---
+
+## Categories
+
+### List categories
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/categories` | Required |
+
+**Response:**
+
+```json
+{
+  "total": 8,
+  "categories": [
+    {
+      "id":            "664a000000000000000000bb",
+      "name":          "Technology",
+      "slug":          "technology",
+      "description":   "Tech news and reviews",
+      "icon":          "cpu",
+      "og_image":      "https://cdn.example.com/category.png",
+      "display_order": 1,
+      "created_at":    "2025-01-01T00:00:00Z",
+      "updated_at":    "2025-01-01T00:00:00Z",
+      "article_count": 12,
+      "deletable":     false
+    }
+  ]
+}
+```
+
+`article_count` is the number of non-deleted articles (including drafts and scheduled ones)
+currently referencing this category. `deletable` is `true` only when `article_count` is `0` —
+see [Delete category](#delete-category).
+
+### Get one category
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/categories/{id}` | Required |
+
+**Response 200:** single category object, including `article_count` and `deletable` as above.
+**Response 404:** `{"error":"..."}`
+
+### Create category
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/categories` | Required |
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `name` | string | Yes | Slug is auto-generated from name (Hungarian accents handled). |
+| `description` | string | | |
+| `icon` | string | | Bootstrap Icons name without the `bi-` prefix, e.g. `cpu`. |
+| `og_image` | string | | Public Open Graph image URL for the category page. |
+| `display_order` | int | | Lower = shown first (default: `0`). |
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Technology","icon":"cpu","og_image":"https://cdn.example.com/category.png","display_order":1}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories
+```
+
+**Response 201:** created category object.
+
+### Update category
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| PUT | `/api/categories/{id}` | Required |
+
+Same fields as Create. Slug is always regenerated from the updated name.
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Tech & Gadgets","icon":"cpu","display_order":1}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb
+```
+
+**Response 200:** updated category object.
+
+### Delete category
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/categories/{id}` | Required |
+
+> **Warning:** A category cannot be deleted while any non-deleted article still references it (by
+> `category_id` or by its cached name), including drafts and scheduled articles. Reassign or delete
+> those articles first.
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb
+```
+
+**Response 200:** `{"message": "..."}`.
+
+**Response 409:** `resource_in_use`, including the referencing article count and a suggested action. Category follows are removed automatically and do not block deletion.
+
+**Response 404:** category not found.
+
+---
+
+## Authors
+
+### List authors
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/authors` | Required |
+
+**Response:**
+
+```json
+{
+  "total": 5,
+  "authors": [
+    {
+      "id":         "664a000000000000000000aa",
+      "name":       "Jane Doe",
+      "slug":       "jane-doe",
+      "bio":        "Senior writer covering technology.",
+      "avatar_url": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/jane.jpg",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z",
+      "article_count": 12,
+      "deletable": false
+    }
+  ]
+}
+```
+
+### Get one author
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/authors/{id}` | Required |
+
+`article_count` is the number of non-deleted articles, including drafts and scheduled articles, that reference the author. `deletable` is `true` only when this count is `0`.
+
+**Response 200:** single author object, including `article_count` and `deletable` as above.
+**Response 404:** `{"error":"..."}`
+
+### Create author
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/authors` | Required |
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `name` | string | Yes | Slug is auto-generated. |
+| `bio` | string | | |
+| `avatar_url` | string | | URL to avatar image. If S3 is configured, external URLs are auto-imported to the media library. |
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Jane Doe","bio":"Senior writer.","avatar_url":"{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/jane.jpg"}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/authors
+```
+
+**Response 201:** created author object.
+
+### Update author
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| PUT | `/api/authors/{id}` | Required |
+
+Same fields as Create. Slug is always regenerated from the updated name.
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Jane Doe","bio":"Updated bio."}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/authors/664a000000000000000000aa
+```
+
+**Response 200:** updated author object.
+
+### Delete author
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/authors/{id}` | Required |
+
+> **Warning:** An author cannot be deleted while non-deleted articles reference it. Author follows are removed automatically and do not block deletion. A blocked request returns `409 resource_in_use` with the article count.
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/authors/664a000000000000000000aa
+```
+
+**Response 200:** `{"message":"A szerző sikeresen törölve"}`
+
+**Response 409:** `resource_in_use` when active articles reference the author.
+
+---
+
+## Banners
+
+Ad placements assigned to one of the fixed `slot_id` values under `/admin/banners`. Each banner has optional article-level targeting (categories, tags, authors, devices, URL path patterns), scheduling, daily impression/click limits, weighted rotation, and campaign/advertiser metadata for reporting. See [Targeting metadata](#targeting-metadata) for the full set of selectable slots, statuses, devices, categories, authors and tags, and [Single banner stats](#single-banner-stats) / [Aggregate stats](#aggregate-stats) for impression/click/CTR reporting.
+
+### List banners
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners` | Required |
+
+**Response:** a bare JSON array (not wrapped in `{"banners": [...]}`), ordered by `slot_id`, then priority descending.
+
+```json
+[
+  {
+    "id":                     "664a000000000000000000cc",
+    "slot_id":                "article-sidebar",
+    "name":                   "Spring campaign sidebar",
+    "image_url":              "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg",
+    "target_url":             "https://advertiser.example.com/",
+    "alt_text":               "Spring sale",
+    "active_from":            "2025-03-01T00:00:00Z",
+    "active_until":           "2025-04-01T00:00:00Z",
+    "priority":               10,
+    "active":                 true,
+    "impressions":            18234,
+    "clicks":                 312,
+    "campaign_name":          "Spring 2025",
+    "advertiser":              "Acme Corp",
+    "status":                 "active",
+    "weight":                 2,
+    "notes":                  "Internal note, never shown publicly.",
+    "targeting": {
+      "categories":   ["Technology"],
+      "tags":         ["ai"],
+      "authors":      [],
+      "devices":      ["desktop"],
+      "url_patterns": ["/article/*"]
+    },
+    "daily_impression_limit": 5000,
+    "daily_click_limit":      200,
+    "archived":               false,
+    "created_at":             "2025-01-01T00:00:00Z",
+    "updated_at":             "2025-01-01T00:00:00Z",
+    "delivery_state":         "active",
+    "ctr":                    1.71,
+    "effective_status":       "active",
+    "effective_campaign_name": "Spring 2025",
+    "effective_weight":       2
+  }
+]
+```
+
+The last five fields (`delivery_state`, `ctr`, `effective_status`, `effective_campaign_name`, `effective_weight`) are computed, not stored — they exist so a client doesn't have to reimplement the fallback rules. `delivery_state` is one of `scheduled`, `active`, `expired`, `paused`, `archived`. `effective_campaign_name` falls back to `name` when `campaign_name` is empty; `effective_weight` falls back to `1` when `weight` is unset or below 1.
+
+### Get one banner
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners/{id}` | Required |
+
+**Response 200:** single banner object, same shape as one array entry above.
+**Response 404:** `{"error":"not found"}`
+
+### Create banner
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/banners` | Required |
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `slot_id` | string | Yes | Must be one of the slots listed by [Targeting metadata](#targeting-metadata). |
+| `name` | string | Yes | Internal label, not shown publicly. Used as the campaign name fallback. |
+| `image_url` | string | Yes | Creative image URL. |
+| `target_url` | string | Yes | Must be an absolute `http(s)` URL — anything else is rejected to prevent open redirects. |
+| `alt_text` | string | | |
+| `active_from` | datetime | Yes | RFC 3339. |
+| `active_until` | datetime | Yes | Must be after `active_from`. |
+| `priority` | int | | 0-100. Higher wins when multiple banners are eligible for the same slot at the same time. |
+| `active` | bool | | Forced to `false` when `status` is `paused`. |
+| `campaign_name` | string | | Defaults to `name` when empty. Snapshotted onto daily stats — see [Aggregate stats](#aggregate-stats). |
+| `advertiser` | string | | Snapshotted onto daily stats. |
+| `status` | string | | `active` or `paused`. Defaults from `active` when omitted. |
+| `weight` | int | | >= 1. Used for weighted random rotation among same-priority banners in a slot. |
+| `notes` | string | | Internal only, never rendered publicly. |
+| `targeting.categories` | string[] | | Category display names. Empty = eligible for every category. |
+| `targeting.tags` | string[] | | Article tags. Empty = eligible for every tag. |
+| `targeting.authors` | string[] | | Author display names. Empty = eligible for every author. |
+| `targeting.devices` | string[] | | One or more of `desktop`, `mobile`, `tablet`. Empty = every device. |
+| `targeting.url_patterns` | string[] | | Matched against the request path. A trailing `*` matches by prefix; otherwise exact or substring match. Empty = every path. |
+| `daily_impression_limit` | int64 | | 0 = unlimited. |
+| `daily_click_limit` | int64 | | 0 = unlimited. |
+| `archived` | bool | | Archived banners are never eligible for delivery regardless of `active`/`status`. |
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "slot_id": "article-sidebar",
+    "name": "Spring campaign sidebar",
+    "image_url": "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg",
+    "target_url": "https://advertiser.example.com/",
+    "active_from": "2025-03-01T00:00:00Z",
+    "active_until": "2025-04-01T00:00:00Z",
+    "priority": 10,
+    "active": true,
+    "campaign_name": "Spring 2025",
+    "advertiser": "Acme Corp",
+    "weight": 2,
+    "targeting": {"categories": ["Technology"], "devices": ["desktop"]}
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners
+```
+
+**Response 201:** created banner object (plain, not the computed-fields shape from List/Get).
+**Response 400:** unknown `slot_id`, missing required field, invalid `target_url`, or `active_until` not after `active_from`.
+
+### Update banner
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| PUT | `/api/banners/{id}` | Required |
+
+Same fields as Create — a full replacement of the mutable fields, not a partial patch.
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"slot_id":"article-sidebar","name":"Spring campaign sidebar","image_url":"{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/images/banner.jpg","target_url":"https://advertiser.example.com/","active_from":"2025-03-01T00:00:00Z","active_until":"2025-04-15T00:00:00Z","active":true}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc
+```
+
+**Response 200:** updated banner object.
+**Response 400:** same validation as Create.
+
+### Delete banner
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/banners/{id}` | Required |
+
+> **Note:** Deleting a banner does not delete its recorded daily stats — see [Aggregate stats](#aggregate-stats) for how historical campaign/advertiser reporting behaves after a banner is deleted.
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc
+```
+
+**Response 204:** no body.
+
+### Targeting metadata
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners/meta` | Required |
+
+Everything an external client needs to build a banner-targeting UI in one round trip: every known slot with its pixel size, the selectable statuses and device values, and the categories/authors/tags currently available on the portal to target against.
+
+```json
+{
+  "slots": [
+    {"ID": "article-sidebar", "Label": "Cikk oldalsáv (desktop)", "WidthPx": 300, "HeightPx": 600, "Description": "Jobb oldali sáv, cikkoldalakon, csak desktopn (>=xl)."},
+    {"ID": "article-horizontal", "Label": "Cikk vízszintes (mobil)", "WidthPx": 728, "HeightPx": 90, "Description": "Vízszintes sáv, cikkoldalakon, csak mobilon (<xl)."}
+  ],
+  "statuses": ["active", "paused"],
+  "devices": ["desktop", "mobile", "tablet"],
+  "categories": ["Technology", "Gaming"],
+  "authors": ["Jane Doe"],
+  "tags": ["ai", "review"],
+  "targeting": {
+    "empty_list": "An empty targeting list for a dimension (categories, tags, authors, devices, url_patterns) means the banner is eligible for every value of that dimension — targeting is opt-in, not opt-out.",
+    "url_patterns": "Each pattern matches the request path (not the full URL). A trailing '*' matches by prefix (e.g. \"/category/tech*\"); otherwise an exact match or substring match is used."
+  }
+}
+```
+
+`slots` is the fixed, code-defined list of ad placements the site supports (currently `article-sidebar` 300x600 desktop, `article-horizontal` 728x90 mobile) — new placements require a code change and a template wire-up, so this list only changes with a deployment. `categories`/`authors`/`tags` reflect current portal content and can change at any time.
+
+### Single banner stats
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners/{id}/stats` | Required |
+
+| Query param | Default | Range |
+| --- | --- | --- |
+| `days` | 30 | 1-366 |
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/664a000000000000000000cc/stats?days=30"
+```
+
+```json
+{
+  "banner_id": "664a000000000000000000cc",
+  "days": 30,
+  "totals":  {"impressions": 18234, "clicks": 312, "ctr": 1.71},
+  "series": [
+    {"date": "2025-03-01", "impressions": 640, "clicks": 12, "ctr": 1.88},
+    {"date": "2025-03-02", "impressions": 712, "clicks": 9,  "ctr": 1.26}
+  ]
+}
+```
+
+`series` only contains days with at least one recorded impression or click — pad missing days with zero on the client if a continuous calendar is needed.
+
+**Response 400:** missing/invalid banner ID, or `days` outside 1-366.
+**Response 404:** banner not found.
+**Response 500:** database error.
+
+### Aggregate stats
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/banners/stats` | Required |
+
+| Query param | Default | Notes |
+| --- | --- | --- |
+| `days` | 30 | 1-366. |
+| `group_by` | (all three) | Optional. One of `campaign`, `advertiser`, `slot` — when given, only that grouping is computed (the other two are omitted from the response). Omit to get all three. |
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/banners/stats?days=30"
+```
+
+```json
+{
+  "days": 30,
+  "totals": {"impressions": 52310, "clicks": 601, "ctr": 1.15},
+  "series": [
+    {"date": "2025-03-01", "impressions": 1820, "clicks": 22, "ctr": 1.21}
+  ],
+  "by_campaign": [
+    {"key": "Spring 2025",  "impressions": 18234, "clicks": 312, "ctr": 1.71},
+    {"key": "(unknown)",    "impressions": 400,   "clicks": 3,   "ctr": 0.75}
+  ],
+  "by_advertiser": [
+    {"key": "Acme Corp", "impressions": 18234, "clicks": 312, "ctr": 1.71}
+  ],
+  "by_slot": [
+    {"key": "article-sidebar", "impressions": 30120, "clicks": 470, "ctr": 1.56}
+  ]
+}
+```
+
+Every daily stat row keeps a **snapshot** of its banner's `campaign_name`/`advertiser` taken on the day it was recorded, so renaming a campaign, reassigning an advertiser, or deleting the banner entirely never rewrites or drops historical rows from these reports — a same-day rename only affects future days. Rows predating this snapshot, or whose banner no longer exists, are grouped under the key `"(unknown)"` rather than being dropped.
+
+**Response 400:** `days` outside 1-366, or invalid `group_by`.
+**Response 500:** database error.
+
+---
+
+## Pages
+
+Custom static (evergreen) pages under `/admin/pages` — e.g. "About us" or "Service → Repairs" — fully manageable from a remote program the same way as articles. Pages are hierarchical via `parent_id` and each has a unique `path` (the full URL path, without a leading slash and without the optional `PAGE_URL_PREFIX`).
+
+### List pages
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/pages` | Required |
+
+**Query parameters:**
+
+- `published` — `true` to return only published pages; omit for all
+
+**Response:**
+
+```json
+{
+  "total": 2,
+  "pages": [
+    {
+      "id":              "664a1b2c3d4e5f6789abcd10",
+      "title":           "Service",
+      "slug":             "szerviz",
+      "path":             "szerviz",
+      "parent_id":        null,
+      "layout":           "default",
+      "content":          "Markdown content…",
+      "summary":          "Short summary…",
+      "seo_title":        "",
+      "seo_description":  "",
+      "og_image":         "",
+      "published":        true,
+      "published_at":     "2025-06-01T10:00:00Z",
+      "menu_order":       0,
+      "show_in_nav":      true,
+      "created_at":       "2025-06-01T09:55:00Z",
+      "updated_at":       "2025-06-01T09:55:00Z"
+    },
+    {
+      "id":              "664a1b2c3d4e5f6789abcd11",
+      "title":           "Repairs",
+      "slug":             "javitas",
+      "path":             "szerviz/javitas",
+      "parent_id":        "664a1b2c3d4e5f6789abcd10",
+      "layout":           "default",
+      "published":        true,
+      "menu_order":       0,
+      "show_in_nav":      false
+    }
+  ]
+}
+```
+
+**curl:**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages?published=true"
+```
+
+### Get one page
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/pages/{id}` | Required |
+
+`{id}` is the MongoDB ObjectID (24-char hex string).
+
+**Response 200:** page object (same shape as in list).
+**Response 404:** `{"error":"Az oldal nem található"}`
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/664a1b2c3d4e5f6789abcd11
+```
+
+### Get a page by URL path
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/pages/by-path?path={path}` | Required |
+
+Looks a page up by its canonical URL path instead of its ObjectID — the same lookup the public site uses to serve a page. `{path}` is the full path without a leading slash and without `PAGE_URL_PREFIX` (e.g. `szerviz/javitas`), URL-encoded as a query parameter. Useful when a remote program knows a page's URL but not its ID.
+
+**Response 200:** page object.
+**Response 400:** missing `path` parameter.
+**Response 404:** `{"error":"Az oldal nem található"}`
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/by-path?path=szerviz/javitas"
+```
+
+### Create page
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/pages` | Required |
+
+**Request body (JSON):**
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | Yes | |
+| `slug` | string | | Auto-generated from `title` when omitted; must be unique among siblings under the same parent. |
+| `content` | string | | Markdown body. |
+| `summary` | string | | |
+| `layout` | string | | One of `default`, `landing`, `sidebar`, `wide`, `plain`, `sidebar-plain`. |
+| `parent_id` | string | | ObjectID of an existing page; omit or empty for a top-level page. |
+| `seo_title` / `seo_description` / `og_image` | string | | |
+| `published` | bool | | |
+| `publish_at` | string (RFC3339) | | Optional scheduled publish time. |
+| `menu_order` | int | | Ordering among sibling pages. |
+| `show_in_nav` | bool | | Only relevant for top-level pages. |
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title": "Repairs",
+    "content": "## Service and repairs\n\nContact us for a quote.",
+    "parent_id": "664a1b2c3d4e5f6789abcd10",
+    "published": true,
+    "show_in_nav": false
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages
+```
+
+**Response 201:** created page object.
+
+### Update page
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| PUT | `/api/pages/{id}` | Required |
+
+Same fields as Create.
+
+> **Note:** The slug (and therefore `path`) only changes when `update_slug: true` is sent — otherwise the existing URL stays stable even if `title` changes. Changing `parent_id` cascades the new `path` down to every descendant page.
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"title":"Repairs","content":"Updated content.","published":true}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/664a1b2c3d4e5f6789abcd11
+```
+
+**Response 200:** updated page object.
+
+### Delete page
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/pages/{id}` | Required |
+
+> **Warning:** A page with children cannot be deleted — remove or re-parent its child pages first. The response is `409 Conflict` with `resource_in_use` and a `child_page` dependency otherwise.
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/pages/664a1b2c3d4e5f6789abcd11
+```
+
+**Response 200:** `{"message":"Az oldal sikeresen törölve"}`
+
+---
+
+## Comment moderation
+
+These endpoints are for external admin tools. They require the same admin session or `X-API-Key` as the rest of the management API. They are separate from the public `/api/comments` endpoints, which use an OIDC user session.
+
+### List comments for moderation
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/admin/comments` | Required |
+
+Only non-deleted comments are returned. Optional query parameters: `article_id` (ObjectID filter), `limit` (1–500, default 100), and `offset` (default 0).
+
+```json
+{
+  "comments": [{"id":"...","article_id":"...","user_id":"...","user_name":"Anna","content":"Example comment","created_at":"2026-09-19T12:00:00Z"}],
+  "total": 1,
+  "limit": 100,
+  "offset": 0
+}
+```
+
+### Delete a comment as moderator
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/admin/comments/{id}` | Required |
+
+Soft-deletes any non-deleted comment regardless of its author, exactly like the built-in admin moderation action. It is audit logged.
+
+**Response 200:** `{"message":"A hozzászólás sikeresen moderálva és törölve"}`.
+**Response 400:** invalid comment ID. **Response 404:** comment does not exist or was already deleted.
+
+---
+
+## Polls
+
+Management endpoints for remotely creating and administering polls, the same way a remote program manages articles or authors. These are separate from the public `GET /api/polls/{id}` and `POST /api/polls/{id}/vote` endpoints, which use a logged-in portal user's session (not an API key) and power the poll widget embedded in articles — see `docs/polls.md` for embedding and voting.
+
+### List polls
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/polls/manage` | Required |
+
+**Query parameters:**
+
+- `status` — `draft`, `active`, `closed` or `archived`; omit for all polls
+
+**Response:**
+
+```json
+{
+  "total": 2,
+  "polls": [
+    {
+      "id":          "664a1b2c3d4e5f6789abcd01",
+      "title":       "Which feature should we build next?",
+      "description": "Optional context shown above the options.",
+      "options": [
+        { "id": "664a1b2c3d4e5f6789abcd02", "text": "Dark mode" },
+        { "id": "664a1b2c3d4e5f6789abcd03", "text": "RSS reader" }
+      ],
+      "mode":         "single",
+      "min_choices":  1,
+      "max_choices":  1,
+      "status":       "active",
+      "starts_at":    null,
+      "ends_at":      "2025-07-01T12:00:00Z",
+      "created_at":   "2025-06-01T09:55:00Z",
+      "updated_at":   "2025-06-01T09:55:00Z"
+    }
+  ]
+}
+```
+
+**curl:**
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  "{{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage?status=active"
+```
+
+### Get one poll
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/polls/manage/{id}` | Required |
+
+`{id}` is the MongoDB ObjectID (24-char hex string).
+
+**Response 200:** single poll object (same shape as in list), including vote counts are *not* included here — use the admin results page for tallies.
+**Response 404:** `{"error":"A szavazás nem található"}`
+
+```bash
+curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage/664a1b2c3d4e5f6789abcd01
+```
+
+### Create poll
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/polls/manage` | Required |
+
+**Request body (JSON):**
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | Yes | Max 200 characters. |
+| `description` | string | | Max 1000 characters. |
+| `option_texts` | string[] | Yes | 2–50 unique, non-empty options (max 200 chars each). |
+| `mode` | string | Yes | `single` or `multiple`. |
+| `min_choices` / `max_choices` | int | | Only used when `mode` is `multiple`; ignored (forced to 1/1) for `single`. |
+| `status` | string | Yes | Initial status: `draft` or `active`. |
+| `starts_at` | string (RFC3339) | | Optional scheduled start; omit to allow voting immediately once active. |
+| `ends_at` | string (RFC3339) | Yes | Must be in the future and after `starts_at`. |
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title": "Which feature should we build next?",
+    "option_texts": ["Dark mode", "RSS reader"],
+    "mode": "single",
+    "status": "draft",
+    "ends_at": "2025-07-01T12:00:00Z"
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage
+```
+
+**Response 201:** created poll object.
+**Response 400:** validation error, e.g. `{"error":"poll must have 2 to 50 options"}`
+
+### Update poll
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| PUT | `/api/polls/manage/{id}` | Required |
+
+Same fields as Create.
+
+> **Warning:** Once a poll has received at least one vote, its options, `mode` and `min_choices`/`max_choices` are locked — only `title`, `description`, `starts_at` and `ends_at` may still change. Attempting to change locked fields returns **409 Conflict**.
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "title": "Which feature should we build next? (updated)",
+    "option_texts": ["Dark mode", "RSS reader"],
+    "mode": "single",
+    "status": "active",
+    "ends_at": "2025-07-15T12:00:00Z"
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage/664a1b2c3d4e5f6789abcd01
+```
+
+**Response 200:** updated poll object.
+**Response 409:** structure is locked after the first vote.
+
+### Set status
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/polls/manage/{id}/status` | Required |
+
+**Request body (JSON):** `{"status": "active" | "closed" | "archived"}`
+
+Valid transitions mirror the admin panel's poll actions:
+
+- `draft` → `active` (only while `ends_at` is still in the future)
+- `active` → `closed`
+- `closed` or an expired `active` poll → `archived`
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"status":"active"}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage/664a1b2c3d4e5f6789abcd01/status
+```
+
+**Response 200:** updated poll object.
+**Response 409:** invalid transition for the poll's current state.
+
+### Delete poll
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/polls/manage/{id}` | Required |
+
+> **Note:** Only `draft` polls with no votes can be deleted — close or archive a poll instead of deleting it once it has gone live.
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/polls/manage/664a1b2c3d4e5f6789abcd01
+```
+
+**Response 200:** `{"message":"A szavazás sikeresen törölve"}`.
+**Response 409:** the poll is not a vote-free draft.
+
+## Galériák
+
+Nyilvános overlay-adat: `GET /api/galleries/{id}`. A válasz a galéria címét és teljes, rendezett `images` képsorát adja vissza.
+
+Hitelesített kezelés:
+
+| Módszer | URL |
+| --- | --- |
+| GET, POST | `/api/galleries/manage` |
+| GET, PUT, DELETE | `/api/galleries/manage/{id}` |
+
+Írási törzs: `{"title":"Nyári képek","image_ids":["<media-id>","<media-id>"]}`. Csak `image/*` médiák választhatók. A lista és részlet tartalmazza az `images`, `article_references`, `page_references` és `deletable` mezőket.
+
+Törléskor aktív cikk- vagy publikálható oldalhivatkozás esetén a válasz `409 Conflict`, `resource_in_use` kóddal, függőségtípusokkal és darabszámmal. Hibás ID: `400`; nem létező galéria: `404`; adattári hiba: `500`.
+
+Markdown-beillesztés cikkbe és statikus oldalba:
+
+````text
+```gallery
+6aab40c08158ffeec624c2ff
+[1-4]
+```
+````
+
+A tartomány 1-alapú, inkluzív és legfeljebb 9 képes; elhagyva `[1-4]`. Egy galéria többször is beilleszthető eltérő tartományokkal. Részletes szerkesztői útmutató: `docs/galleries.md`.
+
+## Webshop catalog synchronization
+
+Authenticated IVR integration API for webshop categories and their category-specific `spec_schema` fields. It is an administrative API only; it is never exposed to public visitors.
+
+### Hidden catalog mode
+
+Set `WEBSHOP_CATALOG_API_ENABLED=true` when the IVR must synchronize catalog data before the public webshop is launched. This initializes the catalog repositories and enables the endpoints below while `WEBSHOP_ENABLED=false` keeps every public webshop route and navigation item hidden. Enable `WEBSHOP_ENABLED=true` only when the storefront should become public.
+
+### Category endpoints
+
+| Method | URL | Purpose |
+| --- | --- | --- |
+| GET | `/api/webshop/categories` | All categories, including inactive records, with `deletable`, dependencies and `sync_cursor` |
+| POST | `/api/webshop/categories` | Create a category from IVR |
+| GET | `/api/webshop/categories/{id}` | Category, complete schema and relationship summary |
+| PUT | `/api/webshop/categories/{id}` | Replace a category and its schema from IVR |
+| DELETE | `/api/webshop/categories/{id}` | Delete only an unused, childless category |
+
+`GET /api/webshop/categories?updated_since=2026-09-20T10:30:00Z` returns only later changes. Store the returned RFC3339-nanosecond `sync_cursor` and send it on the next reconciliation request.
+
+When both `sync_source` and `external_id` are supplied, `POST` is idempotent: an existing matching category is updated and returns `200` with `"upserted":false`; a new category returns `201` with `"upserted":true`. The pair is uniquely indexed.
+
+Create and update bodies use stable snake-case fields:
+
+```json
+{
+  "name_hu":"Processzorok", "slug":"processzorok", "image_url":"https://ivr.example/categories/cpu.jpg", "display_order":20, "active":true,
+  "sync_source":"ivr", "external_id":"masterdata:65f…", "sync_managed_fields":["name_hu","description","image_url","spec_schema"],
+  "spec_schema":[
+    {"key":"socket","label":"Foglalat","type":"select","options":["AM5","LGA1851"],"required":true},
+    {"key":"clock_ghz","label":"Órajel","type":"number","unit":"GHz","number_rule":{"min":1,"max":7,"step":0.1}
+    }
+  ]
+}
+```
+
+Allowed field types are `text`, `number`, `select`, `multiselect` and `boolean`. Technical keys must match `^[a-z][a-z0-9_]{0,79}$`. Select fields require options; number rules enforce `min`, `max` and `step`. Invalid body or ID is `400`; a missing category is `404`; an inactive catalog module is `503`; repository failures are `500`. A category with products or child categories returns `409 Conflict` and the standard `resource_in_use` payload with `products` and/or `child_categories` counts.
+
+### Sync ownership
+
+`sync_source`, `external_id`, `sync_managed_fields` and `last_synced_at` are stored on every IVR-managed category. The portal records `last_synced_at` on each API write. Fields named in `sync_managed_fields` are disabled in the local admin editor, and server-side saving preserves their existing values even if a local request attempts to submit a replacement. The IVR API remains the authoritative writer for those fields.
+
+## Audit and security alerts
+
+Authenticated administration API for the tamper-evident audit trail, integrity checks, in-app alerts and built-in security rules. Audit events are immutable: they can be queried and exported, but never edited or deleted.
+
+`GET /api/audit/status` returns `{"enabled":false}` when auditing is disabled; every other audit endpoint then returns `503` with `audit_disabled`.
+
+| Method | URL | Purpose |
+| --- | --- | --- |
+| GET | `/api/audit/status` | Enabled state, retention and integrity status |
+| GET | `/api/audit/events` | Filtered, cursor-paginated events |
+| GET | `/api/audit/events/export` | CSV or NDJSON export |
+| GET / POST | `/api/audit/integrity` / `/api/audit/integrity/verify` | Verification state / start |
+| GET / POST | `/api/audit/alerts` / `/api/audit/alerts/{id}/acknowledge` | Alert list / acknowledgement |
+| GET | `/api/audit/alerts/unacknowledged-count` | Open-alert count |
+| GET / PUT | `/api/audit/rules/{key}` | Built-in rule read / configuration |
+
+### Events and export
+
+`GET /api/audit/events` and `GET /api/audit/events/export` accept `range=today|yesterday|24h|7d|30d|90d|custom`, `from`, `to`, `module`, `action`, `outcome`, `actor`, `ip` and `q`. Lists also support `limit` (1–200) and opaque `cursor` pagination. A first list page includes outcome/module facets, a capped total, and hash-verification state. Each event contains actor, target, request metadata, sanitized `detail`, `hash` and `prev_hash`.
+
+Exports accept `format=csv|ndjson`, stream at most 100,000 records and are audit logged; ordinary event reads are not.
+
+### Integrity verification
+
+`GET /api/audit/integrity` returns `running`, `ran`, `ok`, `checked`, timestamps, and failure data (`broken_at_seq`, `reason`). `POST /api/audit/integrity/verify` returns `202 {"started":true}`; a concurrently running job returns `409 verification_running`.
+
+### Security alerts
+
+`GET /api/audit/alerts?acknowledged=all|true|false&limit=50&cursor=...` returns cursor-paginated alert records. `GET /api/audit/alerts/unacknowledged-count` returns the open count. `POST /api/audit/alerts/{id}/acknowledge` is idempotent and retains the first acknowledgement attribution; API-key acknowledgements use `api_key`. Invalid IDs return `400`, unknown alerts `404`.
+
+### Built-in rule configuration
+
+`GET /api/audit/rules` lists the fixed catalog and effective configurations, while `GET` and `PUT /api/audit/rules/{key}` read or update a rule. Valid input fields are `enabled`, `cooldown_minutes`, `channels`, and for burst rules `threshold` and `window_minutes`. Channels may only be `webhook` or `pushover`; updates take effect immediately.
+
+`manual_restart` covers manual restart and icon-pack activation; `manual_update` covers admin/API updates; `automatic_update_installed` covers successful automatic installation. The automatic-install rule is disabled by default, so the existing informational Pushover update message remains but no acknowledgement-required in-app alert is created unless explicitly enabled. Rule definitions cannot be created or deleted.

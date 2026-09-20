@@ -1,0 +1,28 @@
+{{define "admin/webshop_product_edit"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-flash" .}}
+    {{template "admin-page-header" dict "Title" (t .Lang "ws.prod_edit_title") "Icon" "box-seam" "Actions" (list (dict "URL" "/admin/webshop/products" "Label" (t .Lang "common.back") "Icon" "arrow-left" "Class" "btn-outline-secondary btn-sm"))}}
+    <form method="POST" action="/admin/webshop/products/edit/{{.Product.ID.Hex}}" class="card border-0 shadow-sm">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <div class="card-body">
+            {{template "webshop-product-form" .}}
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="/admin/webshop/products" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i>{{t .Lang "common.save_changes"}}</button>
+            </div>
+        </div>
+    </form>
+    <div class="card border-danger mt-4">
+        <div class="card-body">
+            <h5 class="text-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "common.danger_zone"}}</h5>
+            <p class="text-muted">{{t .Lang "ws.prod_delete_hint"}}</p>
+            <form method="POST" action="/admin/webshop/products/delete/{{.Product.ID.Hex}}" onsubmit="return confirm('{{t .Lang "ws.prod_confirm_delete"}}')">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash me-1"></i>{{t .Lang "common.delete"}}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}
