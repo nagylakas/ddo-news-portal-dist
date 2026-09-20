@@ -289,14 +289,14 @@ The optional RSS/Atom aggregator is managed through authenticated endpoints.
 With `AGGREGATOR_API_ENABLED=true`, these endpoints and the admin management
 screen are available without replacing the public home page. With full
 `AGGREGATOR_ENABLED=true`, the **General settings / Home page** selector can
-make the aggregator own `/`; the portal's own news then remains at `/news`.
+make the aggregator own `/`. The `show_native_news` setting independently controls whether the portal's own news remains public at `/news`.
 
 | Method | URL | Description |
 | --- | --- | --- |
 | GET, POST | `/api/aggregator/sources` | List or create RSS/Atom sources. |
 | GET, PUT, DELETE | `/api/aggregator/sources/{id}` | Get, update or delete a source and its cached items. |
 | POST | `/api/aggregator/sources/{id}/refresh` | Fetch one source immediately. |
-| GET, PUT | `/api/aggregator/settings` | Read or set `layout`: `magazine`, `grid`, or `timeline`. |
+| GET, PUT | `/api/aggregator/settings` | Read or set `layout` (`magazine`, `grid`, `timeline`) and `show_native_news`. Setting `{"show_native_news":false}` hides native news and makes `/news` return `404`. |
 | GET | `/api/aggregator/items` | List cached items; optional `tag`, `source_id`, `include_hidden`. |
 | GET | `/api/aggregator/items/{id}` | Get one cached item. |
 | PUT | `/api/aggregator/items/{id}/visibility` | Set `{"hidden":true|false}`. |
