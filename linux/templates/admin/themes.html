@@ -1,0 +1,97 @@
+{{define "admin/themes"}}
+{{template "admin-header" .}}
+{{template "admin/pack-store-styles"}}
+<div class="container-fluid py-4 px-4 px-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+            <h4 class="mb-1 fw-bold"><i class="bi bi-brush me-2 text-primary"></i>{{t .Lang "nav.themes"}}</h4>
+            <p class="text-muted mb-0">{{t .Lang "themes.intro"}}</p>
+        </div>
+        <form method="POST" action="/admin/themes/refresh">
+            <button class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise me-1"></i>{{t .Lang "themes.refresh"}}</button>
+        </form>
+    </div>
+
+    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+    {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+
+    {{with .ActiveTheme}}
+    <div class="ip-summary p-3 mb-3 d-flex align-items-center gap-3" style="border-left:.6rem solid {{$.PrimaryColor}} !important">
+        <div class="ip-summary-swatch" style="background:{{$.PrimaryColor}}"><i class="bi bi-brush"></i></div>
+        <div class="flex-grow-1">
+            <div class="text-uppercase small fw-bold text-muted">{{t $.Lang "themes.current"}}</div>
+            <div class="fs-4 fw-bold lh-1">{{.Name}}</div>
+            <div class="small text-muted mt-1"><code>{{.ID}}</code>{{if not .Builtin}} · v{{.InstalledVersion}}{{end}}{{if .Author}} · {{t $.Lang "themes.by"}} {{.Author}}{{end}}</div>
+        </div>
+        {{if .Builtin}}<span class="ip-builtin"><i class="bi bi-lock-fill"></i>{{t $.Lang "themes.builtin"}}</span>{{end}}
+        {{if .UpdateAvailable}}<span class="badge text-bg-warning">{{t $.Lang "themes.update_available"}}</span>{{end}}
+    </div>
+    {{else}}
+    <div class="alert alert-secondary d-flex align-items-center gap-2 mb-3"><i class="bi bi-info-circle"></i>{{t .Lang "themes.no_active"}}</div>
+    {{end}}
+
+    <div class="ip-filters d-flex flex-wrap gap-2 mb-3" role="group">
+        <button type="button" class="btn btn-sm btn-primary" data-filter="all">{{t .Lang "themes.filter_all"}} <span class="badge text-bg-light ms-1">{{len .Themes}}</span></button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="installed">{{t .Lang "themes.installed"}} <span class="badge text-bg-light ms-1">{{.InstalledCount}}</span></button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="available">{{t .Lang "themes.not_installed"}} <span class="badge text-bg-light ms-1">{{.NotInstalledCount}}</span></button>
+        {{if .UpdateCount}}<button type="button" class="btn btn-sm btn-outline-warning" data-filter="update">{{t .Lang "themes.update_available"}} <span class="badge text-bg-warning ms-1">{{.UpdateCount}}</span></button>{{end}}
+    </div>
+
+    <div class="ip-grid">
+        {{range .Themes}}
+        <div class="ip-card{{if .Installed}} is-installed{{end}}{{if .Active}} is-active{{end}}" style="--pc:{{$.PrimaryColor}}"
+            data-installed="{{if .Installed}}1{{else}}0{{end}}" data-update="{{if .UpdateAvailable}}1{{else}}0{{end}}"{{if .Active}} aria-current="true"{{end}}>
+            <div class="ip-card-band">{{if .Active}}<i class="bi bi-check-lg"></i>{{t $.Lang "themes.active"}}{{end}}</div>
+            {{if .Active}}<span class="ip-check"><i class="bi bi-check-lg"></i></span>{{end}}
+            <div class="ip-preview">{{if .HasPreview}}<img src="/admin/themes/preview?id={{.ID}}&version={{.InstalledVersion}}" alt="" loading="lazy">{{else}}<i class="bi bi-window-stack"></i>{{end}}</div>
+            <div class="ip-card-body">
+                <div class="min-w-0">
+                    <h5 class="ip-name">{{.Name}}</h5>
+                    <div class="ip-id"><code>{{.ID}}</code>{{if .Author}} · {{t $.Lang "themes.by"}} {{.Author}}{{end}}</div>
+                </div>
+                <p class="ip-desc" title="{{.Description}}">{{.Description}}</p>
+                <div class="ip-chips">
+                    <span class="ip-chip is-core" title="{{t $.Lang "themes.core_scope"}}"><i class="bi bi-window me-1"></i>{{t $.Lang "themes.core_scope"}}</span>
+                </div>
+                <div class="ip-chips">
+                    {{if .Modules}}<span class="text-muted">{{t $.Lang "themes.modules_label"}}:</span>
+                    {{range .Modules}}<span class="ip-chip">{{t $.Lang (print "themes.module." .)}}</span>{{end}}
+                    {{else}}<span class="text-muted">{{t $.Lang "themes.modules_none"}}</span>{{end}}
+                </div>
+                <div class="ip-meta">
+                    {{if .Builtin}}
+                    <span class="ip-builtin" title="{{t $.Lang "themes.builtin_hint"}}"><i class="bi bi-lock-fill"></i>{{t $.Lang "themes.builtin"}}</span>
+                    {{else if .Installed}}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis border">v{{.InstalledVersion}}</span>
+                    {{if .UpdateAvailable}}<span class="badge text-bg-warning">&rarr; v{{.Version}}</span>{{end}}
+                    {{else}}
+                    <span class="badge text-bg-light border text-muted">v{{.Version}} · {{t $.Lang "themes.not_installed"}}</span>
+                    {{end}}
+                    {{if .Incompatible}}<span class="badge text-bg-danger" title="{{.MinAppVersion}}">{{t $.Lang "themes.incompatible"}} ({{.MinAppVersion}})</span>{{end}}
+                </div>
+                <div class="ip-actions">
+                    {{if and (not .Builtin) (not .Installed) (not .Incompatible)}}
+                    <form method="POST" action="/admin/themes/install"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>{{t $.Lang "themes.install"}}</button></form>
+                    {{else if and .UpdateAvailable (not .Incompatible)}}
+                    <form method="POST" action="/admin/themes/install"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-warning btn-sm"><i class="bi bi-arrow-up-circle me-1"></i>{{t $.Lang "themes.update"}}</button></form>
+                    {{end}}
+                    {{if .Installed}}
+                    {{if .Active}}
+                    <button class="btn btn-sm text-white" style="background:{{$.PrimaryColor}}" disabled><i class="bi bi-check-circle-fill me-1"></i>{{t $.Lang "themes.active"}}</button>
+                    {{else}}
+                    <form method="POST" action="/admin/themes/activate" class="pack-activate-form"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{if .Builtin}}{{.Version}}{{else}}{{.InstalledVersion}}{{end}}"><button class="btn btn-outline-success btn-sm"><i class="bi bi-check2-circle me-1"></i>{{t $.Lang "themes.activate"}}</button></form>
+                    {{end}}
+                    {{end}}
+                    {{if .CanDelete}}
+                    <form method="POST" action="/admin/themes/delete" style="flex:0 0 auto" onsubmit="return confirm('{{t $.Lang "themes.delete_confirm"}}')"><input type="hidden" name="id" value="{{.ID}}"><button class="btn btn-outline-danger btn-sm" title="{{t $.Lang "themes.delete"}}"><i class="bi bi-trash"></i></button></form>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+{{template "admin/pack-store-restart" (dict "Lang" .Lang "Prefix" "themes")}}
+{{template "admin/pack-store-filters"}}
+{{template "admin-footer" .}}
+{{end}}
