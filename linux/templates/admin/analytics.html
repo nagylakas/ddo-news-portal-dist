@@ -1,0 +1,409 @@
+{{define "admin/analytics"}}
+{{template "admin-header" .}}
+
+<div class="container-fluid px-4" id="analyticsRoot"
+     data-timezone="{{.Timezone}}"
+     data-enabled="{{if .Enabled}}1{{else}}0{{end}}">
+
+    {{template "admin-flash" .}}
+
+    <!-- Page header + period controls -->
+    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-start align-items-xl-center gap-3 mb-4">
+        <div>
+            <h4 class="mb-0 fw-bold">
+                <i class="bi bi-graph-up-arrow me-2 text-primary"></i>{{t .Lang "an.title"}}
+            </h4>
+            <p class="text-muted mb-0 mt-1 small">
+                {{t .Lang "an.subtitle"}}
+                <span class="ms-2 badge text-bg-light border">
+                    <i class="bi bi-clock me-1"></i>{{.Timezone}}
+                </span>
+                {{if gt .RetentionDays 0}}
+                <span class="ms-1 badge text-bg-light border">
+                    <i class="bi bi-archive me-1"></i>{{.RetentionDays}} {{t .Lang "an.days_retention"}}
+                </span>
+                {{end}}
+            </p>
+        </div>
+
+        {{if .Enabled}}
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="btn-group btn-group-sm" role="group" id="anRangeGroup">
+                <button type="button" class="btn btn-outline-secondary" data-range="today">{{t .Lang "an.range_today"}}</button>
+                <button type="button" class="btn btn-outline-secondary" data-range="yesterday">{{t .Lang "an.range_yesterday"}}</button>
+                <button type="button" class="btn btn-outline-secondary active" data-range="7d">{{t .Lang "an.range_7d"}}</button>
+                <button type="button" class="btn btn-outline-secondary" data-range="28d">{{t .Lang "an.range_28d"}}</button>
+                <button type="button" class="btn btn-outline-secondary" data-range="90d">{{t .Lang "an.range_90d"}}</button>
+                <button type="button" class="btn btn-outline-secondary" data-range="mtd">{{t .Lang "an.range_mtd"}}</button>
+                <button type="button" class="btn btn-outline-secondary" data-range="ytd">{{t .Lang "an.range_ytd"}}</button>
+                <button type="button" class="btn btn-outline-secondary" data-range="12mo">{{t .Lang "an.range_12mo"}}</button>
+            </div>
+            <div class="input-group input-group-sm" style="width:auto;">
+                <span class="input-group-text"><i class="bi bi-calendar-range"></i></span>
+                <input type="date" class="form-control" id="anCustomFrom" aria-label="{{t .Lang "an.custom_from"}}">
+                <input type="date" class="form-control" id="anCustomTo" aria-label="{{t .Lang "an.custom_to"}}">
+                <button class="btn btn-outline-secondary" type="button" id="anCustomApply">{{t .Lang "an.apply"}}</button>
+            </div>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary" type="button" id="anRefresh" title="{{t .Lang "an.refresh"}}">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <a class="btn btn-outline-secondary" id="anExport" href="#" title="{{t .Lang "an.export"}}">
+                    <i class="bi bi-download"></i>
+                </a>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    {{if not .Enabled}}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "an.disabled"}}
+    </div>
+    {{else}}
+
+    <!-- Active filters -->
+    <div id="anFilters" class="d-flex flex-wrap gap-2 mb-3 d-none"></div>
+
+    <!-- Realtime strip -->
+    <div class="card border-0 shadow-sm mb-4 an-realtime">
+        <div class="card-body py-3">
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-lg-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="an-pulse"></span>
+                        <div>
+                            <div class="text-muted small">{{t .Lang "an.active_now"}}</div>
+                            <div class="fw-bold fs-2 lh-1" id="anActiveVisitors">–</div>
+                            <div class="text-muted" style="font-size:.72rem;">{{t .Lang "an.last_30_min"}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <div class="text-muted small mb-1">{{t .Lang "an.views_per_minute"}}</div>
+                    <div id="anRealtimeChart" class="an-chart an-chart-sm"></div>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="text-muted small mb-1">{{t .Lang "an.active_pages"}}</div>
+                    <div id="anRealtimePages" class="an-barlist an-barlist-compact"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="row g-3 mb-4" id="anKpis">
+        <div class="col-6 col-lg-3 col-xxl" data-metric="visitors">
+            <div class="card border-0 shadow-sm h-100 an-kpi is-selected">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small">{{t .Lang "an.visitors"}}</span>
+                        <span class="an-delta" data-role="delta"></span>
+                    </div>
+                    <div class="fw-bold fs-3 lh-1 mt-1" data-role="value">–</div>
+                    <div class="an-spark mt-2" data-role="spark"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 col-xxl" data-metric="views">
+            <div class="card border-0 shadow-sm h-100 an-kpi">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small">{{t .Lang "an.views"}}</span>
+                        <span class="an-delta" data-role="delta"></span>
+                    </div>
+                    <div class="fw-bold fs-3 lh-1 mt-1" data-role="value">–</div>
+                    <div class="an-spark mt-2" data-role="spark"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 col-xxl" data-metric="sessions">
+            <div class="card border-0 shadow-sm h-100 an-kpi">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small">{{t .Lang "an.sessions"}}</span>
+                        <span class="an-delta" data-role="delta"></span>
+                    </div>
+                    <div class="fw-bold fs-3 lh-1 mt-1" data-role="value">–</div>
+                    <div class="an-spark mt-2" data-role="spark"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 col-xxl" data-metric="views_per_session">
+            <div class="card border-0 shadow-sm h-100 an-kpi an-kpi-static">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small">{{t .Lang "an.views_per_session"}}</span>
+                        <span class="an-delta" data-role="delta"></span>
+                    </div>
+                    <div class="fw-bold fs-3 lh-1 mt-1" data-role="value">–</div>
+                    <div class="text-muted mt-2" style="font-size:.72rem;">{{t .Lang "an.views_per_session_hint"}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 col-xxl" data-metric="avg_engagement">
+            <div class="card border-0 shadow-sm h-100 an-kpi an-kpi-static">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small">{{t .Lang "an.avg_time"}}</span>
+                        <span class="an-delta" data-role="delta"></span>
+                    </div>
+                    <div class="fw-bold fs-3 lh-1 mt-1" data-role="value">–</div>
+                    <div class="text-muted mt-2" style="font-size:.72rem;">{{t .Lang "an.avg_time_hint"}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 col-xxl" data-metric="engagement_rate">
+            <div class="card border-0 shadow-sm h-100 an-kpi an-kpi-static">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small">{{t .Lang "an.engagement_rate"}}</span>
+                        <span class="an-delta" data-role="delta"></span>
+                    </div>
+                    <div class="fw-bold fs-3 lh-1 mt-1" data-role="value">–</div>
+                    <div class="text-muted mt-2" style="font-size:.72rem;">{{t .Lang "an.engagement_rate_hint"}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 col-xxl" data-metric="bounce_rate">
+            <div class="card border-0 shadow-sm h-100 an-kpi an-kpi-static">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small">{{t .Lang "an.bounce_rate"}}</span>
+                        <span class="an-delta" data-role="delta" data-invert="1"></span>
+                    </div>
+                    <div class="fw-bold fs-3 lh-1 mt-1" data-role="value">–</div>
+                    <div class="text-muted mt-2" style="font-size:.72rem;">{{t .Lang "an.bounce_rate_hint"}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 col-xxl" data-metric="outbound">
+            <div class="card border-0 shadow-sm h-100 an-kpi an-kpi-static">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small">{{t .Lang "an.outbound"}}</span>
+                        <span class="an-delta" data-role="delta"></span>
+                    </div>
+                    <div class="fw-bold fs-3 lh-1 mt-1" data-role="value">–</div>
+                    <div class="text-muted mt-2" style="font-size:.72rem;">{{t .Lang "an.outbound_hint"}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main trend chart -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent d-flex flex-wrap justify-content-between align-items-center gap-2 border-0 pt-3">
+            <span class="fw-semibold" id="anChartTitle">{{t .Lang "an.visitors"}}</span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="an-legend"><i class="an-legend-dot"></i>{{t .Lang "an.current_period"}}</span>
+                <span class="an-legend an-legend-prev"><i class="an-legend-dot"></i>{{t .Lang "an.previous_period"}}</span>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="anCompare" checked>
+                    <label class="form-check-label small text-muted" for="anCompare">{{t .Lang "an.compare"}}</label>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div id="anMainChart" class="an-chart an-chart-lg"></div>
+        </div>
+    </div>
+
+    <!-- Acquisition + content -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="fw-semibold"><i class="bi bi-signpost-split me-2 text-primary"></i>{{t .Lang "an.acquisition"}}</span>
+                        <div class="an-tabs" data-target="anAcquisition">
+                            <button class="an-tab active" data-key="channels">{{t .Lang "an.channels"}}</button>
+                            <button class="an-tab" data-key="referrers">{{t .Lang "an.referrers"}}</button>
+                            <button class="an-tab" data-key="utm_sources">{{t .Lang "an.utm_source"}}</button>
+                            <button class="an-tab" data-key="utm_campaigns">{{t .Lang "an.utm_campaign"}}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="anAcquisition" class="an-barlist"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="fw-semibold"><i class="bi bi-file-earmark-text me-2 text-primary"></i>{{t .Lang "an.pages"}}</span>
+                        <div class="an-tabs" data-target="anPages">
+                            <button class="an-tab active" data-key="pages">{{t .Lang "an.top_pages"}}</button>
+                            <button class="an-tab" data-key="entry_pages">{{t .Lang "an.entry_pages"}}</button>
+                            <button class="an-tab" data-key="exit_pages">{{t .Lang "an.exit_pages"}}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="anPages" class="an-barlist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audience + technology -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <span class="fw-semibold"><i class="bi bi-phone me-2 text-primary"></i>{{t .Lang "an.devices"}}</span>
+                </div>
+                <div class="card-body">
+                    <div id="anDeviceDonut" class="an-donut mb-3"></div>
+                    <div id="anDevices" class="an-barlist an-barlist-compact"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="fw-semibold"><i class="bi bi-window me-2 text-primary"></i>{{t .Lang "an.technology"}}</span>
+                        <div class="an-tabs" data-target="anTech">
+                            <button class="an-tab active" data-key="browsers">{{t .Lang "an.browsers"}}</button>
+                            <button class="an-tab" data-key="os">{{t .Lang "an.os"}}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="anTech" class="an-barlist"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="fw-semibold"><i class="bi bi-globe2 me-2 text-primary"></i>{{t .Lang "an.geography"}}</span>
+                        <div class="an-tabs" data-target="anGeo">
+                            <button class="an-tab active" data-key="countries">{{t .Lang "an.countries"}}</button>
+                            <button class="an-tab" data-key="languages">{{t .Lang "an.languages"}}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="anGeo" class="an-barlist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editorial performance -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="fw-semibold"><i class="bi bi-collection me-2 text-primary"></i>{{t .Lang "an.editorial"}}</span>
+                        <div class="an-tabs" data-target="anEditorial">
+                            <button class="an-tab active" data-key="categories">{{t .Lang "an.categories"}}</button>
+                            <button class="an-tab" data-key="authors">{{t .Lang "an.authors"}}</button>
+                            <button class="an-tab" data-key="page_types">{{t .Lang "an.page_types"}}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="anEditorial" class="an-barlist"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <span class="fw-semibold"><i class="bi bi-calendar3 me-2 text-primary"></i>{{t .Lang "an.heatmap"}}</span>
+                    <span class="text-muted small ms-2">{{t .Lang "an.heatmap_hint"}}</span>
+                </div>
+                <div class="card-body">
+                    <div id="anHeatmap" class="an-heatmap"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outbound links -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <span class="fw-semibold"><i class="bi bi-box-arrow-up-right me-2 text-primary"></i>{{t .Lang "an.outbound_links"}}</span>
+                </div>
+                <div class="card-body">
+                    <div id="anOutbound" class="an-barlist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="anLoading" class="an-loading d-none">
+        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+        <span class="small text-muted">{{t .Lang "an.loading"}}</span>
+    </div>
+
+    <script>
+        window.analyticsI18n = {
+            visitors: {{t .Lang "an.visitors"}},
+            views: {{t .Lang "an.views"}},
+            sessions: {{t .Lang "an.sessions"}},
+            noData: {{t .Lang "an.no_data"}},
+            loadError: {{t .Lang "an.load_error"}},
+            vsPrevious: {{t .Lang "an.vs_previous"}},
+            clearFilter: {{t .Lang "an.clear_filter"}},
+            colViews: {{t .Lang "an.col_views"}},
+            colVisitors: {{t .Lang "an.col_visitors"}},
+            colSessions: {{t .Lang "an.col_sessions"}},
+            colTime: {{t .Lang "an.col_time"}},
+            colBounce: {{t .Lang "an.col_bounce"}},
+            weekdays: [{{t .Lang "an.sun"}}, {{t .Lang "an.mon"}}, {{t .Lang "an.tue"}}, {{t .Lang "an.wed"}}, {{t .Lang "an.thu"}}, {{t .Lang "an.fri"}}, {{t .Lang "an.sat"}}],
+            channels: {
+                direct: {{t .Lang "an.channel_direct"}},
+                organic: {{t .Lang "an.channel_organic"}},
+                social: {{t .Lang "an.channel_social"}},
+                referral: {{t .Lang "an.channel_referral"}},
+                campaign: {{t .Lang "an.channel_campaign"}},
+                internal: {{t .Lang "an.channel_internal"}},
+                ai: {{t .Lang "an.channel_ai"}}
+            },
+            devices: {
+                desktop: {{t .Lang "an.device_desktop"}},
+                mobile: {{t .Lang "an.device_mobile"}},
+                tablet: {{t .Lang "an.device_tablet"}}
+            },
+            dimensions: {
+                channel: {{t .Lang "an.channels"}},
+                ref_host: {{t .Lang "an.referrers"}},
+                device: {{t .Lang "an.devices"}},
+                country: {{t .Lang "an.countries"}},
+                category: {{t .Lang "an.categories"}},
+                author: {{t .Lang "an.authors"}},
+                page_type: {{t .Lang "an.page_types"}},
+                path: {{t .Lang "an.pages"}}
+            },
+            pageTypes: {
+                home: {{t .Lang "an.pt_home"}},
+                article: {{t .Lang "an.pt_article"}},
+                category: {{t .Lang "an.pt_category"}},
+                author: {{t .Lang "an.pt_author"}},
+                tag: {{t .Lang "an.pt_tag"}},
+                search: {{t .Lang "an.pt_search"}},
+                page: {{t .Lang "an.pt_page"}},
+                forum: {{t .Lang "an.pt_forum"}},
+                marketplace: {{t .Lang "an.pt_marketplace"}},
+                webshop: {{t .Lang "an.pt_webshop"}},
+                other: {{t .Lang "an.pt_other"}}
+            },
+            locale: {{if eq .Lang "hu"}}"hu-HU"{{else}}"en-GB"{{end}}
+        };
+    </script>
+    <script src="/static/js/admin-analytics.js"></script>
+    {{end}}
+</div>
+
+{{template "admin-footer" .}}
+{{end}}

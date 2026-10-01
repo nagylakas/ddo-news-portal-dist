@@ -1,0 +1,90 @@
+{{define "admin/icon-packs"}}
+{{template "admin-header" .}}
+{{template "admin/pack-store-styles"}}
+<div class="container-fluid py-4 px-4 px-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+            <h4 class="mb-1 fw-bold"><i class="bi bi-palette me-2 text-primary"></i>{{t .Lang "nav.icon_packs"}}</h4>
+            <p class="text-muted mb-0">{{t .Lang "iconpacks.intro"}}</p>
+        </div>
+        <form method="POST" action="/admin/icon-packs/refresh">
+            <button class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise me-1"></i>{{t .Lang "iconpacks.refresh"}}</button>
+        </form>
+    </div>
+
+    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+    {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+
+    {{if .Packs}}
+    {{with .ActivePack}}
+    <div class="ip-summary p-3 mb-3 d-flex align-items-center gap-3" style="border-left:.6rem solid {{.PrimaryColor}} !important">
+        <div class="ip-summary-swatch" style="background:{{.PrimaryColor}}"><i class="bi bi-check2-circle"></i></div>
+        <div class="flex-grow-1">
+            <div class="text-uppercase small fw-bold text-muted">{{t $.Lang "iconpacks.current"}}</div>
+            <div class="fs-4 fw-bold lh-1">{{.Name}}</div>
+            <div class="small text-muted mt-1"><code>{{.ID}}</code> · {{if .LegacyInstalled}}{{t $.Lang "iconpacks.legacy"}}{{else}}v{{.InstalledVersion}}{{end}} · <span style="color:{{.PrimaryColor}}">&#9679;</span> {{.PrimaryColor}}</div>
+        </div>
+        {{if .UpdateAvailable}}<span class="badge text-bg-warning">{{t $.Lang "iconpacks.update_available"}}</span>{{end}}
+    </div>
+    {{else}}
+    <div class="alert alert-secondary d-flex align-items-center gap-2 mb-3"><i class="bi bi-info-circle"></i>{{t .Lang "iconpacks.no_active"}}</div>
+    {{end}}
+
+    <div class="ip-filters d-flex flex-wrap gap-2 mb-3" role="group">
+        <button type="button" class="btn btn-sm btn-primary" data-filter="all">{{t .Lang "iconpacks.filter_all"}} <span class="badge text-bg-light ms-1">{{len .Packs}}</span></button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="installed">{{t .Lang "iconpacks.installed"}} <span class="badge text-bg-light ms-1">{{.InstalledCount}}</span></button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="available">{{t .Lang "iconpacks.not_installed"}} <span class="badge text-bg-light ms-1">{{.NotInstalledCount}}</span></button>
+        {{if .UpdateCount}}<button type="button" class="btn btn-sm btn-outline-warning" data-filter="update">{{t .Lang "iconpacks.update_available"}} <span class="badge text-bg-warning ms-1">{{.UpdateCount}}</span></button>{{end}}
+    </div>
+
+    <div class="ip-grid">
+        {{range .Packs}}
+        <div class="ip-card{{if .Installed}} is-installed{{end}}{{if .Active}} is-active{{end}}" style="--pc:{{.PrimaryColor}}"
+            data-installed="{{if .Installed}}1{{else}}0{{end}}" data-update="{{if .UpdateAvailable}}1{{else}}0{{end}}"{{if .Active}} aria-current="true"{{end}}>
+            <div class="ip-card-band">{{if .Active}}<i class="bi bi-check-lg"></i>{{t $.Lang "iconpacks.active"}}{{end}}</div>
+            {{if .Active}}<span class="ip-check"><i class="bi bi-check-lg"></i></span>{{end}}
+            <div class="ip-card-body">
+                <div class="ip-card-head">
+                    <span class="ip-dot" title="{{.PrimaryColor}}"></span>
+                    <div class="min-w-0">
+                        <h5 class="ip-name">{{.Name}}</h5>
+                        <div class="ip-id"><code>{{.ID}}</code></div>
+                    </div>
+                </div>
+                <p class="ip-desc" title="{{.Description}}">{{.Description}}</p>
+                <div class="ip-meta">
+                    {{if .Installed}}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{if .LegacyInstalled}}{{t $.Lang "iconpacks.legacy"}}{{else}}v{{.InstalledVersion}}{{end}}</span>
+                    {{if .UpdateAvailable}}<span class="badge text-bg-warning" title="{{t $.Lang "iconpacks.available"}}: v{{.Version}}">&rarr; v{{.Version}}</span>{{end}}
+                    {{else}}
+                    <span class="badge text-bg-light border text-muted">v{{.Version}} · {{t $.Lang "iconpacks.not_installed"}}</span>
+                    {{end}}
+                </div>
+                <div class="ip-actions">
+                    {{if not .Installed}}
+                    <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>{{t $.Lang "iconpacks.install"}}</button></form>
+                    {{else if .UpdateAvailable}}
+                    <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-warning btn-sm"><i class="bi bi-arrow-up-circle me-1"></i>{{t $.Lang "iconpacks.update"}}</button></form>
+                    {{end}}
+                    {{if .CatalogInstalled}}
+                    {{if .Active}}
+                    <button class="btn btn-sm text-white" style="background:{{.PrimaryColor}}" disabled><i class="bi bi-check-circle-fill me-1"></i>{{t $.Lang "iconpacks.active"}}</button>
+                    {{else}}
+                    <form method="POST" action="/admin/icon-packs/activate" class="pack-activate-form"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-outline-success btn-sm"><i class="bi bi-check2-circle me-1"></i>{{t $.Lang "iconpacks.activate"}}</button></form>
+                    {{end}}
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5 text-muted"><i class="bi bi-cloud-arrow-down fs-1 d-block mb-3"></i>{{t .Lang "iconpacks.empty"}}</div>
+    </div>
+    {{end}}
+</div>
+{{template "admin/pack-store-restart" (dict "Lang" .Lang "Prefix" "iconpacks")}}
+{{template "admin/pack-store-filters"}}
+{{template "admin-footer" .}}
+{{end}}

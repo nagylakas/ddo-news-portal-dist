@@ -1,0 +1,24 @@
+{{define "page_sidebar-plain"}}
+{{template "header" .}}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    {{template "page_breadcrumb_plain" .}}
+    {{template "page_sidebar_mobile_navigation" .}}
+    <div class="row g-4">
+        <aside class="col-lg-3 d-none d-lg-block">
+            {{template "page_sidebar_navigation" .}}
+        </aside>
+        <main class="col-lg-9">
+            <article class="page-article">
+                <header class="mb-4">
+                    <h1 class="page-article-title">{{.Page.Title}}</h1>
+                    {{if .Page.Summary}}<p class="lead text-muted">{{.Page.Summary}}</p>{{end}}
+                </header>
+                <div class="page-article-content article-content">
+                    {{.ContentHTML}}
+                </div>
+            </article>
+        </main>
+    </div>
+</div>
+{{template "footer" .}}
+{{end}}

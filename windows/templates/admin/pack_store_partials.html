@@ -1,0 +1,102 @@
+{{define "admin/pack-store-styles"}}
+<style>
+    .ip-summary { border: 0; border-radius: 1rem; background: var(--bs-body-bg); box-shadow: 0 .25rem 1rem rgba(0,0,0,.08); overflow: hidden; }
+    .ip-summary-swatch { width: 4.5rem; height: 4.5rem; border-radius: 1rem; flex: none; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem; box-shadow: inset 0 0 0 3px rgba(255,255,255,.35); }
+    .ip-filters .btn { border-radius: 2rem; }
+    .ip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    @media (min-width: 1400px) { .ip-grid { grid-template-columns: repeat(5, 1fr); } }
+    .ip-card { --pc: #6c757d; position: relative; display: flex; flex-direction: column; border: 2px solid var(--bs-border-color); border-radius: .9rem; background: var(--bs-body-bg); overflow: hidden; transition: box-shadow .15s, transform .15s, border-color .15s; }
+    .ip-card:hover { box-shadow: 0 .4rem 1rem rgba(0,0,0,.12); transform: translateY(-2px); }
+    .ip-card-band { height: .6rem; background: var(--pc); }
+    .ip-card-body { padding: .8rem .9rem .9rem; display: flex; flex-direction: column; flex: 1; gap: .45rem; }
+    .ip-card-head { display: flex; align-items: center; gap: .65rem; }
+    .ip-dot { width: 2.1rem; height: 2.1rem; border-radius: 50%; background: var(--pc); flex: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc) 25%, transparent); }
+    .ip-name { font-weight: 700; line-height: 1.15; margin: 0; font-size: 1rem; }
+    .ip-id { font-size: .72rem; color: var(--bs-secondary-color); }
+    .ip-desc { font-size: .78rem; color: var(--bs-secondary-color); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.3em; }
+    .ip-meta { font-size: .75rem; display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; min-height: 1.5rem; }
+    .ip-actions { display: flex; gap: .4rem; margin-top: auto; }
+    .ip-actions form { flex: 1; margin: 0; }
+    .ip-actions .btn { width: 100%; white-space: nowrap; }
+    .ip-card:not(.is-installed) .ip-dot { filter: grayscale(.85); opacity: .6; }
+    .ip-card:not(.is-installed) .ip-card-band { filter: grayscale(.85); opacity: .5; }
+    /* Aktív csomag: egyértelmű, a csomag színével kiemelt kártya */
+    .ip-card.is-active { border-color: var(--pc); box-shadow: 0 0 0 4px color-mix(in srgb, var(--pc) 28%, transparent), 0 .6rem 1.4rem rgba(0,0,0,.14); background: color-mix(in srgb, var(--pc) 7%, var(--bs-body-bg)); transform: none; }
+    .ip-card.is-active .ip-card-band { height: 1.55rem; display: flex; align-items: center; justify-content: center; gap: .35rem; color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+    .ip-card.is-active .ip-dot { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--pc); }
+    .ip-check { position: absolute; top: 2rem; right: .6rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--pc); color: #fff; display: flex; align-items: center; justify-content: center; font-size: .95rem; box-shadow: 0 0 0 2px var(--bs-body-bg); }
+    .ip-card.is-hidden { display: none; }
+    .ip-preview { height: 7.5rem; background: linear-gradient(135deg, color-mix(in srgb, var(--pc) 85%, #000) 0%, var(--pc) 55%, color-mix(in srgb, var(--pc) 35%, #fff) 100%); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.85); font-size: 2.4rem; overflow: hidden; }
+    .ip-preview img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+    .ip-card:not(.is-installed) .ip-preview { filter: grayscale(.7); opacity: .7; }
+    .ip-card.is-active .ip-preview { height: 6rem; }
+    .ip-chips { display: flex; flex-wrap: wrap; gap: .25rem; align-items: center; font-size: .72rem; }
+    .ip-chip { border-radius: 2rem; padding: .05rem .5rem; background: color-mix(in srgb, var(--pc) 14%, var(--bs-body-bg)); border: 1px solid color-mix(in srgb, var(--pc) 40%, transparent); font-weight: 600; }
+    .ip-chip.is-core { background: var(--bs-secondary-bg); border-color: var(--bs-border-color); font-weight: 500; color: var(--bs-secondary-color); }
+    .ip-builtin { display: inline-flex; align-items: center; gap: .25rem; font-size: .72rem; font-weight: 600; color: var(--bs-secondary-color); }
+</style>
+{{end}}
+
+{{define "admin/pack-store-restart"}}
+<div id="packRestartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:2.5rem 3rem;text-align:center;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+        <div class="spinner-border text-warning mb-3" role="status" style="width:3rem;height:3rem;"></div>
+        <h5 class="mb-2 fw-bold">{{t .Lang (print .Prefix ".restart_title")}}</h5>
+        <p class="text-muted mb-3" style="font-size:.9rem;">{{t .Lang (print .Prefix ".restart_text")}}</p>
+        <div id="packRestartStatus" class="text-muted" style="font-size:.8rem;"></div>
+    </div>
+</div>
+<script>
+(function () {
+    var messages = { saving: "{{t .Lang (print .Prefix ".restart_saving")}}", waiting: "{{t .Lang (print .Prefix ".restart_waiting")}}", login: "{{t .Lang (print .Prefix ".restart_login")}}" };
+    document.querySelectorAll('.pack-activate-form').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var overlay = document.getElementById('packRestartOverlay');
+            var status = document.getElementById('packRestartStatus');
+            overlay.style.display = 'flex';
+            status.textContent = messages.saving;
+            form.querySelector('button').disabled = true;
+            fetch(form.action, { method: 'POST', body: new FormData(form), redirect: 'manual' }).catch(function () {});
+            setTimeout(function poll(attempt) {
+                status.textContent = messages.waiting + ' (' + (attempt + 1) + ')';
+                fetch('/manifest.json', { cache: 'no-store' }).then(function (response) {
+                    if (!response.ok) throw new Error('offline');
+                    window.location.href = '/admin/login?flash=' + encodeURIComponent(messages.login);
+                }).catch(function () {
+                    setTimeout(function () { poll(attempt + 1); }, 1500);
+                });
+            }, 1200, 0);
+        });
+    });
+}());
+</script>
+{{end}}
+
+{{define "admin/pack-store-filters"}}
+<script>
+(function () {
+    var buttons = document.querySelectorAll('.ip-filters [data-filter]');
+    var cards = document.querySelectorAll('.ip-card');
+    buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var f = btn.getAttribute('data-filter');
+            buttons.forEach(function (b) {
+                var on = b === btn;
+                b.classList.toggle('btn-primary', on && f !== 'update');
+                b.classList.toggle('btn-warning', on && f === 'update');
+                b.classList.toggle('btn-outline-primary', !on && b.getAttribute('data-filter') !== 'update');
+                b.classList.toggle('btn-outline-warning', !on && b.getAttribute('data-filter') === 'update');
+            });
+            cards.forEach(function (c) {
+                var show = f === 'all' ||
+                    (f === 'installed' && c.dataset.installed === '1') ||
+                    (f === 'available' && c.dataset.installed === '0') ||
+                    (f === 'update' && c.dataset.update === '1');
+                c.classList.toggle('is-hidden', !show);
+            });
+        });
+    });
+}());
+</script>
+{{end}}

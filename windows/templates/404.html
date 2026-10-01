@@ -1,0 +1,39 @@
+{{define "404"}}
+{{template "header" .}}
+<div class="container py-5">
+    <div class="text-center">
+        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 6rem;"></i>
+        <h1 class="display-4 fw-bold mt-4">404</h1>
+        <h2 class="text-muted mb-4">Az oldal nem található</h2>
+        <p class="lead text-muted mb-4">
+            A keresett oldal nem létezik, vagy áthelyezték.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="/" class="btn btn-primary btn-lg">
+                <i class="bi bi-house me-2"></i>Kezdőlap
+            </a>
+            <a href="/search" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-search me-2"></i>Keresés
+            </a>
+        </div>
+    </div>
+
+    <!-- Suggested Categories -->
+    <section class="mt-5 pt-5 border-top">
+        <h4 class="fw-bold mb-4 text-center">Böngéssz kategóriák szerint</h4>
+        <div class="row row-cols-2 row-cols-md-4 g-3 justify-content-center">
+            {{range .Categories}}
+            <div class="col">
+                <a href="/category/{{lower .}}" class="card text-decoration-none category-card border-0 bg-light">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-folder2-open text-primary mb-2 fs-4"></i>
+                        <h6 class="card-title mb-0 text-dark small">{{.}}</h6>
+                    </div>
+                </a>
+            </div>
+            {{end}}
+        </div>
+    </section>
+</div>
+{{template "footer" .}}
+{{end}}

@@ -1,0 +1,19 @@
+{{define "admin/forum"}}
+{{template "admin-header" .}}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Fórum admin</h1>
+        <div class="d-flex gap-2">
+            <a href="/admin/forum/categories" class="btn btn-outline-primary"><i class="bi bi-folder2-open me-1"></i>Kategóriák</a>
+            <a href="/admin/forum/topics" class="btn btn-primary"><i class="bi bi-chat-square-text me-1"></i>Témák</a>
+        </div>
+    </div>
+    {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+    <div class="row g-4">
+        <div class="col-md-6"><div class="card shadow-sm border-0"><div class="card-body"><h2 class="h5">Kategóriák</h2><p class="display-6">{{len .Categories}}</p></div></div></div>
+        <div class="col-md-6"><div class="card shadow-sm border-0"><div class="card-body"><h2 class="h5">Legutóbbi témák</h2><p class="display-6">{{len .Topics}}</p></div></div></div>
+    </div>
+</div>
+{{template "admin-footer" .}}
+{{end}}
