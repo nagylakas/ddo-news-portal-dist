@@ -85,6 +85,13 @@
                     <a href="#audit-integrity" class="list-group-item list-group-item-action py-1 px-2 ms-2">Integrity</a>
                     <a href="#audit-alerts" class="list-group-item list-group-item-action py-1 px-2 ms-2">Alerts</a>
                     <a href="#audit-rules" class="list-group-item list-group-item-action py-1 px-2 ms-2">Rules</a>
+                    <a href="#security-api" class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Attack protection</a>
+                    <a href="#security-bans" class="list-group-item list-group-item-action py-1 px-2 ms-2">Bans</a>
+                    <a href="#security-events" class="list-group-item list-group-item-action py-1 px-2 ms-2">Events</a>
+                    <a href="#security-rules" class="list-group-item list-group-item-action py-1 px-2 ms-2">Rules</a>
+                    <a href="#security-allowlist" class="list-group-item list-group-item-action py-1 px-2 ms-2">Allowlist</a>
+                    <a href="#security-metrics" class="list-group-item list-group-item-action py-1 px-2 ms-2">Reputation &amp; metrics</a>
+                    <a href="#security-audit" class="list-group-item list-group-item-action py-1 px-2 ms-2">Audit trail</a>
                 </div>
             </div>
         </div>
@@ -158,10 +165,11 @@ Content-Type: application/json
                         <tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/system</code></td><td>Required</td></tr></tbody>
                     </table>
                 </div>
-                <p>Returns the running portal engine version and the active icon package. <code>icon_pack.loaded</code> is true only when the selected package version is installed and active locally.</p>
+                <p>Returns the running portal engine version, the active icon package and the active theme. <code>icon_pack.loaded</code> is true only when the selected package version is installed and active locally. <code>theme.builtin</code> is true for the built-in <code>default</code> theme (version <code>builtin</code>); <code>theme.modules</code> lists the plugin modules (<code>forum</code>, <code>webshop</code>, <code>marketplace</code>, <code>aggregator</code>) the theme styles specially, on top of the shared frame every theme provides.</p>
 <pre class="bg-dark text-light p-3 rounded small"><code>{
   "engine_version": "{{.AppVersion}}",
-  "icon_pack": {"id": "itlife", "version": "1.2.0", "loaded": true}
+  "icon_pack": {"id": "itlife", "version": "1.2.0", "loaded": true},
+  "theme": {"id": "aurora", "version": "1.0.0", "builtin": false, "modules": ["forum"]}
 }</code></pre>
             </section>
 
@@ -2133,6 +2141,104 @@ Content-Type: application/json
   -d '{"enabled":true,"cooldown_minutes":30,"channels":["webhook"]}' \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/audit/rules/automatic_update_installed</code></pre>
                 <p>Invalid bodies return <code>400</code>; unknown rule keys return <code>404</code>. The rules themselves cannot be created or deleted.</p>
+            </section>
+
+            <section id="security-api" class="mb-2">
+                <h2>Attack protection</h2>
+                <p>Authenticated administration API of the application-level attack protection: honeypot trap paths, rule-based attack scoring and temporary IP bans. The routes exist only while the protection runs (<code>SECURITY_ENABLED</code> is not <code>false</code> and the database is connected); otherwise they return <code>404</code>.</p>
+                <p><strong>Authentication:</strong> admin session or <code>X-API-Key</code>. Requests carrying a valid admin session or API key are never scored or blocked, so this API stays reachable from a banned address.</p>
+                <table class="table table-sm table-bordered"><thead><tr><th>Method</th><th>URL</th><th>Purpose</th></tr></thead><tbody>
+                    <tr><td>GET</td><td><code>/api/security/bans</code></td><td>Ban list (newest first)</td></tr>
+                    <tr><td>POST</td><td><code>/api/security/bans</code></td><td>Ban an address manually</td></tr>
+                    <tr><td>DELETE</td><td><code>/api/security/bans/{id-or-ip}</code></td><td>Lift every active ban of the address</td></tr>
+                    <tr><td>GET</td><td><code>/api/security/events</code></td><td>Security events (honeypot hits, rule matches)</td></tr>
+                    <tr><td>GET</td><td><code>/api/security/rules</code></td><td>Detection rules</td></tr>
+                    <tr><td>POST</td><td><code>/api/security/rules</code></td><td>Create a rule (or update when the body has <code>id</code>)</td></tr>
+                    <tr><td>PUT / DELETE</td><td><code>/api/security/rules/{id}</code></td><td>Update / delete a rule</td></tr>
+                    <tr><td>GET / POST</td><td><code>/api/security/allowlist</code></td><td>Allowlist / add an entry</td></tr>
+                    <tr><td>DELETE</td><td><code>/api/security/allowlist/{id}</code></td><td>Remove an allowlist entry</td></tr>
+                    <tr><td>GET</td><td><code>/api/security/reputation/{ip}</code></td><td>Cached AbuseIPDB reputation</td></tr>
+                    <tr><td>GET</td><td><code>/api/security/metrics</code></td><td>In-memory counters since the server started</td></tr>
+                </tbody></table>
+                <p>Errors are returned as <code>{"error":"message"}</code> with <code>400</code> (invalid input), <code>404</code> (unknown record or list), <code>409</code> (duplicate, or a ban that is no longer active), <code>405</code> (unsupported method or route) or <code>500</code> (database failure).</p>
+            </section>
+
+            <section id="security-bans" class="mb-5 ps-3">
+                <h5>Bans</h5>
+                <p><code>GET /api/security/bans</code> accepts <code>limit</code> (1–200, default 50), <code>offset</code>, <code>ip</code> and <code>active=true</code> (only bans still enforced). Each ban has <code>id</code>, <code>ip</code>, <code>reason</code>, <code>manual</code>, <code>score</code>, <code>rule_ids</code>, <code>ban_number</code>, <code>created_at</code>, <code>created_by</code>, <code>expires_at</code>, <code>unblocked_at</code>, <code>unblocked_by</code>, <code>blocked_count</code> (requests rejected so far) and <code>last_blocked_at</code>.</p>
+                <p>IPv6 clients are banned by their /64 network: <code>ip</code> then holds the network address (for example <code>2001:db8:1:2::</code>), and the <code>ip</code> filter and manual bans accept any address of that network.</p>
+                <p><code>POST /api/security/bans</code> body:</p>
+                <table class="table table-sm table-bordered"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead><tbody>
+                    <tr><td><code>ip</code></td><td>string</td><td>yes</td><td>IPv4 or IPv6 address</td></tr>
+                    <tr><td><code>reason</code></td><td>string</td><td>no</td><td>At most 200 characters; default <code>manual</code></td></tr>
+                    <tr><td><code>hours</code></td><td>integer</td><td>no</td><td>1–720; default 24</td></tr>
+                </tbody></table>
+                <p>It returns <code>201</code> with the new ban, or <code>200</code> with the existing ban when the address is already banned (nothing changes; lift it first to change the duration). <code>400</code> is returned for an invalid address or <code>hours</code>, for loopback, private and link-local addresses, and for an allowlisted address.</p>
+                <p><code>DELETE /api/security/bans/{id-or-ip}</code> takes a ban <code>id</code> or the address itself, lifts every active ban of that address, clears its attack score and returns <code>204</code>. Unknown id: <code>404</code>; a ban that already expired or was lifted: <code>409</code>.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"ip":"203.0.113.50","reason":"abuse report","hours":48}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/security/bans
+
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/security/bans/203.0.113.50</code></pre>
+<pre class="bg-light p-3 rounded small"><code>{
+  "id": "66fb1c2e9a1b2c3d4e5f6a7b",
+  "ip": "203.0.113.50",
+  "reason": "abuse report",
+  "score": 100,
+  "manual": true,
+  "ban_number": 1,
+  "created_at": "2026-10-01T10:00:00Z",
+  "created_by": "api_key",
+  "expires_at": "2026-10-03T10:00:00Z",
+  "blocked_count": 0
+}</code></pre>
+            </section>
+
+            <section id="security-events" class="mb-5 ps-3">
+                <h5>Events</h5>
+                <p><code>GET /api/security/events</code> accepts <code>limit</code>, <code>offset</code>, <code>ip</code>, <code>kind</code> (<code>honeypot</code>, <code>rule_match</code>), <code>category</code> and <code>decision</code>. Repeated hits are aggregated per address, rule and path in 10-minute windows (<code>count</code>, <code>first_seen_at</code>, <code>last_seen_at</code>). Further fields: <code>rule_id</code>, <code>method</code>, <code>path</code>, <code>excerpt</code>, <code>score</code>, <code>total_score</code>. Request contents are never stored; <code>excerpt</code> only names the matched part.</p>
+                <table class="table table-sm table-bordered"><thead><tr><th><code>decision</code></th><th>Meaning</th></tr></thead><tbody>
+                    <tr><td><code>banned</code></td><td>The hit banned the address (honeypot, or the score reached 100)</td></tr>
+                    <tr><td><code>observed</code></td><td>Scored, below the threshold</td></tr>
+                    <tr><td><code>ignored</code></td><td>The request came from a web browser (it carries a Fetch Metadata header: <code>Sec-Fetch-Site</code>, <code>Sec-Fetch-Mode</code> or <code>Sec-Fetch-Dest</code>), e.g. an embedded image pointing at a trap URL or a link received in a message; never scored. At most one such event per address per minute is stored</td></tr>
+                </tbody></table>
+                <p>Events are kept for 90 days.</p>
+            </section>
+
+            <section id="security-rules" class="mb-5 ps-3">
+                <h5>Rules</h5>
+                <p>A rule is a Go (RE2) regular expression checked against parts of the request. Each match adds <code>score</code> points to the address; a repeated match within 10 minutes adds 20 more; the address is banned at 100 points (24 hours, then 48 and 72 hours for repeat offenders within 30 days).</p>
+                <table class="table table-sm table-bordered"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead><tbody>
+                    <tr><td><code>name</code></td><td>string</td><td>yes</td><td>Unique</td></tr>
+                    <tr><td><code>category</code></td><td>string</td><td>yes</td><td>Free label, e.g. <code>injection</code></td></tr>
+                    <tr><td><code>targets</code></td><td>string array</td><td>yes</td><td>Any of <code>method</code>, <code>path</code>, <code>query</code>, <code>header</code>, <code>body</code></td></tr>
+                    <tr><td><code>pattern</code></td><td>string</td><td>yes</td><td>RE2, at most 2048 characters</td></tr>
+                    <tr><td><code>score</code></td><td>integer</td><td>yes</td><td>1–100</td></tr>
+                    <tr><td><code>severity</code></td><td>string</td><td>no</td><td><code>low</code>, <code>medium</code> (default), <code>high</code>, <code>critical</code></td></tr>
+                    <tr><td><code>enabled</code></td><td>boolean</td><td>no</td><td>Default <code>true</code> on create</td></tr>
+                </tbody></table>
+                <p><code>path</code> and <code>query</code> are matched in both raw and URL-decoded form. The search parameter <code>q</code> is excluded from <code>query</code>, so readers searching for attack strings are not scored. <code>header</code> covers <code>User-Agent</code>, <code>Content-Type</code>, <code>Referer</code> and <code>X-Requested-With</code>; <code>body</code> covers text, JSON, XML and form bodies up to 64 KiB.</p>
+                <p><code>version</code>, <code>created_at</code>, <code>updated_at</code> and <code>updated_by</code> are managed by the server and ignored in the request. <code>POST</code> returns <code>201</code> (created) or <code>200</code> (updated through <code>id</code> in the body); <code>PUT</code> returns <code>200</code>; <code>DELETE</code> returns <code>204</code>. <code>400</code> is returned for an invalid rule and for a pattern that matches ordinary requests (it would ban every visitor); <code>404</code> for an unknown id; <code>409</code> for a duplicate name. <code>GET</code> accepts <code>category</code>, <code>severity</code> and <code>enabled</code>. Changes take effect immediately.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Scanner user agents","category":"scanner","targets":["header"],"pattern":"(?i)sqlmap|nikto|masscan","score":100,"severity":"high"}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/security/rules</code></pre>
+            </section>
+
+            <section id="security-allowlist" class="mb-5 ps-3">
+                <h5>Allowlist</h5>
+                <p>Allowlisted addresses are never scored or banned. <code>POST /api/security/allowlist</code> takes <code>cidr</code> (an address or a network of at least /8 for IPv4 and /16 for IPv6) and an optional <code>reason</code>; it returns <code>201</code> with <code>id</code>, <code>cidr</code> (normalized), <code>reason</code>, <code>created_at</code> and <code>created_by</code>. Invalid or too broad networks return <code>400</code>, duplicates <code>409</code>. <code>DELETE /api/security/allowlist/{id}</code> returns <code>204</code>, or <code>404</code> for an unknown id.</p>
+            </section>
+
+            <section id="security-metrics" class="mb-5 ps-3">
+                <h5>Reputation and metrics</h5>
+                <p><code>GET /api/security/reputation/{ip}</code> returns the cached AbuseIPDB result (<code>ip</code>, <code>confidence</code>, <code>country</code>, <code>usage_type</code>, <code>checked_at</code>, <code>expires_at</code>), or <code>404</code> when nothing is cached. Lookups happen only when <code>ABUSEIPDB_ENABLED=true</code> and a rule matched.</p>
+                <p><code>GET /api/security/metrics</code> returns <code>rule_matches</code>, <code>bans_created</code>, <code>blocked_requests</code>, <code>ignored_requests</code>, <code>mongo_errors</code>, <code>provider_errors</code> and <code>ban_cache_hits</code>. The counters live in memory and restart from zero with the server.</p>
+            </section>
+
+            <section id="security-audit" class="mb-5 ps-3">
+                <h5>Audit trail</h5>
+                <p>Every change made through this API is written to the audit log with the affected address, network or rule name as its target: <code>security.ban_create</code>, <code>security.ban_remove</code>, <code>security.allowlist_create</code>, <code>security.allowlist_remove</code>, <code>security.rule_save</code>, <code>security.rule_delete</code>. Reads are logged as <code>security.view</code> (except <code>metrics</code>). Automatic bans appear as <code>security.auto_ban</code> events of the <code>system</code> actor, with the banned address, the reason, score and expiry.</p>
             </section>
 
         </div><!-- /col -->

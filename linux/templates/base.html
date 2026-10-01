@@ -1,6 +1,6 @@
 {{define "header"}}
 <!DOCTYPE html>
-<html lang="hu" data-bs-theme="light">
+<html lang="hu" data-bs-theme="light" data-theme="{{themeID}}">
 
 <head>
     <meta charset="UTF-8">
@@ -45,7 +45,11 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/style.css?v={{assetVersion}}">
     <!-- Primary color override -->
-    <style>:root { --primary-color: {{.PrimaryColor}}; --bs-primary: {{.PrimaryColor}}; --bs-link-color: {{.PrimaryColor}}; --bs-link-hover-color: {{.PrimaryColor}}; }</style>
+    <style>:root { --primary-color: {{.PrimaryColor}}; --bs-primary: {{.PrimaryColor}}; --bs-link-color: {{.PrimaryColor}}; --bs-link-hover-color: {{.PrimaryColor}}; --primary-rgb: {{primaryRGB .PrimaryColor}}; --primary-contrast: {{contrastColor .PrimaryColor}}; --primary-soft: color-mix(in srgb, var(--primary-color) 12%, white); --primary-strong: color-mix(in srgb, var(--primary-color) 78%, black); --brand-logo: url('/branding/logo.png?v={{assetVersion}}'); }</style>
+    <!-- Theme: design tokens and stylesheets (empty for the built-in theme) -->
+    {{with themeTokensCSS}}<style>{{.}}</style>{{end}}
+    {{range themeCSSURLs}}<link rel="stylesheet" href="{{.}}">
+    {{end}}
     <!-- RSS Autodiscovery -->
     {{if .RSSURL}}<link rel="alternate" type="application/rss+xml" title="{{.SiteNameLong}} RSS" href="{{.RSSURL}}">{{end}}
     <!-- SEO: meta description -->

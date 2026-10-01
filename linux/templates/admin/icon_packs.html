@@ -1,7 +1,8 @@
 {{define "admin/icon-packs"}}
 {{template "admin-header" .}}
-<div class="container-fluid py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+{{template "admin/pack-store-styles"}}
+<div class="container-fluid py-4 px-4 px-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
         <div>
             <h4 class="mb-1 fw-bold"><i class="bi bi-palette me-2 text-primary"></i>{{t .Lang "nav.icon_packs"}}</h4>
             <p class="text-muted mb-0">{{t .Lang "iconpacks.intro"}}</p>
@@ -15,48 +16,63 @@
     {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
 
     {{if .Packs}}
-    <div class="row g-4">
+    {{with .ActivePack}}
+    <div class="ip-summary p-3 mb-3 d-flex align-items-center gap-3" style="border-left:.6rem solid {{.PrimaryColor}} !important">
+        <div class="ip-summary-swatch" style="background:{{.PrimaryColor}}"><i class="bi bi-check2-circle"></i></div>
+        <div class="flex-grow-1">
+            <div class="text-uppercase small fw-bold text-muted">{{t $.Lang "iconpacks.current"}}</div>
+            <div class="fs-4 fw-bold lh-1">{{.Name}}</div>
+            <div class="small text-muted mt-1"><code>{{.ID}}</code> · {{if .LegacyInstalled}}{{t $.Lang "iconpacks.legacy"}}{{else}}v{{.InstalledVersion}}{{end}} · <span style="color:{{.PrimaryColor}}">&#9679;</span> {{.PrimaryColor}}</div>
+        </div>
+        {{if .UpdateAvailable}}<span class="badge text-bg-warning">{{t $.Lang "iconpacks.update_available"}}</span>{{end}}
+    </div>
+    {{else}}
+    <div class="alert alert-secondary d-flex align-items-center gap-2 mb-3"><i class="bi bi-info-circle"></i>{{t .Lang "iconpacks.no_active"}}</div>
+    {{end}}
+
+    <div class="ip-filters d-flex flex-wrap gap-2 mb-3" role="group">
+        <button type="button" class="btn btn-sm btn-primary" data-filter="all">{{t .Lang "iconpacks.filter_all"}} <span class="badge text-bg-light ms-1">{{len .Packs}}</span></button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="installed">{{t .Lang "iconpacks.installed"}} <span class="badge text-bg-light ms-1">{{.InstalledCount}}</span></button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="available">{{t .Lang "iconpacks.not_installed"}} <span class="badge text-bg-light ms-1">{{.NotInstalledCount}}</span></button>
+        {{if .UpdateCount}}<button type="button" class="btn btn-sm btn-outline-warning" data-filter="update">{{t .Lang "iconpacks.update_available"}} <span class="badge text-bg-warning ms-1">{{.UpdateCount}}</span></button>{{end}}
+    </div>
+
+    <div class="ip-grid">
         {{range .Packs}}
-        <div class="col-sm-6 col-xl-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
-                        <div>
-                            <h5 class="mb-1">{{.Name}}</h5>
-                            <code>{{.ID}}</code>
-                        </div>
-                        <span class="rounded-circle border"
-                            style="width:2rem;height:2rem;background:{{.PrimaryColor}};display:inline-block"
-                            title="{{.PrimaryColor}}"></span>
+        <div class="ip-card{{if .Installed}} is-installed{{end}}{{if .Active}} is-active{{end}}" style="--pc:{{.PrimaryColor}}"
+            data-installed="{{if .Installed}}1{{else}}0{{end}}" data-update="{{if .UpdateAvailable}}1{{else}}0{{end}}"{{if .Active}} aria-current="true"{{end}}>
+            <div class="ip-card-band">{{if .Active}}<i class="bi bi-check-lg"></i>{{t $.Lang "iconpacks.active"}}{{end}}</div>
+            {{if .Active}}<span class="ip-check"><i class="bi bi-check-lg"></i></span>{{end}}
+            <div class="ip-card-body">
+                <div class="ip-card-head">
+                    <span class="ip-dot" title="{{.PrimaryColor}}"></span>
+                    <div class="min-w-0">
+                        <h5 class="ip-name">{{.Name}}</h5>
+                        <div class="ip-id"><code>{{.ID}}</code></div>
                     </div>
-                    {{if .Description}}<p class="text-muted small flex-grow-1">{{.Description}}</p>{{else}}<div
-                        class="flex-grow-1"></div>{{end}}
-                    <div class="small mb-3">
-                        <div>{{t $.Lang "iconpacks.available"}}: <strong>v{{.Version}}</strong></div>
-                        {{if .Installed}}<div>{{t $.Lang "iconpacks.installed"}}: {{if .LegacyInstalled}}<strong>{{t $.Lang "iconpacks.legacy"}}</strong>{{else}}<strong>v{{.InstalledVersion}}</strong>{{end}}</div>{{else}}<div
-                            class="text-muted">{{t $.Lang "iconpacks.not_installed"}}</div>{{end}}
-                        {{if .UpdateAvailable}}<span class="badge text-bg-warning mt-1">{{t $.Lang "iconpacks.update_available"}}</span>{{end}}
-                        {{if .Active}}<span class="badge text-bg-success mt-1">{{t $.Lang "iconpacks.active"}}</span>{{end}}
-                    </div>
-                    <div class="d-flex gap-2">
-                        {{if not .Installed}}
-                        <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id"
-                                value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button
-                                class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>{{t $.Lang "iconpacks.install"}}</button>
-                        </form>
-                        {{else if .UpdateAvailable}}
-                        <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id"
-                                value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button
-                                class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>{{t $.Lang "iconpacks.update"}}</button>
-                        </form>
-                        {{end}}
-                        {{if .CatalogInstalled}}
-                        <form method="POST" action="/admin/icon-packs/activate" class="icon-pack-activate-form"><input type="hidden" name="id"
-                                value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button
-                                class="btn btn-outline-success btn-sm" {{if .Active}}disabled{{end}}><i
-                                    class="bi bi-check2-circle me-1"></i>{{t $.Lang "iconpacks.activate"}}</button></form>
-                        {{end}}
-                    </div>
+                </div>
+                <p class="ip-desc" title="{{.Description}}">{{.Description}}</p>
+                <div class="ip-meta">
+                    {{if .Installed}}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{if .LegacyInstalled}}{{t $.Lang "iconpacks.legacy"}}{{else}}v{{.InstalledVersion}}{{end}}</span>
+                    {{if .UpdateAvailable}}<span class="badge text-bg-warning" title="{{t $.Lang "iconpacks.available"}}: v{{.Version}}">&rarr; v{{.Version}}</span>{{end}}
+                    {{else}}
+                    <span class="badge text-bg-light border text-muted">v{{.Version}} · {{t $.Lang "iconpacks.not_installed"}}</span>
+                    {{end}}
+                </div>
+                <div class="ip-actions">
+                    {{if not .Installed}}
+                    <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-primary btn-sm"><i class="bi bi-download me-1"></i>{{t $.Lang "iconpacks.install"}}</button></form>
+                    {{else if .UpdateAvailable}}
+                    <form method="POST" action="/admin/icon-packs/install"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-warning btn-sm"><i class="bi bi-arrow-up-circle me-1"></i>{{t $.Lang "iconpacks.update"}}</button></form>
+                    {{end}}
+                    {{if .CatalogInstalled}}
+                    {{if .Active}}
+                    <button class="btn btn-sm text-white" style="background:{{.PrimaryColor}}" disabled><i class="bi bi-check-circle-fill me-1"></i>{{t $.Lang "iconpacks.active"}}</button>
+                    {{else}}
+                    <form method="POST" action="/admin/icon-packs/activate" class="pack-activate-form"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{.Version}}"><button class="btn btn-outline-success btn-sm"><i class="bi bi-check2-circle me-1"></i>{{t $.Lang "iconpacks.activate"}}</button></form>
+                    {{end}}
+                    {{end}}
                 </div>
             </div>
         </div>
@@ -68,38 +84,7 @@
     </div>
     {{end}}
 </div>
-<div id="iconPackRestartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:12px;padding:2.5rem 3rem;text-align:center;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);">
-        <div class="spinner-border text-warning mb-3" role="status" style="width:3rem;height:3rem;"></div>
-        <h5 class="mb-2 fw-bold">{{t .Lang "iconpacks.restart_title"}}</h5>
-        <p class="text-muted mb-3" style="font-size:.9rem;">{{t .Lang "iconpacks.restart_text"}}</p>
-        <div id="iconPackRestartStatus" class="text-muted" style="font-size:.8rem;"></div>
-    </div>
-</div>
-<script>
-(function () {
-    var messages = { saving: "{{t .Lang "iconpacks.restart_saving"}}", waiting: "{{t .Lang "iconpacks.restart_waiting"}}", login: "{{t .Lang "iconpacks.restart_login"}}" };
-    document.querySelectorAll('.icon-pack-activate-form').forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            var overlay = document.getElementById('iconPackRestartOverlay');
-            var status = document.getElementById('iconPackRestartStatus');
-            overlay.style.display = 'flex';
-            status.textContent = messages.saving;
-            form.querySelector('button').disabled = true;
-            fetch(form.action, { method: 'POST', body: new FormData(form), redirect: 'manual' }).catch(function () {});
-            setTimeout(function poll(attempt) {
-                status.textContent = messages.waiting + ' (' + (attempt + 1) + ')';
-                fetch('/manifest.json', { cache: 'no-store' }).then(function (response) {
-                    if (!response.ok) throw new Error('offline');
-                    window.location.href = '/admin/login?flash=' + encodeURIComponent(messages.login);
-                }).catch(function () {
-                    setTimeout(function () { poll(attempt + 1); }, 1500);
-                });
-            }, 1200, 0);
-        });
-    });
-}());
-</script>
+{{template "admin/pack-store-restart" (dict "Lang" .Lang "Prefix" "iconpacks")}}
+{{template "admin/pack-store-filters"}}
 {{template "admin-footer" .}}
 {{end}}
