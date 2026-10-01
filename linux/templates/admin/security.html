@@ -1,0 +1,260 @@
+{{define "admin/security"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-page-header" dict "Title" (t .Lang "sec.title") "Icon" "shield-shaded" "Subtitle" (t .Lang "sec.subtitle") "Actions" (list (dict "URL" "/admin/audit" "Label" (t .Lang "audit.title") "Icon" "shield-lock" "Class" "btn-outline-secondary btn-sm") (dict "URL" "/admin/audit/rules" "Label" (t .Lang "audit.rules_title") "Icon" "sliders2" "Class" "btn-outline-secondary btn-sm"))}}
+
+    {{template "admin-flash" .}}
+
+    {{if not .Enabled}}
+    <div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "sec.disabled"}}</div>
+    {{else}}
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">{{t .Lang "sec.metric_active_bans"}}</div><div class="fs-3 fw-bold {{if .ActiveBans}}text-danger{{end}}">{{len .ActiveBans}}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">{{t .Lang "sec.metric_blocked"}}</div><div class="fs-3 fw-bold">{{.Metrics.BlockedRequests}}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">{{t .Lang "sec.metric_bans_created"}}</div><div class="fs-3 fw-bold">{{.Metrics.BansCreated}}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">{{t .Lang "sec.metric_db_errors"}}</div><div class="fs-3 fw-bold {{if gt .Metrics.MongoErrors 0}}text-warning{{end}}">{{.Metrics.MongoErrors}}</div></div></div></div>
+    </div>
+    <p class="text-muted small mt-n3 mb-4">{{t .Lang "sec.metric_hint"}}</p>
+
+    <div class="card border-0 shadow-sm mb-4" id="securityActiveBans">
+        <div class="card-header bg-white fw-semibold"><i class="bi bi-slash-circle me-2 text-danger"></i>{{t .Lang "sec.active_bans"}}</div>
+        {{if .ActiveBans}}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{t .Lang "sec.col_ip"}}</th>
+                        <th>{{t .Lang "sec.col_reason"}}</th>
+                        <th class="text-nowrap">{{t .Lang "sec.col_created"}}</th>
+                        <th class="text-nowrap">{{t .Lang "sec.col_expires"}}</th>
+                        <th class="text-end">{{t .Lang "sec.col_blocked"}}</th>
+                        <th class="text-end"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .ActiveBans}}
+                    <tr>
+                        <td><code>{{.IP}}</code></td>
+                        <td>
+                            {{if .Manual}}<span class="badge bg-secondary me-1">{{t $.Lang "sec.manual"}}</span>{{else}}<span class="badge bg-warning text-dark me-1">{{t $.Lang "sec.automatic"}}</span>{{end}}
+                            {{.Reason}}
+                            <div class="text-muted small">#{{.BanNumber}}{{if .CreatedBy}} · {{.CreatedBy}}{{end}}</div>
+                        </td>
+                        <td class="text-nowrap text-muted small">{{adminDateTime .CreatedAt}}</td>
+                        <td class="text-nowrap text-muted small">{{adminDateTime .ExpiresAt}}</td>
+                        <td class="text-end">{{.BlockedCount}}</td>
+                        <td class="text-end">
+                            <form action="/admin/security/bans/unblock/{{.ID.Hex}}" method="POST" class="d-inline" data-confirm="{{t $.Lang "sec.confirm_unban"}}">
+                                <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-unlock me-1"></i>{{t $.Lang "sec.unban"}}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <div class="card-body text-muted">{{t .Lang "sec.no_active_bans"}}</div>
+        {{end}}
+        <div class="card-footer bg-white">
+            <form action="/admin/security/bans" method="POST" class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label class="form-label small mb-1" for="secBanIP">{{t .Lang "sec.col_ip"}}</label>
+                    <input type="text" class="form-control form-control-sm" id="secBanIP" name="ip" required placeholder="203.0.113.10">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="secBanHours">{{t .Lang "sec.hours"}}</label>
+                    <input type="number" class="form-control form-control-sm" id="secBanHours" name="hours" value="24" min="1" max="720">
+                </div>
+                <div class="col-12 col-md-5">
+                    <label class="form-label small mb-1" for="secBanReason">{{t .Lang "sec.col_reason"}}</label>
+                    <input type="text" class="form-control form-control-sm" id="secBanReason" name="reason" maxlength="200">
+                </div>
+                <div class="col-12 col-md-2">
+                    <button type="submit" class="btn btn-sm btn-danger w-100"><i class="bi bi-slash-circle me-1"></i>{{t .Lang "sec.ban"}}</button>
+                </div>
+            </form>
+            <div class="form-text">{{t .Lang "sec.ban_hint"}}</div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" id="securityEvents">
+        <div class="card-header bg-white fw-semibold"><i class="bi bi-activity me-2 text-primary"></i>{{t .Lang "sec.events"}}</div>
+        {{if .Events}}
+        <div class="table-responsive" style="max-height:480px">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-nowrap">{{t .Lang "sec.col_last_seen"}}</th>
+                        <th>{{t .Lang "sec.col_ip"}}</th>
+                        <th>{{t .Lang "sec.col_kind"}}</th>
+                        <th>{{t .Lang "sec.col_request"}}</th>
+                        <th class="text-end">{{t .Lang "sec.col_score"}}</th>
+                        <th>{{t .Lang "sec.col_decision"}}</th>
+                        <th class="text-end">{{t .Lang "sec.col_count"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Events}}
+                    <tr>
+                        <td class="text-nowrap text-muted small">{{adminDateTime .LastSeenAt}}</td>
+                        <td><code>{{.IP}}</code></td>
+                        <td>
+                            {{if eq .Kind "honeypot"}}<span class="badge bg-dark">honeypot</span>{{else}}<span class="badge bg-info text-dark">{{.Category}}</span>{{end}}
+                            {{with index $.RuleNames .RuleID}}<div class="text-muted small">{{.}}</div>{{end}}
+                        </td>
+                        <td class="small"><code>{{.Method}}</code> <span class="text-break">{{truncate .Path 90}}</span></td>
+                        <td class="text-end text-nowrap">{{.Score}}{{if .TotalScore}} <span class="text-muted small">/ {{.TotalScore}}</span>{{end}}</td>
+                        <td>
+                            {{if eq .Decision "banned"}}<span class="badge bg-danger">{{t $.Lang "sec.decision_banned"}}</span>
+                            {{else if eq .Decision "ignored"}}<span class="badge bg-light text-dark border">{{t $.Lang "sec.decision_ignored"}}</span>
+                            {{else}}<span class="badge bg-secondary">{{t $.Lang "sec.decision_observed"}}</span>{{end}}
+                        </td>
+                        <td class="text-end">{{.Count}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white text-muted small">{{t .Lang "sec.events_hint"}}</div>
+        {{else}}
+        <div class="card-body text-muted">{{t .Lang "sec.no_events"}}</div>
+        {{end}}
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-xl-5">
+            <div class="card border-0 shadow-sm h-100" id="securityAllowlist">
+                <div class="card-header bg-white fw-semibold"><i class="bi bi-check2-circle me-2 text-success"></i>{{t .Lang "sec.allowlist"}}</div>
+                {{if .Allowlist}}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <tbody>
+                            {{range .Allowlist}}
+                            <tr>
+                                <td><code>{{.CIDR}}</code>{{if .Reason}}<div class="text-muted small">{{.Reason}}</div>{{end}}</td>
+                                <td class="text-muted small text-nowrap">{{adminDateTime .CreatedAt}}{{if .CreatedBy}}<div>{{.CreatedBy}}</div>{{end}}</td>
+                                <td class="text-end">
+                                    <form action="/admin/security/allowlist/delete/{{.ID.Hex}}" method="POST" class="d-inline" data-confirm="{{t $.Lang "sec.confirm_allow_delete"}}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="{{t $.Lang "common.delete"}}"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                {{else}}
+                <div class="card-body text-muted">{{t .Lang "sec.no_allowlist"}}</div>
+                {{end}}
+                <div class="card-footer bg-white">
+                    <form action="/admin/security/allowlist" method="POST" class="row g-2 align-items-end">
+                        <div class="col-12 col-md-5">
+                            <label class="form-label small mb-1" for="secAllowCIDR">{{t .Lang "sec.cidr"}}</label>
+                            <input type="text" class="form-control form-control-sm" id="secAllowCIDR" name="cidr" required placeholder="198.51.100.0/24">
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label small mb-1" for="secAllowReason">{{t .Lang "sec.col_reason"}}</label>
+                            <input type="text" class="form-control form-control-sm" id="secAllowReason" name="reason" maxlength="200">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <button type="submit" class="btn btn-sm btn-primary w-100" title="{{t .Lang "sec.allow_add"}}"><i class="bi bi-plus-lg"></i></button>
+                        </div>
+                    </form>
+                    <div class="form-text">{{t .Lang "sec.allow_hint"}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-7">
+            <div class="card border-0 shadow-sm h-100" id="securityRules">
+                <div class="card-header bg-white fw-semibold"><i class="bi bi-funnel me-2 text-primary"></i>{{t .Lang "sec.rules"}}</div>
+                {{if .Rules}}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{t .Lang "common.name"}}</th>
+                                <th>{{t .Lang "sec.col_targets"}}</th>
+                                <th class="text-end">{{t .Lang "sec.col_score"}}</th>
+                                <th class="text-end">{{t .Lang "common.status"}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Rules}}
+                            <tr>
+                                <td><div class="fw-semibold">{{.Name}}</div><div class="text-muted small">{{.Category}} · {{.Severity}} · v{{.Version}}</div></td>
+                                <td class="small">{{join .Targets ", "}}</td>
+                                <td class="text-end">{{.Score}}</td>
+                                <td class="text-end">
+                                    <form action="/admin/security/rules/toggle/{{.ID.Hex}}" method="POST" class="d-inline">
+                                        <input type="hidden" name="enabled" value="{{if .Enabled}}false{{else}}true{{end}}">
+                                        {{if .Enabled}}
+                                        <button type="submit" class="btn btn-sm btn-success" title="{{t $.Lang "sec.rule_disable"}}"><i class="bi bi-toggle-on me-1"></i>{{t $.Lang "common.active"}}</button>
+                                        {{else}}
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="{{t $.Lang "sec.rule_enable"}}"><i class="bi bi-toggle-off me-1"></i>{{t $.Lang "common.inactive"}}</button>
+                                        {{end}}
+                                    </form>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                {{else}}
+                <div class="card-body text-muted">{{t .Lang "sec.no_rules"}}</div>
+                {{end}}
+                <div class="card-footer bg-white text-muted small">{{t .Lang "sec.rules_hint"}}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold"><i class="bi bi-bug me-2 text-secondary"></i>{{t .Lang "sec.honeypots"}}</div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">{{t .Lang "sec.honeypots_hint"}}</p>
+            {{range .HoneypotPaths}}<code class="me-2 d-inline-block mb-1">{{.}}</code>{{end}}
+        </div>
+    </div>
+
+    {{if .PastBans}}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold"><i class="bi bi-clock-history me-2 text-secondary"></i>{{t .Lang "sec.past_bans"}}</div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{t .Lang "sec.col_ip"}}</th>
+                        <th>{{t .Lang "sec.col_reason"}}</th>
+                        <th class="text-nowrap">{{t .Lang "sec.col_created"}}</th>
+                        <th class="text-nowrap">{{t .Lang "sec.col_ended"}}</th>
+                        <th class="text-end">{{t .Lang "sec.col_blocked"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .PastBans}}
+                    <tr>
+                        <td><code>{{.IP}}</code></td>
+                        <td>{{if .Manual}}<span class="badge bg-secondary me-1">{{t $.Lang "sec.manual"}}</span>{{end}}{{.Reason}}</td>
+                        <td class="text-nowrap text-muted small">{{adminDateTime .CreatedAt}}</td>
+                        <td class="text-nowrap text-muted small">{{if .UnblockedAt}}{{adminDateTime .UnblockedAt}} <span class="badge bg-success">{{t $.Lang "sec.lifted"}}</span>{{if .UnblockedBy}} {{.UnblockedBy}}{{end}}{{else}}{{adminDateTime .ExpiresAt}}{{end}}</td>
+                        <td class="text-end">{{.BlockedCount}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{end}}
+
+    {{end}}
+</div>
+<script>
+document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+        if (!window.confirm(form.getAttribute('data-confirm'))) { e.preventDefault(); }
+    });
+});
+</script>
+{{template "admin-footer" .}}
+{{end}}

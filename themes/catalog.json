@@ -1,0 +1,57 @@
+{
+    "schema_version":  1,
+    "packages":  [
+                     {
+                         "id":  "aurora",
+                         "version":  "1.0.1",
+                         "name":  "Aurora",
+                         "description":  "Reference theme: soft rounded cards, airy spacing and a translucent navbar. It reuses the colours and logo of the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.9",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-aurora-1.0.1.zip",
+                         "sha256":  "2de89def5a3db93d475d89a948591736a8e78c544808c020103deabb5d83b046"
+                     },
+                     {
+                         "id":  "meridian",
+                         "version":  "1.0.0",
+                         "name":  "Meridian",
+                         "description":  "Editorial print-magazine look: warm paper background, serif headlines, hairline rules, drop caps and an ink-black frame. Accent colour, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.9",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-meridian-1.0.0.zip",
+                         "sha256":  "46b3851ea5b2912dbfbc2dac3e39a98c5f9c70e81f4611957f675b93ac46fc89"
+                     },
+                     {
+                         "id":  "nexus",
+                         "version":  "1.0.0",
+                         "name":  "Nexus",
+                         "description":  "Modern gaming-media look: near-black navy surfaces, rounded bento cards with hairline borders, eyebrow labels, a scrolling live ticker, a numbered top-5 list and an accent taken from your icon pack. Ships its own home page layout.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.9",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-nexus-1.0.0.zip",
+                         "sha256":  "04980224f9c07a6b673f10ae3a7f51443481747eda92e1df240549c9203fb4fd"
+                     },
+                     {
+                         "id":  "overdrive",
+                         "version":  "1.0.0",
+                         "name":  "Overdrive",
+                         "description":  "Modern dark gaming theme: deep navy surfaces, a glowing accent taken from your icon pack, angled corners, a flowing gradient rail and subtle motion (staggered reveals, hover glow, shimmer buttons, reading progress bar). All animation respects reduced-motion.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.9",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-overdrive-1.0.0.zip",
+                         "sha256":  "fa338294e4f8fddc3bd5db3597c4a23a0d2ceabf0e2ae12acde615a8ec91477a"
+                     }
+                 ]
+}

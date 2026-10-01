@@ -80,6 +80,7 @@ REST API reference for authenticated administrative access to this news portal.
   - [Category endpoints](#category-endpoints)
   - [Sync ownership](#sync-ownership)
 - [Audit and security alerts](#audit-and-security-alerts)
+- [Attack protection](#attack-protection)
   - [Events and export](#events-and-export)
   - [Integrity verification](#integrity-verification)
   - [Security alerts](#security-alerts)
@@ -161,7 +162,7 @@ All endpoints in this section require an admin session or `X-API-Key`. They are 
 | --- | --- | --- |
 | GET | `/api/system` | Required |
 
-Returns the running portal engine version and the configured icon package. `icon_pack.loaded` is true only when that package version is available locally and is actually active.
+Returns the running portal engine version, the configured icon package and the active theme. `icon_pack.loaded` is true only when that package version is available locally and is actually active. `theme.builtin` is true for the built-in `default` theme (version `builtin`); `theme.modules` lists the plugin modules (`forum`, `webshop`, `marketplace`, `aggregator`) the theme styles specially, on top of the shared frame every theme provides.
 
 ```json
 {
@@ -170,6 +171,12 @@ Returns the running portal engine version and the configured icon package. `icon
     "id": "itlife",
     "version": "1.2.0",
     "loaded": true
+  },
+  "theme": {
+    "id": "aurora",
+    "version": "1.0.0",
+    "builtin": false,
+    "modules": ["forum"]
   }
 }
 ```
@@ -1864,3 +1871,117 @@ Exports accept `format=csv|ndjson`, stream at most 100,000 records and are audit
 `GET /api/audit/rules` lists the fixed catalog and effective configurations, while `GET` and `PUT /api/audit/rules/{key}` read or update a rule. Valid input fields are `enabled`, `cooldown_minutes`, `channels`, and for burst rules `threshold` and `window_minutes`. Channels may only be `webhook` or `pushover`; updates take effect immediately.
 
 `manual_restart` covers manual restart and icon-pack activation; `manual_update` covers admin/API updates; `automatic_update_installed` covers successful automatic installation. The automatic-install rule is disabled by default, so the existing informational Pushover update message remains but no acknowledgement-required in-app alert is created unless explicitly enabled. Rule definitions cannot be created or deleted.
+
+## Attack protection
+
+Authenticated administration API of the application-level attack protection: honeypot trap paths, rule-based attack scoring and temporary IP bans. The routes exist only while the protection runs (`SECURITY_ENABLED` is not `false` and the database is connected); otherwise they return `404`.
+
+Requests carrying a valid admin session or `X-API-Key` are never scored or blocked, so this API stays reachable from a banned address.
+
+| Method | URL | Purpose |
+| --- | --- | --- |
+| GET | `/api/security/bans` | Ban list (newest first) |
+| POST | `/api/security/bans` | Ban an address manually |
+| DELETE | `/api/security/bans/{id-or-ip}` | Lift every active ban of the address |
+| GET | `/api/security/events` | Security events (honeypot hits, rule matches) |
+| GET | `/api/security/rules` | Detection rules |
+| POST | `/api/security/rules` | Create a rule (or update when the body has `id`) |
+| PUT / DELETE | `/api/security/rules/{id}` | Update / delete a rule |
+| GET / POST | `/api/security/allowlist` | Allowlist / add an entry |
+| DELETE | `/api/security/allowlist/{id}` | Remove an allowlist entry |
+| GET | `/api/security/reputation/{ip}` | Cached AbuseIPDB reputation |
+| GET | `/api/security/metrics` | In-memory counters since the server started |
+
+Errors are returned as `{"error":"message"}` with `400` (invalid input), `404` (unknown record or list), `409` (duplicate, or a ban that is no longer active), `405` (unsupported method or route) or `500` (database failure).
+
+### Bans
+
+`GET /api/security/bans` accepts `limit` (1-200, default 50), `offset`, `ip` and `active=true` (only bans still enforced). Each ban has `id`, `ip`, `reason`, `manual`, `score`, `rule_ids`, `ban_number`, `created_at`, `created_by`, `expires_at`, `unblocked_at`, `unblocked_by`, `blocked_count` (requests rejected so far) and `last_blocked_at`.
+
+IPv6 clients are banned by their /64 network: `ip` then holds the network address (for example `2001:db8:1:2::`), and the `ip` filter and manual bans accept any address of that network.
+
+`POST /api/security/bans` body:
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `ip` | string | yes | IPv4 or IPv6 address |
+| `reason` | string | no | At most 200 characters; default `manual` |
+| `hours` | integer | no | 1-720; default 24 |
+
+It returns `201` with the new ban, or `200` with the existing ban when the address is already banned (nothing changes; lift it first to change the duration). `400` is returned for an invalid address or `hours`, for loopback, private and link-local addresses, and for an allowlisted address.
+
+`DELETE /api/security/bans/{id-or-ip}` takes a ban `id` or the address itself, lifts every active ban of that address, clears its attack score and returns `204`. Unknown id: `404`; a ban that already expired or was lifted: `409`.
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"ip":"203.0.113.50","reason":"abuse report","hours":48}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/security/bans
+
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/security/bans/203.0.113.50
+```
+
+```json
+{
+  "id": "66fb1c2e9a1b2c3d4e5f6a7b",
+  "ip": "203.0.113.50",
+  "reason": "abuse report",
+  "score": 100,
+  "manual": true,
+  "ban_number": 1,
+  "created_at": "2026-10-01T10:00:00Z",
+  "created_by": "api_key",
+  "expires_at": "2026-10-03T10:00:00Z",
+  "blocked_count": 0
+}
+```
+
+### Events
+
+`GET /api/security/events` accepts `limit`, `offset`, `ip`, `kind` (`honeypot`, `rule_match`), `category` and `decision`. Repeated hits are aggregated per address, rule and path in 10-minute windows (`count`, `first_seen_at`, `last_seen_at`). Further fields: `rule_id`, `method`, `path`, `excerpt`, `score`, `total_score`. Request contents are never stored; `excerpt` only names the matched part.
+
+| `decision` | Meaning |
+| --- | --- |
+| `banned` | The hit banned the address (honeypot, or the score reached 100) |
+| `observed` | Scored, below the threshold |
+| `ignored` | The request came from a web browser (it carries a Fetch Metadata header: `Sec-Fetch-Site`, `Sec-Fetch-Mode` or `Sec-Fetch-Dest`), e.g. an embedded image pointing at a trap URL or a link received in a message; never scored. At most one such event per address per minute is stored |
+
+Events are kept for 90 days.
+
+### Rules
+
+A rule is a Go (RE2) regular expression checked against parts of the request. Each match adds `score` points to the address; a repeated match within 10 minutes adds 20 more; the address is banned at 100 points (24 hours, then 48 and 72 hours for repeat offenders within 30 days).
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `name` | string | yes | Unique |
+| `category` | string | yes | Free label, e.g. `injection` |
+| `targets` | string array | yes | Any of `method`, `path`, `query`, `header`, `body` |
+| `pattern` | string | yes | RE2, at most 2048 characters |
+| `score` | integer | yes | 1-100 |
+| `severity` | string | no | `low`, `medium` (default), `high`, `critical` |
+| `enabled` | boolean | no | Default `true` on create |
+
+`path` and `query` are matched in both raw and URL-decoded form. The search parameter `q` is excluded from `query`, so readers searching for attack strings are not scored. `header` covers `User-Agent`, `Content-Type`, `Referer` and `X-Requested-With`; `body` covers text, JSON, XML and form bodies up to 64 KiB.
+
+`version`, `created_at`, `updated_at` and `updated_by` are managed by the server and ignored in the request. `POST` returns `201` (created) or `200` (updated through `id` in the body); `PUT` returns `200`; `DELETE` returns `204`. `400` is returned for an invalid rule and for a pattern that matches ordinary requests (it would ban every visitor); `404` for an unknown id; `409` for a duplicate name. `GET` accepts `category`, `severity` and `enabled`. Changes take effect immediately.
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"name":"Scanner user agents","category":"scanner","targets":["header"],"pattern":"(?i)sqlmap|nikto|masscan","score":100,"severity":"high"}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/security/rules
+```
+
+### Allowlist
+
+Allowlisted addresses are never scored or banned. `POST /api/security/allowlist` takes `cidr` (an address or a network of at least /8 for IPv4 and /16 for IPv6) and an optional `reason`; it returns `201` with `id`, `cidr` (normalized), `reason`, `created_at` and `created_by`. Invalid or too broad networks return `400`, duplicates `409`. `DELETE /api/security/allowlist/{id}` returns `204`, or `404` for an unknown id.
+
+### Reputation and metrics
+
+`GET /api/security/reputation/{ip}` returns the cached AbuseIPDB result (`ip`, `confidence`, `country`, `usage_type`, `checked_at`, `expires_at`), or `404` when nothing is cached. Lookups happen only when `ABUSEIPDB_ENABLED=true` and a rule matched.
+
+`GET /api/security/metrics` returns `rule_matches`, `bans_created`, `blocked_requests`, `ignored_requests`, `mongo_errors`, `provider_errors` and `ban_cache_hits`. The counters live in memory and restart from zero with the server.
+
+### Audit trail
+
+Every change made through this API is written to the audit log with the affected address, network or rule name as its target: `security.ban_create`, `security.ban_remove`, `security.allowlist_create`, `security.allowlist_remove`, `security.rule_save`, `security.rule_delete`. Reads are logged as `security.view` (except `metrics`). Automatic bans appear as `security.auto_ban` events of the `system` actor, with the banned address, the reason, score and expiry.
