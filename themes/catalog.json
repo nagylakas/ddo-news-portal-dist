@@ -41,6 +41,19 @@
                          "sha256":  "a6640030ee0b45fd04fcea2612e0903ec3a71bfd5224292461436b93b62be26c"
                      },
                      {
+                         "id":  "kepes",
+                         "version":  "1.1.0",
+                         "name":  "Képes",
+                         "description":  "Photo-first look for image and video-heavy portals: a large inset hero, a masonry-like mosaic of big image cards with the headline set on a gradient, minimal chrome, generous whitespace and rounded corners. Stories without a picture become typographic cards on a tint of their category colour. A calm light scheme and a dramatic near-black dark scheme. Accent colour, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-kepes-1.1.0.zip",
+                         "sha256":  "638c49e988f20fe281d3927ed9083647151918b1e8a4646848064e7063e3c90c"
+                     },
+                     {
                          "id":  "kontraszt",
                          "version":  "1.0.0",
                          "name":  "Kontraszt",
@@ -52,6 +65,19 @@
                                      ],
                          "asset":  "theme-kontraszt-1.0.0.zip",
                          "sha256":  "1202ca0132ad987c72388f3444fcdac535b1786afbc3b7b5a05dd9bd7e95039c"
+                     },
+                     {
+                         "id":  "kontraszt",
+                         "version":  "1.1.0",
+                         "name":  "Kontraszt",
+                         "description":  "Accessibility theme aiming at WCAG AAA: at least 7:1 text contrast, underlined links everywhere, thick 3 px focus rings, larger type, 44 px tap targets, clear card borders and no motion at all. Titles never sit directly on images, they get a solid band. The icon pack colour is used only for decorative borders and stripes. Black-on-white and white-on-black schemes.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-kontraszt-1.1.0.zip",
+                         "sha256":  "41021502c5f2be434f51ee84d4c264d924f63a3f5708d2aae7af7b9e3e39fdaf"
                      },
                      {
                          "id":  "meridian",
@@ -91,6 +117,19 @@
                                      ],
                          "asset":  "theme-napilap-1.0.0.zip",
                          "sha256":  "bb399c37f7386b41f18b871554e7bd4e4dd59480fe40ca007ff95ca492c454ca"
+                     },
+                     {
+                         "id":  "napilap",
+                         "version":  "1.1.0",
+                         "name":  "Napilap",
+                         "description":  "Broadsheet daily-newspaper front page: a serif nameplate with a date line, a dense multi-column grid separated by thin column rules, a two-column lead story, text-first secondary stories with small thumbnails and a headlines-only briefs column. Off-white newsprint by day, a dark night edition by night. Accent colour, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-napilap-1.1.0.zip",
+                         "sha256":  "204c7012f15ba46d75c64e121c046df1856e0242c2fd06c30c117a322948a887"
                      },
                      {
                          "id":  "nexus",
@@ -159,6 +198,19 @@
                          "sha256":  "bdc484639c707ce59a03dda9c168a7b2d216a885ec2a986fd0edcf15bbb86058"
                      },
                      {
+                         "id":  "papir",
+                         "version":  "1.1.0",
+                         "name":  "Papír",
+                         "description":  "Quiet newspaper theme on warm paper: a full-width, multi-column front page whose column count grows with the screen (a two-column lead story, hairline column rules, serif small-caps section heads, a most-read column) with small, lazy-loaded black-and-white pictures between the stories. Listings flow in ruled newspaper columns, the article page spans the screen with the text in the main column beside the sidebar. Serif type, no shadows, no animations, light on slow connections. Warm paper-white and warm dark grey schemes.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-papir-1.1.0.zip",
+                         "sha256":  "c42804f765c258412744255cb92b45b8a5968f49c0f2a6cca4705bad05342256"
+                     },
+                     {
                          "id":  "terminal",
                          "version":  "1.0.0",
                          "name":  "Terminál",
@@ -170,6 +222,19 @@
                                      ],
                          "asset":  "theme-terminal-1.0.0.zip",
                          "sha256":  "f891f498360acaab5bdf633170afa59a1c84d564bcee21b88a9a39ce55344664"
+                     },
+                     {
+                         "id":  "terminal",
+                         "version":  "1.1.0",
+                         "name":  "Terminál",
+                         "description":  "Monospace, high-contrast theme for IT audiences: ASCII-flavoured dashed and double rules, prompt glyphs before section titles, [ BRACKETED ] category labels and square corners. The icon pack colour works as the terminal highlight. Classic dark terminal and green-bar paper light schemes.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-terminal-1.1.0.zip",
+                         "sha256":  "cd57aec345e167c20a261e915b729ee7145b51243fdf8401481fb5894d56b188"
                      }
                  ]
 }
