@@ -235,6 +235,19 @@
                                      ],
                          "asset":  "theme-terminal-1.1.0.zip",
                          "sha256":  "cd57aec345e167c20a261e915b729ee7145b51243fdf8401481fb5894d56b188"
+                     },
+                     {
+                         "id":  "tuesday",
+                         "version":  "1.0.0",
+                         "name":  "Tuesday",
+                         "description":  "Hand-painted look: soft watercolour washes bleeding through the cards on grainy cold-press paper, and thick wax-crayon / dry-brush strokes with ragged, speckled edges as the decoration: painted section labels, brush-stroke category chips, crayon rules and underlines, deckled picture edges, a torn edge under the navbar and a big sweeping stroke on the listing headers and in the footer. A near-black dark scheme with lavender paint and a warm watercolour-paper light scheme; paint colour, texture strength, stroke style (brush or crayon), card corners and picture edges are adjustable. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-tuesday-1.0.0.zip",
+                         "sha256":  "278ea27277117b290c7eb94bcc3f361506a442fed6c514064f8b85f7fbad539d"
                      }
                  ]
 }
