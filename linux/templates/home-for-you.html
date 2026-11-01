@@ -1,0 +1,30 @@
+{{/*
+  "Neked" block of the home page: the newest articles matching the signed-in
+  reader's follows (HomeData.ForYou, empty for visitors). Themes that override
+  "home" should call {{template "home/for-you" .}}; it renders nothing when
+  there is nothing to show, and themes may override it.
+*/}}
+{{define "home/for-you"}}
+{{if .ForYou}}
+<section class="for-you-block container-fluid px-4 px-lg-5 pt-5" aria-labelledby="forYouHeading">
+    <div class="section-header mb-3 d-flex align-items-center justify-content-between gap-3">
+        <h2 class="section-title" id="forYouHeading"><i class="bi bi-stars text-primary me-2" aria-hidden="true"></i>Neked <span class="text-primary">ajánljuk</span></h2>
+        <a class="for-you-more small fw-semibold text-decoration-none" href="/neked">Összes <i class="bi bi-arrow-right-short" aria-hidden="true"></i></a>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 for-you-grid">
+        {{range .ForYou}}
+        <div class="col">
+            <a class="for-you-card listing-row text-decoration-none" href="/article/{{.Slug}}">
+                {{if .ImageURL}}<img class="for-you-img" src="{{coverSizedURL . 320}}" alt="" loading="lazy" decoding="async">{{end}}
+                <span class="for-you-body">
+                    <span class="category-chip" {{categoryStyle .Category}}>{{.Category}}</span>
+                    <span class="for-you-title">{{truncate .Title 90}}</span>
+                    <span class="for-you-meta">{{formatDate .PublishedAt}}</span>
+                </span>
+            </a>
+        </div>
+        {{end}}
+    </div>
+</section>
+{{end}}
+{{end}}

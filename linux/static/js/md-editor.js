@@ -3,17 +3,97 @@
  * Requires marked.js to be loaded before this script.
  */
 
-// Configure marked for safe rendering
-marked.use({
-    breaks: true,
-    gfm: true,
-});
+// Configure marked (output is always passed through sanitizePreviewHTML).
+if (typeof marked !== 'undefined') {
+    marked.use({
+        breaks: true,
+        gfm: true,
+    });
+}
+
+// The public site renders Markdown on the server with raw HTML stripped and
+// unsafe URLs removed; marked does neither. Content can come from API, MCP
+// or central-sync clients, so the preview must not execute it in the admin
+// origin. The HTML is parsed into an inert document (no scripts run, no
+// resources load) and rebuilt from an allowlist of tags and attributes.
+var PREVIEW_ALLOWED_TAGS = {
+    A: 1, ABBR: 1, B: 1, BLOCKQUOTE: 1, BR: 1, CODE: 1, DEL: 1, DIV: 1, EM: 1,
+    H1: 1, H2: 1, H3: 1, H4: 1, H5: 1, H6: 1, HR: 1, I: 1, IMG: 1, INPUT: 1,
+    KBD: 1, LI: 1, OL: 1, P: 1, PRE: 1, S: 1, SECTION: 1, SPAN: 1, STRONG: 1,
+    SUB: 1, SUP: 1, TABLE: 1, TBODY: 1, TD: 1, TFOOT: 1, TH: 1, THEAD: 1, TR: 1, UL: 1
+};
+var PREVIEW_ALLOWED_ATTRS = {
+    alt: 1, align: 1, checked: 1, 'class': 1, disabled: 1, href: 1, id: 1,
+    src: 1, start: 1, title: 1, type: 1
+};
+var PREVIEW_DROP_WITH_CONTENT = { SCRIPT: 1, STYLE: 1, TEMPLATE: 1, NOSCRIPT: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, SVG: 1, MATH: 1 };
+
+function isSafePreviewURL(value) {
+    var v = String(value || '').replace(/[\u0000- \u007f]/g, '').toLowerCase();
+    if (v === '' || v.charAt(0) === '#' || v.charAt(0) === '?') return true;
+    if (v.charAt(0) === '/') return v.charAt(1) !== '/' && v.charCodeAt(1) !== 92; // 92 = backslash
+    var colon = v.indexOf(':');
+    if (colon < 0) return true; // relative path
+    var slash = v.indexOf('/');
+    if (slash >= 0 && slash < colon) return true; // "a/b:c" is relative
+    var scheme = v.slice(0, colon);
+    return scheme === 'http' || scheme === 'https' || scheme === 'mailto';
+}
+
+function sanitizePreviewNode(node, doc) {
+    if (node.nodeType === 3) return doc.createTextNode(node.nodeValue);
+    if (node.nodeType !== 1) return null;
+    var tag = node.nodeName.toUpperCase();
+    if (PREVIEW_DROP_WITH_CONTENT[tag]) return null;
+    var children = Array.prototype.slice.call(node.childNodes);
+    if (!PREVIEW_ALLOWED_TAGS[tag] || (tag === 'INPUT' && String(node.getAttribute('type')).toLowerCase() !== 'checkbox')) {
+        // Unknown element: keep its (sanitized) content, drop the element.
+        var frag = doc.createDocumentFragment();
+        children.forEach(function (child) {
+            var clean = sanitizePreviewNode(child, doc);
+            if (clean) frag.appendChild(clean);
+        });
+        return frag;
+    }
+    var el = doc.createElement(tag.toLowerCase());
+    Array.prototype.slice.call(node.attributes).forEach(function (attr) {
+        var name = attr.name.toLowerCase();
+        if (!PREVIEW_ALLOWED_ATTRS[name]) return;
+        if ((name === 'href' || name === 'src') && !isSafePreviewURL(attr.value)) return;
+        el.setAttribute(name, attr.value);
+    });
+    if (tag === 'INPUT') el.setAttribute('disabled', '');
+    if (tag === 'A') el.setAttribute('rel', 'noopener noreferrer');
+    children.forEach(function (child) {
+        var clean = sanitizePreviewNode(child, doc);
+        if (clean) el.appendChild(clean);
+    });
+    return el;
+}
+
+function sanitizePreviewHTML(html) {
+    var parsed = new DOMParser().parseFromString('<!doctype html><body>' + html, 'text/html');
+    var frag = document.createDocumentFragment();
+    Array.prototype.slice.call(parsed.body.childNodes).forEach(function (child) {
+        var clean = sanitizePreviewNode(child, document);
+        if (clean) frag.appendChild(clean);
+    });
+    return frag;
+}
 
 // renderMarkdownPreview also expands reusable gallery blocks. The editor uses
 // marked for immediate feedback, while the public renderer resolves blocks on
 // the server; this small hydration step makes the two views agree.
 function renderMarkdownPreview(preview, source) {
-    preview.innerHTML = marked.parse(source || '');
+    preview.textContent = '';
+    if (typeof marked === 'undefined') {
+        // No Markdown parser on this page: show the source as plain text.
+        var pre = document.createElement('pre');
+        pre.textContent = source || '';
+        preview.appendChild(pre);
+        return;
+    }
+    preview.appendChild(sanitizePreviewHTML(marked.parse(source || '')));
     preview.querySelectorAll('pre > code.language-gallery').forEach(function (code) {
         var lines = code.textContent.trim().split(/\s+/);
         var id = lines[0] || '';

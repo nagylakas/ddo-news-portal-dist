@@ -1,11 +1,13 @@
 {{define "header"}}
 <!DOCTYPE html>
-<html lang="hu" data-bs-theme="light" data-theme="{{themeID}}">
+<html lang="hu" data-bs-theme="{{themeDefaultScheme}}" data-theme="{{themeID}}" {{appearanceAttrs}}>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}</title>
+    <meta name="color-scheme" content="{{themeSchemes}}">
+    {{template "appearance/head"}}
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/branding/icons/favicon.ico?v={{assetVersion}}">
     <link rel="icon" type="image/png" sizes="16x16" href="/branding/icons/icon-16x16.png?v={{assetVersion}}">
@@ -99,13 +101,14 @@
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"NewsMediaOrganization","@id":"{{siteURL}}/#organization","name":{{js (publisherName)}},"url":{{if publisherAboutURL}}{{js (publisherAboutURL)}}{{else}}"{{siteURL}}/"{{end}}{{if publisherLogoURL}},"logo":{"@type":"ImageObject","url":"{{publisherLogoURL}}"}{{end}}{{if publisherDescription}},"description":{{js (publisherDescription)}}{{end}}{{if publisherEditorialPolicyURL}},"publishingPrinciples":{{js (publisherEditorialPolicyURL)}}{{end}}{{if publisherCorrectionsPolicyURL}},"correctionsPolicy":{{js (publisherCorrectionsPolicyURL)}}{{end}},"sameAs":[{{range $i,$url := publisherSameAs}}{{if $i}},{{end}}{{js $url}}{{end}}]{{if publisherTopics}},"knowsAbout":[{{range $i,$topic := publisherTopics}}{{if $i}},{{end}}{{js $topic}}{{end}}]{{end}}},{"@type":"WebSite","@id":"{{siteURL}}/#website","url":"{{siteURL}}/","name":{{js .SiteNameLong}},"publisher":{"@id":"{{siteURL}}/#organization"},"potentialAction":{"@type":"SearchAction","target":"{{siteURL}}/search?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
 </head>
 
-<body>
+<body{{if .CurrentUser}} data-reader-sync="1"{{end}}>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm site-navbar">
         <div class="container-fluid px-4 px-lg-5">
             <a class="navbar-brand" href="/">
                 <img src="/branding/logo.png?v={{assetVersion}}" alt="{{.SiteNameShort}}" {{if brandingLogoWidth}}width="{{brandingLogoWidth}}" height="{{brandingLogoHeight}}"{{end}} style="height:40px; width:auto; display:block;">
             </a>
+            <div class="reader-toggle-slot order-lg-last ms-auto ms-lg-2">{{template "appearance/reader-toggle"}}</div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -204,6 +207,7 @@
         </div>
     </nav>
     <main>
+        {{template "appearance/skin-banner"}}
         {{end}}
 
         {{define "footer"}}

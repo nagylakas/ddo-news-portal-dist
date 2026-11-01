@@ -16,13 +16,22 @@
 
 {{if .OIDCEnabled}}
 <div class="container-fluid px-4 px-lg-5 pt-4 pb-0">
-    <form method="POST" action="/api/personal/follow" class="category-follow-form">
+    <form method="POST" action="/api/personal/follow" class="category-follow-form d-inline-block">
         <input type="hidden" name="kind" value="category">
         <input type="hidden" name="id" value="{{.Category}}">
         <input type="hidden" name="label" value="{{.Category}}">
         <input type="hidden" name="return" value="/category/{{lower .Category}}">
         <button class="btn btn-sm btn-outline-primary" type="submit">
             <i class="bi bi-rss{{if .CategoryFollowed}}-fill{{end}} me-1"></i>{{if .CategoryFollowed}}Követés leállítása{{else}}Kategória követése{{end}}
+        </button>
+    </form>
+    <form method="POST" action="/api/personal/mute" class="category-follow-form d-inline-block ms-1">
+        <input type="hidden" name="kind" value="category">
+        <input type="hidden" name="id" value="{{.Category}}">
+        <input type="hidden" name="label" value="{{.Category}}">
+        <input type="hidden" name="return" value="/category/{{lower .Category}}">
+        <button class="btn btn-sm btn-outline-secondary" type="submit" title="A kategória cikkei nem jelennek meg a címlapon, amíg be vagy jelentkezve.">
+            <i class="bi bi-eye{{if not .CategoryMuted}}-slash{{end}} me-1"></i>{{if .CategoryMuted}}Megjelenítés a címlapon{{else}}Elrejtés a címlapról{{end}}
         </button>
     </form>
 </div>

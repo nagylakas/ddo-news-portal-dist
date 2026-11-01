@@ -18,6 +18,13 @@
                     <a href="#update-status" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update status</a>
                     <a href="#restart" class="list-group-item list-group-item-action py-1 px-2 ms-2">Restart portal</a>
                     <a href="#mcp" class="list-group-item list-group-item-action py-1 px-2 ms-2">MCP server</a>
+                    <a href="#appearance" class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Appearance</a>
+                    <a href="#app-get" class="list-group-item list-group-item-action py-1 px-2 ms-2">Read state</a>
+                    <a href="#app-options" class="list-group-item list-group-item-action py-1 px-2 ms-2">Change options</a>
+                    <a href="#app-reset" class="list-group-item list-group-item-action py-1 px-2 ms-2">Reset options</a>
+                    <a href="#app-skins" class="list-group-item list-group-item-action py-1 px-2 ms-2">Schedule a skin</a>
+                    <a href="#app-skin-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete a schedule</a>
+                    <a href="#app-audit" class="list-group-item list-group-item-action py-1 px-2 ms-2">Audit trail</a>
                     <a href="#stats"      class="list-group-item list-group-item-action py-1 px-2">Site Statistics</a>
                     <a href="#analytics"  class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Analytics</a>
                     <a href="#an-params"     class="list-group-item list-group-item-action py-1 px-2 ms-2">Query parameters</a>
@@ -111,7 +118,7 @@
                 <h4 class="border-bottom pb-2"><i class="bi bi-key me-2"></i>Authentication</h4>
                 <p>Every administrative API endpoint documented on this page requires authentication. Two methods are accepted:</p>
                 <ul>
-                    <li><strong>Session cookie</strong> — automatically used when you are logged in to the admin panel.</li>
+                    <li><strong>Session cookie</strong> — automatically used when you are logged in to the admin panel. For state-changing methods (<code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>) a cookie-authenticated request must also carry an <code>Origin</code> (or <code>Referer</code>) header matching this site, otherwise it is treated as unauthenticated (CSRF protection). Browsers send it automatically for same-site <code>fetch</code> calls; the API key method is not affected.</li>
                     <li><strong>API key header</strong> — send
                         {{if .APIKey}}<code>X-API-Key: {{.APIKey}}</code>{{else}}<code>X-API-Key: &lt;your-key&gt;</code>{{end}}
                         in the request. The key is set via the <code>API_KEY</code> environment variable.</li>
@@ -165,11 +172,19 @@ Content-Type: application/json
                         <tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/system</code></td><td>Required</td></tr></tbody>
                     </table>
                 </div>
-                <p>Returns the running portal engine version, the active icon package and the active theme. <code>icon_pack.loaded</code> is true only when the selected package version is installed and active locally. <code>theme.builtin</code> is true for the built-in <code>default</code> theme (version <code>builtin</code>); <code>theme.modules</code> lists the plugin modules (<code>forum</code>, <code>webshop</code>, <code>marketplace</code>, <code>aggregator</code>) the theme styles specially, on top of the shared frame every theme provides.</p>
+                <p>Returns the running portal engine version, the active icon package and the active theme. <code>icon_pack.loaded</code> is true only when the selected package version is installed and active locally. <code>theme.builtin</code> is true for the built-in <code>default</code> theme (version <code>builtin</code>); <code>theme.modules</code> lists the plugin modules (<code>forum</code>, <code>webshop</code>, <code>marketplace</code>, <code>aggregator</code>) the theme styles specially, on top of the shared frame every theme provides (a child theme also inherits its parent's modules). <code>theme.schemes</code> lists the colour schemes readers can choose from (<code>light</code>, <code>dark</code>; a theme that declares none reports <code>["light"]</code>). <code>theme.extends</code> is the parent theme of a child theme and <code>theme.skin</code> the id of the scheduled skin running right now (see <a href="#appearance">Appearance</a>); both are omitted when empty. The MCP tool <code>get_system_info</code> returns the same <code>theme</code> object.</p>
 <pre class="bg-dark text-light p-3 rounded small"><code>{
   "engine_version": "{{.AppVersion}}",
   "icon_pack": {"id": "itlife", "version": "1.2.0", "loaded": true},
-  "theme": {"id": "aurora", "version": "1.0.0", "builtin": false, "modules": ["forum"]}
+  "theme": {
+    "id": "aurora-night",
+    "version": "1.0.0",
+    "builtin": false,
+    "modules": ["forum"],
+    "schemes": ["light", "dark"],
+    "extends": "aurora",
+    "skin": "mourning"
+  }
 }</code></pre>
             </section>
 
@@ -183,7 +198,8 @@ Content-Type: application/json
                 </div>
                 <p>Fetches and validates the distribution manifest without installing it. Use <code>update_available</code> from the response before starting an update.</p>
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" +  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/system/update/check</code></pre>
-                <p class="mb-0"><strong>Errors:</strong> <code>409</code> self-update unavailable; <code>502</code> update manifest unavailable.</p>
+                <p class="mb-0"><strong>Errors:</strong> <code>409</code> self-update unavailable; <code>502</code> update manifest unavailable or failed verification.</p>
+                <p class="mt-2 mb-0">The manifest (<code>latest.json</code>) carries a <code>sha256</code> checksum for every package and an ed25519 <code>signature</code>. The portal accepts only a manifest signed with its built-in public key; an unsigned, foreign-key or tampered manifest, or a package entry without <code>sha256</code>, is answered with <code>502</code> (<code>update integrity check failed: …</code>). Every refusal writes a <code>SECURITY: self-update refused …</code> log line and a <code>system.update_rejected</code> audit event (alert rule <code>update_rejected</code>).</p>
             </section>
 
             <section id="update-start" class="mb-5 ps-3">
@@ -211,6 +227,7 @@ Content-Type: application/json
                     </table>
                 </div>
                 <p>Returns <code>in_progress</code>, <code>step</code>, <code>message</code>, <code>error</code>, and version fields. The portal restarts shortly after a successful install; clients should retry after its temporary unavailability.</p>
+                <p class="mb-0">The downloaded package is capped at 128 MiB and extracted only after its SHA-256 matches the signed manifest. On a mismatch nothing is installed and <code>error</code> reads <code>Update refused: …</code>.</p>
             </section>
 
             <section id="restart" class="mb-5 ps-3">
@@ -254,6 +271,263 @@ Content-Type: application/json
             </section>
 
             <section id="aggregator" class="mb-5"><h4 class="border-bottom pb-2"><i class="bi bi-rss me-2"></i>News aggregator</h4><p>The optional RSS/Atom aggregator is available in API-only mode with <code>AGGREGATOR_API_ENABLED=true</code>, without replacing the public home. With full <code>AGGREGATOR_ENABLED=true</code>, the <strong>General settings / Home page</strong> selector can make it own <code>/</code>. Its settings can independently hide the portal's native <code>/news</code> listing.</p><div class="table-responsive"><table class="table table-sm table-bordered"><thead class="table-light"><tr><th>Method</th><th>URL</th><th>Description</th></tr></thead><tbody><tr><td>GET, POST</td><td><code>/api/aggregator/sources</code></td><td>List/create RSS or Atom sources.</td></tr><tr><td>GET, PUT, DELETE</td><td><code>/api/aggregator/sources/{id}</code></td><td>Get/update/delete source and cached items.</td></tr><tr><td>POST</td><td><code>/api/aggregator/sources/{id}/refresh</code></td><td>Refresh one source.</td></tr><tr><td>GET, PUT</td><td><code>/api/aggregator/settings</code></td><td>Read/set <code>layout</code> and <code>show_native_news</code>. Set <code>{"show_native_news":false}</code> to hide native news and make <code>/news</code> return 404.</td></tr><tr><td>GET</td><td><code>/api/aggregator/items</code></td><td>Cached items; <code>tag</code>, <code>source_id</code>, <code>include_hidden</code>.</td></tr><tr><td>GET / PUT</td><td><code>/api/aggregator/items/{id}</code> / <code>.../visibility</code></td><td>Get item or set <code>{"hidden":true|false}</code>.</td></tr></tbody></table></div><p class="mb-0">Public HTTP(S) feeds only. Refresh runs every 15 minutes; cached items are retained for 90 days by default (a daily cleanup tick enforces it) — configurable via <code>AGGREGATOR_RETENTION_DAYS</code> (<code>0</code> = keep forever). Failed sources are hidden until a successful refresh. MCP: <code>list_aggregator_sources</code>, <code>get_aggregator_source</code>, <code>create_aggregator_source</code>, <code>update_aggregator_source</code>, <code>delete_aggregator_source</code>, <code>refresh_aggregator_source</code>, <code>list_aggregator_items</code>, <code>get_aggregator_item</code>, <code>set_aggregator_item_visibility</code>, <code>get_aggregator_settings</code>, <code>update_aggregator_settings</code>.</p></section>
+
+            <!-- ── Appearance ─────────────────────────────────────────── -->
+            <section id="appearance" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4">
+                    <i class="bi bi-palette me-2"></i>Appearance
+                </h3>
+                <p>Run-time appearance of the public site: the <strong>customizer</strong> values of the active theme (design tokens such as the navigation bar colour or the card corner radius) and <strong>scheduled skins</strong> — temporary overlays such as mourning or a breaking-news bar that work with every theme. It is the API twin of the <a href="/admin/appearance">Appearance</a> admin page; both call the same helpers. Every change takes effect on the next page load, <strong>without a restart</strong>.</p>
+                <p><strong>Authentication:</strong> admin session or <code>X-API-Key</code>. A cookie-authenticated <code>PUT</code>/<code>POST</code>/<code>DELETE</code> needs a matching <code>Origin</code> (or <code>Referer</code>) header — see <a href="#auth">Authentication</a>.</p>
+                <table class="table table-sm table-bordered"><thead><tr><th>Method</th><th>URL</th><th>Purpose</th></tr></thead><tbody>
+                    <tr><td>GET</td><td><code>/api/appearance</code></td><td>Active theme with its options, running skin, schedules, available skins</td></tr>
+                    <tr><td>PUT</td><td><code>/api/appearance/options</code></td><td>Change customizer values (partial update)</td></tr>
+                    <tr><td>DELETE</td><td><code>/api/appearance/options</code></td><td>Reset the active theme to its defaults</td></tr>
+                    <tr><td>POST</td><td><code>/api/appearance/skins</code></td><td>Schedule a skin</td></tr>
+                    <tr><td>DELETE</td><td><code>/api/appearance/skins/{id}</code></td><td>Delete (and thereby stop) a schedule</td></tr>
+                </tbody></table>
+                <p>Errors are returned as <code>{"error":"message"}</code> with <code>400</code> (invalid JSON, unknown body field, invalid value), <code>404</code> (unknown schedule or sub-path), <code>405</code> (unsupported method) or <code>500</code> (the settings could not be written during a <code>DELETE</code>; on <code>PUT</code>/<code>POST</code> such a failure is reported as <code>400</code>). The settings live in <code>THEME_PACK_STORAGE_DIR/appearance.json</code>, so self-updates keep them; like the session store, the file assumes one application instance per storage directory.</p>
+            </section>
+
+            <section id="app-get" class="mb-5 ps-3">
+                <h5>Read the appearance state</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-success">GET</span></td><td><code>/api/appearance</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+<pre class="bg-dark text-light p-3 rounded small"><code>{
+  "theme": {
+    "id": "default",
+    "version": "builtin",
+    "name": "DDO Classic",
+    "builtin": true,
+    "schemes": ["light", "dark"],
+    "options": [
+      {
+        "id": "navbar",
+        "label": "Navigációs sáv színe",
+        "label_en": "Navigation bar colour",
+        "type": "select",
+        "token": "--theme-navbar-bg",
+        "default": "#0d0d0d",
+        "value": "#14213d",
+        "changed": true,
+        "choices": [
+          {"value": "#0d0d0d", "label": "Fekete", "label_en": "Black"},
+          {"value": "var(--primary-strong)", "label": "Az ikoncsomag színe", "label_en": "Icon pack colour"},
+          {"value": "#14213d", "label": "Éjkék", "label_en": "Midnight blue"},
+          {"value": "#2b2d31", "label": "Grafit", "label_en": "Graphite"}
+        ]
+      },
+      {
+        "id": "card-radius",
+        "label": "Kártyák lekerekítése",
+        "label_en": "Card corner radius",
+        "type": "range",
+        "token": "--theme-card-radius",
+        "default": "0px",
+        "value": "8px",
+        "changed": true,
+        "max": 24,
+        "step": 1,
+        "unit": "px"
+      }
+    ]
+  },
+  "active_skin": {
+    "id": "9f2c4e1a7b3d5c60",
+    "skin": "mourning",
+    "starts_at": "2026-11-01T23:00:00Z",
+    "ends_at": "2026-11-02T23:00:00Z",
+    "message": "Nemzeti gyásznap",
+    "created_by": "api_key",
+    "created_at": "2026-11-01T09:12:00Z",
+    "state": "running"
+  },
+  "schedules": [
+    {
+      "id": "9f2c4e1a7b3d5c60",
+      "skin": "mourning",
+      "starts_at": "2026-11-01T23:00:00Z",
+      "ends_at": "2026-11-02T23:00:00Z",
+      "message": "Nemzeti gyásznap",
+      "created_by": "api_key",
+      "created_at": "2026-11-01T09:12:00Z",
+      "state": "running"
+    }
+  ],
+  "skins": [
+    {"id": "mourning", "name": "Gyász", "name_en": "Mourning", "description": "…", "description_en": "…", "icon": "bi-flower1"},
+    {"id": "national", "name": "Nemzeti ünnep", "name_en": "National holiday", "description": "…", "description_en": "…", "icon": "bi-flag"}
+  ]
+}</code></pre>
+                <p class="mb-1"><strong><code>theme</code></strong> — the running theme:</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>id</code>, <code>version</code>, <code>name</code></td><td>string</td><td>The built-in theme is <code>default</code> / <code>builtin</code> / <code>DDO Classic</code>.</td></tr>
+                            <tr><td><code>builtin</code></td><td>bool</td><td><code>true</code> for the built-in theme.</td></tr>
+                            <tr><td><code>extends</code></td><td>string</td><td>Parent theme id of a child theme; omitted when the theme has no parent.</td></tr>
+                            <tr><td><code>schemes</code></td><td>string array</td><td>Colour schemes readers can choose from on the public site (<code>light</code>, <code>dark</code>). A theme that declares none reports <code>["light"]</code>.</td></tr>
+                            <tr><td><code>options</code></td><td>array</td><td>Customizer options (a child theme's list starts with its parent's options); empty array when the theme exposes none.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong><code>theme.options[]</code></strong>:</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>id</code></td><td>string</td><td>Key to use in <code>PUT /api/appearance/options</code>. The built-in theme has <code>navbar</code>, <code>heading-font</code> and <code>card-radius</code>.</td></tr>
+                            <tr><td><code>label</code> / <code>label_en</code></td><td>string</td><td>Hungarian / English label (<code>label_en</code> omitted when the theme gives none).</td></tr>
+                            <tr><td><code>type</code></td><td>string</td><td><code>select</code> (one of <code>choices</code>) or <code>range</code> (a number between <code>min</code> and <code>max</code>).</td></tr>
+                            <tr><td><code>token</code></td><td>string</td><td>The CSS custom property the value is written to on every page.</td></tr>
+                            <tr><td><code>default</code></td><td>string</td><td>Default CSS value (range values include the unit, e.g. <code>0px</code>).</td></tr>
+                            <tr><td><code>value</code></td><td>string</td><td>Current CSS value: the saved value, otherwise the theme's own token value (select) or <code>default</code>.</td></tr>
+                            <tr><td><code>changed</code></td><td>bool</td><td><code>true</code> when a value differing from the default is saved.</td></tr>
+                            <tr><td><code>choices</code></td><td>array</td><td>Select only: <code>value</code>, <code>label</code>, <code>label_en</code>.</td></tr>
+                            <tr><td><code>min</code>, <code>max</code>, <code>step</code>, <code>unit</code></td><td>number / string</td><td>Range only (zero values are omitted, so a missing <code>min</code> means <code>0</code>). <code>unit</code> is one of <code>px</code>, <code>rem</code>, <code>em</code>, <code>%</code>, <code>ch</code>, <code>vw</code> or omitted.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong><code>active_skin</code></strong> is the schedule running right now, or <code>null</code>. <strong><code>schedules</code></strong> lists every stored schedule, latest start first:</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>id</code></td><td>string</td><td>16 hex characters; use it with <code>DELETE /api/appearance/skins/{id}</code>.</td></tr>
+                            <tr><td><code>skin</code></td><td>string</td><td>Skin id (see below).</td></tr>
+                            <tr><td><code>starts_at</code> / <code>ends_at</code></td><td>RFC 3339 (UTC)</td><td><code>ends_at</code> is omitted for an open-ended schedule (on until deleted).</td></tr>
+                            <tr><td><code>message</code>, <code>link_url</code></td><td>string</td><td>Text and target of the bar shown under the header; omitted when empty.</td></tr>
+                            <tr><td><code>created_by</code></td><td>string</td><td>Set by the server: the admin's e-mail address, or <code>api_key</code>.</td></tr>
+                            <tr><td><code>created_at</code></td><td>RFC 3339 (UTC)</td><td></td></tr>
+                            <tr><td><code>state</code></td><td>string</td><td><code>running</code> (shown now), <code>scheduled</code> (starts later), <code>ended</code>, or <code>overridden</code> (inside its period, but a schedule that started later wins).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-1"><strong><code>skins</code></strong> lists the built-in skins (<code>id</code>, <code>name</code>, <code>name_en</code>, <code>description</code>, <code>description_en</code>, <code>icon</code>):</p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th><code>id</code></th><th>Effect</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>mourning</code></td><td>Greyscale images and logo, a muted grey accent and a mourning ribbon in the corner.</td></tr>
+                            <tr><td><code>national</code></td><td>A red-white-green band under the navigation bar (national holidays).</td></tr>
+                            <tr><td><code>christmas</code></td><td>A festive band and gentle snowfall (respects reduced motion).</td></tr>
+                            <tr><td><code>election</code></td><td>A highlighted live bar under the header with the message and link.</td></tr>
+                            <tr><td><code>breaking</code></td><td>A red, pulsing breaking-news bar under the header with the message and link.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mb-0">With any skin, a non-empty <code>message</code> is shown in a bar under the header (linked when <code>link_url</code> is set).</p>
+            </section>
+
+            <section id="app-options" class="mb-5 ps-3">
+                <h5>Change customizer values</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-warning text-dark">PUT</span></td><td><code>/api/appearance/options</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>values</code></td><td>object</td><td>Yes</td><td>Option id → value, at least one entry. Range values are bare numbers (<code>"8"</code>; the unit is added, <code>"8px"</code> is also accepted) between <code>min</code> and <code>max</code>; select values must be one of the option's <code>choices[].value</code>.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>A <strong>partial update</strong>: the given values are merged into the saved ones, options not in the body keep their current value. A value equal to the option's default is not stored (<code>changed</code> becomes <code>false</code>), so a later theme update that changes the default takes effect. The options belong to the <strong>active</strong> theme and are saved per theme id — values of another theme are kept and come back when that theme is activated again.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "values": {"navbar": "#14213d", "card-radius": "8"}
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/appearance/options</code></pre>
+                <p class="mb-0"><strong>Response 200:</strong> the full state, as in <a href="#app-get">GET /api/appearance</a>. <strong>Response 400:</strong> empty or missing <code>values</code> (use <code>DELETE</code> to reset), unknown option id for the active theme, a select value outside <code>choices</code>, a range value outside <code>min</code>–<code>max</code>, invalid JSON or an unknown body field. Nothing is saved on error. A value saved earlier that the current theme version no longer accepts also fails the request; reset with <code>DELETE</code> in that case.</p>
+            </section>
+
+            <section id="app-reset" class="mb-5 ps-3">
+                <h5>Reset customizer values</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-danger">DELETE</span></td><td><code>/api/appearance/options</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <p>Removes every saved value of the active theme, restoring its defaults. No body.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/appearance/options</code></pre>
+                <p class="mb-0"><strong>Response 200:</strong> the full state, as in <a href="#app-get">GET /api/appearance</a>. <strong>Response 500:</strong> the settings could not be written.</p>
+            </section>
+
+            <section id="app-skins" class="mb-5 ps-3">
+                <h5>Schedule a skin</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-primary">POST</span></td><td><code>/api/appearance/skins</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>skin</code></td><td>string</td><td>Yes</td><td><code>mourning</code>, <code>national</code>, <code>christmas</code>, <code>election</code> or <code>breaking</code>.</td></tr>
+                            <tr><td><code>starts_at</code></td><td>RFC 3339</td><td></td><td>Default: now. May lie in the past.</td></tr>
+                            <tr><td><code>ends_at</code></td><td>RFC 3339</td><td></td><td>Must be after <code>starts_at</code> and in the future. Omitted: the skin stays on until the schedule is deleted.</td></tr>
+                            <tr><td><code>message</code></td><td>string</td><td></td><td>At most 200 characters, no control characters; shown in a bar under the header.</td></tr>
+                            <tr><td><code>link_url</code></td><td>string</td><td></td><td>A site path (<code>/…</code>, not <code>//…</code>) or an <code>https://</code> URL without credentials; at most 500 characters, no whitespace.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>When schedules overlap, the one that <strong>started last</strong> wins (on equal start, the one created last), so a later announcement overrides an earlier one; the others are reported as <code>overridden</code>. At most 100 schedules are stored; ended schedules are pruned 30 days after their end. Times are stored in UTC. <code>created_by</code> is always filled by the server.</p>
+                <p class="mb-1"><strong>Example — national day of mourning on every portal instance</strong> (each instance has its own API key):</p>
+<pre class="bg-dark text-light p-3 rounded small"><code># portals.txt: one "&lt;site URL&gt; &lt;API key&gt;" pair per line
+while read -r site key; do
+  curl -sS -X POST -H "X-API-Key: $key" -H "Content-Type: application/json" \
+    -d '{"skin":"mourning","starts_at":"2026-11-02T00:00:00+01:00","ends_at":"2026-11-03T00:00:00+01:00","message":"Nemzeti gyásznap","link_url":"/article/nemzeti-gyasznap"}' \
+    "$site/api/appearance/skins"
+done &lt; portals.txt</code></pre>
+                <p class="mb-1">Single instance, breaking-news bar from now on until deleted:</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"skin":"breaking","message":"Rendkívüli hír: …","link_url":"/article/rendkivuli"}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/appearance/skins</code></pre>
+                <p class="mb-1"><strong>Response 201:</strong> the stored schedule. Here <code>state</code> is <code>active</code> (inside its period) or <code>scheduled</code>; whether it is actually <code>running</code> or <code>overridden</code> is resolved by <a href="#app-get">GET /api/appearance</a>.</p>
+<pre class="bg-light p-3 rounded small"><code>{
+  "id": "9f2c4e1a7b3d5c60",
+  "skin": "mourning",
+  "starts_at": "2026-11-01T23:00:00Z",
+  "ends_at": "2026-11-02T23:00:00Z",
+  "message": "Nemzeti gyásznap",
+  "link_url": "/article/nemzeti-gyasznap",
+  "created_by": "api_key",
+  "created_at": "2026-11-01T09:12:00Z",
+  "state": "scheduled"
+}</code></pre>
+                <p class="mb-0"><strong>Response 400:</strong> unknown skin, <code>ends_at</code> not after <code>starts_at</code> or already in the past, a too long message or one with control characters, an invalid link, 100 schedules already stored, invalid JSON / time format or an unknown body field.</p>
+            </section>
+
+            <section id="app-skin-delete" class="mb-5 ps-3">
+                <h5>Delete a skin schedule</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light"><tr><th>Method</th><th>URL</th><th>Auth</th></tr></thead>
+                        <tbody><tr><td><span class="badge bg-danger">DELETE</span></td><td><code>/api/appearance/skins/{id}</code></td><td>Required</td></tr></tbody>
+                    </table>
+                </div>
+                <p>Deleting a running schedule stops the skin immediately (an overridden schedule, if any, takes over). Ended schedules can be deleted too.</p>
+<pre class="bg-dark text-light p-3 rounded small"><code>curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/appearance/skins/9f2c4e1a7b3d5c60</code></pre>
+                <p class="mb-0"><strong>Response 204:</strong> no content. <strong>Response 404:</strong> <code>{"error":"schedule not found"}</code>. <strong>Response 500:</strong> the settings could not be written.</p>
+            </section>
+
+            <section id="app-audit" class="mb-5 ps-3">
+                <h5>Audit trail</h5>
+                <p class="mb-0">Every change is written to the audit log (module <code>theme</code>): <code>theme.options_update</code> (target: the theme, detail <code>changed_keys</code> — the ids of the saved options, never their values), <code>theme.options_reset</code> (detail <code>reset</code>), <code>theme.skin_schedule</code> (target: the skin, details <code>schedule_id</code>, <code>starts_at</code>, <code>ends_at</code>) and <code>theme.skin_delete</code> (target: the schedule, detail <code>skin</code>). The admin page writes the same events. <code>GET /api/appearance</code> is not logged.</p>
+            </section>
 
             <!-- ── Site Statistics ────────────────────────────────────── -->
             <section id="stats" class="mb-5">
@@ -334,7 +608,7 @@ Content-Type: application/json
                         <thead class="table-light"><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
                         <tbody>
                             <tr><td><code>range</code></td><td>string</td><td><code>7d</code></td><td><code>today</code>, <code>yesterday</code>, <code>24h</code>, <code>7d</code>, <code>28d</code>, <code>30d</code>, <code>90d</code>, <code>mtd</code>, <code>ytd</code>, <code>12mo</code>, <code>custom</code></td></tr>
-                            <tr><td><code>from</code></td><td>date</td><td>—</td><td><code>YYYY-MM-DD</code>, with <code>range=custom</code></td></tr>
+                            <tr><td><code>from</code></td><td>date</td><td>—</td><td><code>YYYY-MM-DD</code>, with <code>range=custom</code>. A custom range is capped at 731 days and cannot end after today; a longer or future range is shortened.</td></tr>
                             <tr><td><code>to</code></td><td>date</td><td>—</td><td><code>YYYY-MM-DD</code>, inclusive</td></tr>
                             <tr><td><code>granularity</code></td><td>string</td><td>auto</td><td><code>hour</code>, <code>day</code> or <code>month</code> — overrides the bucket size</td></tr>
                             <tr><td><code>compare</code></td><td>boolean</td><td><code>true</code></td><td><code>false</code> skips the previous-period aggregations</td></tr>
@@ -991,6 +1265,7 @@ Content-Type: application/json
       "slug":          "technology",
       "description":   "Tech news and reviews",
       "icon":          "cpu",
+      "color":         "#0b7285",
       "og_image":      "https://cdn.example.com/category.png",
       "display_order": 1,
       "created_at":    "2025-01-01T00:00:00Z",
@@ -1000,6 +1275,10 @@ Content-Type: application/json
     }
   ]
 }</code></pre>
+                <p class="mt-2 mb-1 small text-muted">
+                    <code>color</code> is the optional accent colour of the category's labels on the public
+                    site, as lower-case <code>#rrggbb</code>; an empty string means the theme's default colour.
+                </p>
                 <p class="mt-2 mb-1 small text-muted">
                     <code>article_count</code> is the number of non-deleted articles (including drafts and
                     scheduled ones) currently referencing this category. <code>deletable</code> is
@@ -1046,15 +1325,18 @@ Content-Type: application/json
                             <tr><td><code>name</code></td><td>string</td><td>Yes</td><td>Slug is auto-generated from name (Hungarian accents handled).</td></tr>
                             <tr><td><code>description</code></td><td>string</td><td></td><td></td></tr>
                             <tr><td><code>icon</code></td><td>string</td><td></td><td>Bootstrap Icons name without the <code>bi-</code> prefix, e.g. <code>cpu</code>.</td></tr>
+                            <tr><td><code>color</code></td><td>string</td><td></td><td>Accent colour of the category's labels: <code>#rrggbb</code> or empty (theme default). The <code>#</code> is optional and the case is ignored on input (<code>0B7285</code> → <code>#0b7285</code>); it is stored in lower case. Any other value is rejected.</td></tr>
                             <tr><td><code>og_image</code></td><td>string</td><td></td><td>Public Open Graph image URL for the category page.</td></tr>
                             <tr><td><code>display_order</code></td><td>int</td><td></td><td>Lower = shown first (default: <code>0</code>).</td></tr>
                         </tbody>
                     </table>
                 </div>
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
-  -d '{"name":"Technology","icon":"cpu","og_image":"https://cdn.example.com/category.png","display_order":1}' \
+  -d '{"name":"Technology","icon":"cpu","color":"#0b7285","og_image":"https://cdn.example.com/category.png","display_order":1}' \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories</code></pre>
                 <p class="mt-2 mb-1"><strong>Response 201:</strong> created category object.</p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> <code>{"error":"Érvénytelen szín: #rrggbb formátum szükséges"}</code> — invalid <code>color</code> (nothing is saved).</p>
+                <p class="mt-2 mb-1"><strong>Response 500:</strong> <code>{"error":"Nem sikerült létrehozni a kategóriát"}</code> — database error.</p>
             </section>
 
             <!-- Update category -->
@@ -1070,11 +1352,13 @@ Content-Type: application/json
                         </tr></tbody>
                     </table>
                 </div>
-                <p>Same fields as Create. Slug is always regenerated from the updated name.</p>
+                <p>Same fields as Create (full replacement: an omitted <code>color</code> clears the colour). Slug is always regenerated from the updated name.</p>
 <pre class="bg-dark text-light p-3 rounded small"><code>curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
-  -d '{"name":"Tech & Gadgets","icon":"cpu","display_order":1}' \
+  -d '{"name":"Tech &amp; Gadgets","icon":"cpu","color":"#c92a2a","display_order":1}' \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb</code></pre>
                 <p class="mt-2 mb-1"><strong>Response 200:</strong> updated category object.</p>
+                <p class="mt-2 mb-1"><strong>Response 400:</strong> <code>{"error":"Érvénytelen szín: #rrggbb formátum szükséges"}</code> — invalid <code>color</code> (nothing is saved).</p>
+                <p class="mt-2 mb-1"><strong>Response 404:</strong> <code>{"error":"A kategória nem található vagy nem sikerült frissíteni"}</code> — unknown id.</p>
             </section>
 
             <!-- Delete category -->
@@ -2066,7 +2350,7 @@ Content-Type: application/json
 
             <section id="galleries" class="mb-5">
                 <h2>Galériák</h2>
-                <p>A <code>GET /api/galleries/{id}</code> nyilvános, a teljes rendezett képsort adja az overlayhez. A kezelés API-kulccsal vagy admin munkamenettel érhető el.</p>
+                <p>A <code>GET /api/galleries/{id}</code> nyilvános, a teljes rendezett képsort adja az overlayhez. A nyilvános válasz csak a megjelenítéshez szükséges mezőket tartalmazza: <code>id</code>, <code>title</code> és <code>images[]</code> (<code>id</code>, <code>url</code>, <code>alt_text</code>, <code>title</code>, <code>width</code>, <code>height</code>); a belső médiametaadatok (pl. <code>object_key</code>, <code>md5_hash</code>, hivatkozásszámok) csak a kezelő végpontokon látszanak. A kezelés API-kulccsal vagy admin munkamenettel érhető el.</p>
                 <table class="table table-sm table-bordered"><thead><tr><th>Method</th><th>URL</th></tr></thead><tbody><tr><td>GET, POST</td><td><code>/api/galleries/manage</code></td></tr><tr><td>GET, PUT, DELETE</td><td><code>/api/galleries/manage/{id}</code></td></tr></tbody></table>
                 <p>Írási törzs: <code>{"title":"Nyári képek","image_ids":["&lt;media-id&gt;"]}</code>. Csak képfájl-médiák választhatók. A kezelő válaszok az <code>images</code>, <code>article_references</code>, <code>page_references</code> és <code>deletable</code> mezőket tartalmazzák.</p>
                 <p>Aktív cikk- vagy publikálható oldalhivatkozás esetén a törlés <strong>409 Conflict</strong>, <code>resource_in_use</code> kóddal tér vissza. Hibás ID: 400; hiányzó galéria: 404; adattári hiba: 500.</p>

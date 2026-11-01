@@ -1,0 +1,241 @@
+{{define "admin/appearance"}}
+{{template "admin-header" .}}
+<style>
+    .ap-grid { display: grid; grid-template-columns: minmax(18rem, 26rem) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+    @media (max-width: 991.98px) { .ap-grid { grid-template-columns: 1fr; } }
+    .ap-card { border: 1px solid var(--bs-border-color); border-radius: .8rem; background: var(--bs-body-bg); }
+    .ap-card-head { padding: .9rem 1.1rem; border-bottom: 1px solid var(--bs-border-color); display: flex; align-items: center; gap: .6rem; }
+    .ap-card-body { padding: 1.1rem; }
+    .ap-option + .ap-option { margin-top: 1rem; }
+    .ap-option label { font-weight: 600; font-size: .9rem; display: flex; justify-content: space-between; gap: .5rem; }
+    .ap-option .ap-value { font-family: var(--bs-font-monospace); font-size: .78rem; color: var(--bs-secondary-color); }
+    .ap-changed { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--bs-warning-text-emphasis); background: var(--bs-warning-bg-subtle); border-radius: 1rem; padding: 0 .45rem; }
+    .ap-preview-wrap { position: sticky; top: 5rem; }
+    .ap-preview-bar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .6rem .8rem; border-bottom: 1px solid var(--bs-border-color); }
+    .ap-frame { width: 100%; height: min(78vh, 52rem); border: 0; border-radius: 0 0 .8rem .8rem; background: #fff; display: block; }
+    .ap-skin-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: .6rem; }
+    .ap-skin { border: 1px solid var(--bs-border-color); border-radius: .6rem; padding: .7rem .8rem; cursor: pointer; display: flex; gap: .6rem; align-items: flex-start; }
+    .ap-skin input { margin-top: .3rem; }
+    .ap-skin:has(input:checked) { border-color: var(--bs-primary); box-shadow: 0 0 0 .15rem rgba(var(--bs-primary-rgb), .2); }
+    .ap-skin small { display: block; color: var(--bs-secondary-color); line-height: 1.3; }
+    .ap-state { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .ap-state-running { color: var(--bs-success); }
+    .ap-state-scheduled { color: var(--bs-primary); }
+    .ap-state-ended, .ap-state-overridden { color: var(--bs-secondary-color); }
+</style>
+<div class="container-fluid py-4 px-4 px-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+            <h4 class="mb-1 fw-bold"><i class="bi bi-sliders me-2 text-primary"></i>{{t .Lang "nav.appearance"}}</h4>
+            <p class="text-muted mb-0">{{t .Lang "appearance.intro"}}</p>
+        </div>
+        <a class="btn btn-outline-primary" href="/admin/themes"><i class="bi bi-brush me-1"></i>{{t .Lang "nav.themes"}}</a>
+    </div>
+
+    {{if .ErrorMessage}}<div class="alert alert-danger">{{.ErrorMessage}}</div>{{end}}
+    {{if .FlashMessage}}<div class="alert alert-success">{{.FlashMessage}}</div>{{end}}
+
+    <!-- ===== Customizer ===== -->
+    <h5 class="fw-bold mt-4 mb-3" id="customizer"><i class="bi bi-palette me-2"></i>{{t .Lang "appearance.customizer"}}</h5>
+    <div class="ap-grid mb-5">
+        <div class="ap-card">
+            <div class="ap-card-head">
+                <div class="flex-grow-1">
+                    <div class="small text-muted text-uppercase fw-bold">{{t .Lang "appearance.theme_label"}}</div>
+                    <div class="fw-bold">{{.Theme.Name}} <code class="small">{{.Theme.ID}}</code>{{if not .Theme.Builtin}} <span class="text-muted small">v{{.Theme.Version}}</span>{{end}}</div>
+                    <div class="small text-muted">{{t .Lang "appearance.schemes_label"}}: {{range $i, $s := .Schemes}}{{if $i}}, {{end}}{{t $.Lang (print "themes.scheme." $s)}}{{end}}</div>
+                </div>
+            </div>
+            <div class="ap-card-body">
+                <p class="small text-muted">{{t .Lang "appearance.customizer_intro"}}{{if eq (len .Schemes) 2}} {{t .Lang "appearance.schemes_hint"}}{{end}}</p>
+                {{if .Options}}
+                <form method="POST" action="/admin/appearance/options" id="apOptionsForm">
+                    {{range .Options}}
+                    <div class="ap-option" data-token="{{.Token}}" data-unit="{{.Unit}}">
+                        <label for="opt_{{.ID}}"><span>{{.Label}} {{if .Changed}}<span class="ap-changed">{{t $.Lang "appearance.changed"}}</span>{{end}}</span><span class="ap-value" data-ap-value>{{.Value}}</span></label>
+                        {{if eq .Type "range"}}
+                        <input type="range" class="form-range" id="opt_{{.ID}}" name="opt_{{.ID}}" min="{{.Min}}" max="{{.Max}}" step="{{.Step}}" value="{{.RawValue}}" data-default="{{.Option.Default}}">
+                        {{else}}
+                        <select class="form-select form-select-sm" id="opt_{{.ID}}" name="opt_{{.ID}}">
+                            {{$current := .Value}}
+                            {{range .Choices}}<option value="{{.Value}}"{{if eq .Value $current}} selected{{end}}>{{.Label}}</option>{{end}}
+                        </select>
+                        {{end}}
+                    </div>
+                    {{end}}
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn btn-primary"><i class="bi bi-check2 me-1"></i>{{t .Lang "appearance.save"}}</button>
+                    </div>
+                </form>
+                <form method="POST" action="/admin/appearance/options/reset" class="mt-2" onsubmit="return confirm('{{t .Lang "appearance.reset_confirm"}}')">
+                    <button class="btn btn-link btn-sm px-0 text-secondary"><i class="bi bi-arrow-counterclockwise me-1"></i>{{t .Lang "appearance.reset"}}</button>
+                </form>
+                {{else}}
+                <div class="alert alert-secondary mb-0">{{t .Lang "appearance.no_options"}}</div>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="ap-card ap-preview-wrap">
+            <div class="ap-preview-bar">
+                <strong class="me-auto"><i class="bi bi-eye me-1"></i>{{t .Lang "appearance.preview"}}</strong>
+                <label class="small text-muted" for="apPreviewPage">{{t .Lang "appearance.preview_page"}}</label>
+                <select class="form-select form-select-sm w-auto" id="apPreviewPage">
+                    <option value="/">{{t .Lang "appearance.preview_home"}}</option>
+                    <option value="/search?q=a">{{t .Lang "appearance.preview_search"}}</option>
+                </select>
+                {{if eq (len .Schemes) 2}}
+                <div class="btn-group btn-group-sm" role="group" aria-label="{{t .Lang "appearance.preview_scheme"}}">
+                    {{range .Schemes}}<button type="button" class="btn btn-outline-secondary" data-ap-scheme="{{.}}">{{t $.Lang (print "themes.scheme." .)}}</button>{{end}}
+                </div>
+                {{end}}
+                <select class="form-select form-select-sm w-auto" id="apPreviewSkin" aria-label="{{t .Lang "appearance.preview_skin"}}">
+                    <option value="">{{t .Lang "appearance.preview_skin"}}: {{t .Lang "appearance.preview_none"}}</option>
+                    {{range .Skins}}<option value="{{.ID}}">{{.DisplayName $.Lang}}</option>{{end}}
+                </select>
+            </div>
+            <iframe class="ap-frame" id="apFrame" src="/?appearance_preview=1" title="{{t .Lang "appearance.preview"}}" loading="lazy"></iframe>
+        </div>
+    </div>
+
+    <!-- ===== Skins ===== -->
+    <h5 class="fw-bold mb-2" id="skins"><i class="bi bi-calendar-event me-2"></i>{{t .Lang "appearance.skins"}}</h5>
+    <p class="text-muted">{{t .Lang "appearance.skins_intro"}}</p>
+    {{with .ActiveSkin}}
+    <div class="alert alert-success d-flex align-items-center gap-3">
+        <i class="bi {{.SkinIcon}} fs-3"></i>
+        <div class="flex-grow-1">
+            <div class="small text-uppercase fw-bold">{{t $.Lang "appearance.skin_running"}}</div>
+            <div class="fw-bold">{{.SkinName}}</div>
+            <div class="small">{{.Starts}} &rarr; {{if .Ends}}{{.Ends}}{{else}}{{t $.Lang "appearance.until_stopped"}}{{end}}{{if .Message}} · „{{.Message}}”{{end}}</div>
+        </div>
+        <form method="POST" action="/admin/appearance/skins/delete/{{.ID}}" onsubmit="return confirm('{{t $.Lang "appearance.delete_confirm"}}')">
+            <button class="btn btn-outline-danger btn-sm"><i class="bi bi-stop-circle me-1"></i>{{t $.Lang "appearance.stop"}}</button>
+        </form>
+    </div>
+    {{else}}
+    <div class="alert alert-light border"><i class="bi bi-info-circle me-1"></i>{{t .Lang "appearance.no_skin"}}</div>
+    {{end}}
+
+    <div class="ap-grid">
+        <div class="ap-card">
+            <div class="ap-card-head"><i class="bi bi-plus-circle"></i><strong>{{t .Lang "appearance.add_schedule"}}</strong></div>
+            <form class="ap-card-body" method="POST" action="/admin/appearance/skins">
+                <div class="mb-3">
+                    <div class="form-label fw-semibold">{{t .Lang "appearance.field.skin"}}</div>
+                    <div class="ap-skin-list">
+                        {{range $i, $s := .Skins}}
+                        <label class="ap-skin"><input class="form-check-input" type="radio" name="skin" value="{{$s.ID}}"{{if eq $i 0}} checked{{end}} required>
+                            <span><i class="bi {{$s.Icon}} me-1"></i><strong>{{$s.DisplayName $.Lang}}</strong><small>{{$s.DisplayDescription $.Lang}}</small></span></label>
+                        {{end}}
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold" for="apStarts">{{t .Lang "appearance.field.starts_at"}}</label>
+                        <input type="datetime-local" class="form-control" id="apStarts" name="starts_at" value="{{.DefaultStart}}">
+                        <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="start_now" value="1" id="apStartNow"><label class="form-check-label small" for="apStartNow">{{t .Lang "appearance.field.start_now"}}</label></div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold" for="apEnds">{{t .Lang "appearance.field.ends_at"}}</label>
+                        <input type="datetime-local" class="form-control" id="apEnds" name="ends_at">
+                        <div class="form-text">{{t .Lang "appearance.field.ends_hint"}}</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold" for="apMessage">{{t .Lang "appearance.field.message"}}</label>
+                        <input type="text" class="form-control" id="apMessage" name="message" maxlength="200">
+                        <div class="form-text">{{t .Lang "appearance.field.message_hint"}}</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold" for="apLink">{{t .Lang "appearance.field.link"}}</label>
+                        <input type="text" class="form-control" id="apLink" name="link_url" maxlength="500" placeholder="/article/...">
+                        <div class="form-text">{{t .Lang "appearance.field.link_hint"}}</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-3"><i class="bi bi-calendar-plus me-1"></i>{{t .Lang "appearance.add_schedule"}}</button>
+            </form>
+        </div>
+        <div class="ap-card">
+            <div class="ap-card-head"><i class="bi bi-list-ul"></i><strong>{{t .Lang "appearance.schedule_list"}}</strong></div>
+            <div class="ap-card-body p-0">
+                {{if .Schedules}}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <tbody>
+                        {{range .Schedules}}
+                        <tr>
+                            <td class="ps-3"><i class="bi {{.SkinIcon}} me-1"></i><strong>{{.SkinName}}</strong>{{if .Message}}<div class="small text-muted text-truncate" style="max-width:22rem">„{{.Message}}”</div>{{end}}</td>
+                            <td class="small">{{.Starts}}<br>&rarr; {{if .Ends}}{{.Ends}}{{else}}{{t $.Lang "appearance.until_stopped"}}{{end}}</td>
+                            <td><span class="ap-state ap-state-{{.State}}">{{t $.Lang (print "appearance.state." .State)}}</span>{{if .CreatedBy}}<div class="small text-muted">{{t $.Lang "appearance.created_by"}} {{.CreatedBy}}</div>{{end}}</td>
+                            <td class="text-end pe-3">
+                                <form method="POST" action="/admin/appearance/skins/delete/{{.ID}}" onsubmit="return confirm('{{t $.Lang "appearance.delete_confirm"}}')">
+                                    <button class="btn btn-outline-danger btn-sm" title="{{t $.Lang "appearance.delete"}}"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                {{else}}
+                <p class="text-muted p-3 mb-0">{{t .Lang "appearance.no_schedules"}}</p>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    var frame = document.getElementById('apFrame');
+    if (!frame) return;
+    var scheme = '', skin = '';
+    function doc() { try { return frame.contentDocument; } catch (e) { return null; } }
+    function apply() {
+        var d = doc();
+        if (!d || !d.documentElement) return;
+        var root = d.documentElement;
+        document.querySelectorAll('.ap-option').forEach(function (box) {
+            var input = box.querySelector('input, select');
+            var value = input.value + (input.type === 'range' ? (box.dataset.unit || '') : '');
+            root.style.setProperty(box.dataset.token, value);
+            var label = box.querySelector('[data-ap-value]');
+            if (label) label.textContent = value;
+        });
+        if (scheme) root.setAttribute('data-bs-theme', scheme);
+        if (skin) { root.setAttribute('data-skin', skin); } else if (root.dataset.apSkinSet) { root.removeAttribute('data-skin'); }
+        root.dataset.apSkinSet = skin ? '1' : '';
+        // Keep preview navigation inside the preview mode.
+        d.querySelectorAll('a[href^="/"]').forEach(function (a) {
+            if (a.dataset.apPatched) return;
+            a.dataset.apPatched = '1';
+            a.addEventListener('click', function (event) {
+                event.preventDefault();
+                var href = a.getAttribute('href');
+                frame.src = href + (href.indexOf('?') < 0 ? '?' : '&') + 'appearance_preview=1';
+            });
+        });
+    }
+    frame.addEventListener('load', apply);
+    document.querySelectorAll('.ap-option input, .ap-option select').forEach(function (el) {
+        el.addEventListener('input', apply);
+        el.addEventListener('change', apply);
+    });
+    var page = document.getElementById('apPreviewPage');
+    if (page) page.addEventListener('change', function () {
+        frame.src = page.value + (page.value.indexOf('?') < 0 ? '?' : '&') + 'appearance_preview=1';
+    });
+    document.querySelectorAll('[data-ap-scheme]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            scheme = btn.dataset.apScheme;
+            document.querySelectorAll('[data-ap-scheme]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+            apply();
+        });
+    });
+    var skinSelect = document.getElementById('apPreviewSkin');
+    if (skinSelect) skinSelect.addEventListener('change', function () { skin = skinSelect.value; apply(); });
+    var startNow = document.getElementById('apStartNow'), starts = document.getElementById('apStarts');
+    if (startNow && starts) startNow.addEventListener('change', function () { starts.disabled = startNow.checked; });
+}());
+</script>
+{{template "admin-footer" .}}
+{{end}}

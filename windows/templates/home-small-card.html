@@ -9,7 +9,7 @@
                 <i class="bi bi-image text-muted" style="font-size:2rem;"></i>
             </div>
             {{end}}
-            <span class="latest-badge latest-badge-sm latest-badge-overlay">{{.Category}}</span>
+            <span class="latest-badge latest-badge-sm latest-badge-overlay" {{categoryStyle .Category}}>{{.Category}}</span>
         </div>
         <div class="latest-small-body">
             <h6 class="latest-small-title">{{truncate .Title 65}}</h6>

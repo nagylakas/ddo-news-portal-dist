@@ -24,6 +24,7 @@
             <div class="small text-muted mt-1"><code>{{.ID}}</code>{{if not .Builtin}} · v{{.InstalledVersion}}{{end}}{{if .Author}} · {{t $.Lang "themes.by"}} {{.Author}}{{end}}</div>
         </div>
         {{if .Builtin}}<span class="ip-builtin"><i class="bi bi-lock-fill"></i>{{t $.Lang "themes.builtin"}}</span>{{end}}
+        <a class="btn btn-sm btn-outline-primary" href="/admin/appearance"><i class="bi bi-sliders me-1"></i>{{t $.Lang "themes.customize"}}</a>
         {{if .UpdateAvailable}}<span class="badge text-bg-warning">{{t $.Lang "themes.update_available"}}</span>{{end}}
     </div>
     {{else}}
@@ -52,6 +53,10 @@
                 <p class="ip-desc" title="{{.Description}}">{{.Description}}</p>
                 <div class="ip-chips">
                     <span class="ip-chip is-core" title="{{t $.Lang "themes.core_scope"}}"><i class="bi bi-window me-1"></i>{{t $.Lang "themes.core_scope"}}</span>
+                    {{$schemes := .EffectiveSchemes}}{{if eq (len $schemes) 2}}<span class="ip-chip is-core"><i class="bi bi-circle-half me-1"></i>{{t $.Lang "themes.scheme.both"}}</span>{{else if eq (index $schemes 0) "dark"}}<span class="ip-chip is-core"><i class="bi bi-moon-stars me-1"></i>{{t $.Lang "themes.scheme.dark"}}</span>{{end}}
+                    {{if .Options}}<span class="ip-chip is-core"><i class="bi bi-sliders me-1"></i>{{len .Options}} {{t $.Lang "themes.options_count"}}</span>{{end}}
+                    {{if .Extends}}<span class="ip-chip"><i class="bi bi-diagram-2 me-1"></i>{{t $.Lang "themes.extends"}} <code>{{.Extends}}</code></span>{{end}}
+                    {{if .IsActiveParent}}<span class="ip-chip"><i class="bi bi-lock me-1"></i>{{t $.Lang "themes.parent_of_active"}}</span>{{end}}
                 </div>
                 <div class="ip-chips">
                     {{if .Modules}}<span class="text-muted">{{t $.Lang "themes.modules_label"}}:</span>
@@ -79,7 +84,7 @@
                     {{if .Active}}
                     <button class="btn btn-sm text-white" style="background:{{$.PrimaryColor}}" disabled><i class="bi bi-check-circle-fill me-1"></i>{{t $.Lang "themes.active"}}</button>
                     {{else}}
-                    <form method="POST" action="/admin/themes/activate" class="pack-activate-form"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{if .Builtin}}{{.Version}}{{else}}{{.InstalledVersion}}{{end}}"><button class="btn btn-outline-success btn-sm"><i class="bi bi-check2-circle me-1"></i>{{t $.Lang "themes.activate"}}</button></form>
+                    <form method="POST" action="/admin/themes/activate"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="version" value="{{if .Builtin}}{{.Version}}{{else}}{{.InstalledVersion}}{{end}}"><button class="btn btn-outline-success btn-sm"><i class="bi bi-check2-circle me-1"></i>{{t $.Lang "themes.activate"}}</button></form>
                     {{end}}
                     {{end}}
                     {{if .CanDelete}}
@@ -91,7 +96,6 @@
         {{end}}
     </div>
 </div>
-{{template "admin/pack-store-restart" (dict "Lang" .Lang "Prefix" "themes")}}
 {{template "admin/pack-store-filters"}}
 {{template "admin-footer" .}}
 {{end}}

@@ -15,6 +15,45 @@
                          "sha256":  "2de89def5a3db93d475d89a948591736a8e78c544808c020103deabb5d83b046"
                      },
                      {
+                         "id":  "aurora",
+                         "version":  "1.1.0",
+                         "name":  "Aurora",
+                         "description":  "Reference theme: soft rounded cards, airy spacing and a translucent navbar, in a light and a deep-slate dark scheme the reader can switch between. Corner radius, shadow strength, page tint and navbar colour are adjustable in the customizer. It reuses the colours and logo of the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-aurora-1.1.0.zip",
+                         "sha256":  "b34a1f2668461e35acaa2b1a98c5dea44fb6dbe6d487ef3b71209021f0e744e8"
+                     },
+                     {
+                         "id":  "kepes",
+                         "version":  "1.0.0",
+                         "name":  "Képes",
+                         "description":  "Photo-first look for image and video-heavy portals: a large inset hero, a masonry-like mosaic of big image cards with the headline set on a gradient, minimal chrome, generous whitespace and rounded corners. Stories without a picture become typographic cards on a tint of their category colour. A calm light scheme and a dramatic near-black dark scheme. Accent colour, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-kepes-1.0.0.zip",
+                         "sha256":  "a6640030ee0b45fd04fcea2612e0903ec3a71bfd5224292461436b93b62be26c"
+                     },
+                     {
+                         "id":  "kontraszt",
+                         "version":  "1.0.0",
+                         "name":  "Kontraszt",
+                         "description":  "Accessibility theme aiming at WCAG AAA: at least 7:1 text contrast, underlined links everywhere, thick 3 px focus rings, larger type, 44 px tap targets, clear card borders and no motion at all. Titles never sit directly on images, they get a solid band. The icon pack colour is used only for decorative borders and stripes. Black-on-white and white-on-black schemes.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-kontraszt-1.0.0.zip",
+                         "sha256":  "1202ca0132ad987c72388f3444fcdac535b1786afbc3b7b5a05dd9bd7e95039c"
+                     },
+                     {
                          "id":  "meridian",
                          "version":  "1.0.0",
                          "name":  "Meridian",
@@ -26,6 +65,32 @@
                                      ],
                          "asset":  "theme-meridian-1.0.0.zip",
                          "sha256":  "46b3851ea5b2912dbfbc2dac3e39a98c5f9c70e81f4611957f675b93ac46fc89"
+                     },
+                     {
+                         "id":  "meridian",
+                         "version":  "1.1.0",
+                         "name":  "Meridian",
+                         "description":  "Editorial print-magazine look: warm paper background, serif headlines, hairline rules, drop caps and an ink-black frame, plus a \"night print\" dark scheme (deep warm charcoal paper, cream ink) the reader can switch to. Headline typeface, drop cap and rule strength are adjustable in the customizer. Accent colour, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-meridian-1.1.0.zip",
+                         "sha256":  "22ea036c0829caa4792e1c29fbd770f2f0e56bf5f278b13fd517d824f5e6a91b"
+                     },
+                     {
+                         "id":  "napilap",
+                         "version":  "1.0.0",
+                         "name":  "Napilap",
+                         "description":  "Broadsheet daily-newspaper front page: a serif nameplate with a date line, a dense multi-column grid separated by thin column rules, a two-column lead story, text-first secondary stories with small thumbnails and a headlines-only briefs column. Off-white newsprint by day, a dark night edition by night. Accent colour, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-napilap-1.0.0.zip",
+                         "sha256":  "bb399c37f7386b41f18b871554e7bd4e4dd59480fe40ca007ff95ca492c454ca"
                      },
                      {
                          "id":  "nexus",
@@ -41,6 +106,33 @@
                          "sha256":  "04980224f9c07a6b673f10ae3a7f51443481747eda92e1df240549c9203fb4fd"
                      },
                      {
+                         "id":  "nexus",
+                         "version":  "1.0.1",
+                         "name":  "Nexus",
+                         "description":  "Modern gaming-media look: near-black navy surfaces, rounded bento cards with hairline borders, eyebrow labels, a scrolling live ticker, a numbered top-5 list and an accent taken from your icon pack. Ships its own home page layout, including the reader\u0027s personal \"For you\" block. Dark colour scheme.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-nexus-1.0.1.zip",
+                         "sha256":  "7438163e6630d9094c933601464d5d8ed22fce879c1f086ca01627a2367eb638"
+                     },
+                     {
+                         "id":  "nexus-light",
+                         "version":  "1.0.0",
+                         "name":  "Nexus Light",
+                         "description":  "The Nexus bento layout in daylight: cool off-white canvas, white cards with soft shadows instead of glows, a light live ticker and a deep navy frame that keeps every logo readable. Inherits the Nexus home page and card templates; readers can switch to the original dark Nexus palette.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-nexus-light-1.0.0.zip",
+                         "sha256":  "948cc7ab36fb291a40fc5da03b31586f9e0e3919fe8b4d500e09677abd7ad1b5",
+                         "extends":  "nexus"
+                     },
+                     {
                          "id":  "overdrive",
                          "version":  "1.0.0",
                          "name":  "Overdrive",
@@ -52,6 +144,32 @@
                                      ],
                          "asset":  "theme-overdrive-1.0.0.zip",
                          "sha256":  "fa338294e4f8fddc3bd5db3597c4a23a0d2ceabf0e2ae12acde615a8ec91477a"
+                     },
+                     {
+                         "id":  "papir",
+                         "version":  "1.0.0",
+                         "name":  "Papír",
+                         "description":  "Text-first, lightweight reading theme: listings drop their thumbnails and become calm text rows, the article page is a single comfortable column with large type and generous line height. No shadows, no animations, ideal on slow mobile connections. Warm paper-white and warm dark grey schemes.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-papir-1.0.0.zip",
+                         "sha256":  "bdc484639c707ce59a03dda9c168a7b2d216a885ec2a986fd0edcf15bbb86058"
+                     },
+                     {
+                         "id":  "terminal",
+                         "version":  "1.0.0",
+                         "name":  "Terminál",
+                         "description":  "Monospace, high-contrast theme for IT audiences: ASCII-flavoured dashed and double rules, prompt glyphs before section titles, [ BRACKETED ] category labels and square corners. The icon pack colour works as the terminal highlight. Classic dark terminal and green-bar paper light schemes.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-terminal-1.0.0.zip",
+                         "sha256":  "f891f498360acaab5bdf633170afa59a1c84d564bcee21b88a9a39ce55344664"
                      }
                  ]
 }

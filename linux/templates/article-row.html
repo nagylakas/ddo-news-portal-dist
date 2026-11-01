@@ -11,7 +11,7 @@
     <!-- Text -->
     <div class="listing-text">
         <div class="listing-meta-top">
-            <span class="latest-badge latest-badge-sm">{{.Category}}</span>
+            <span class="latest-badge latest-badge-sm" {{categoryStyle .Category}}>{{.Category}}</span>
             <span class="listing-date">{{formatDate .PublishedAt}}</span>
         </div>
         <a href="/article/{{.Slug}}" class="text-decoration-none text-dark">

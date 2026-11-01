@@ -9,6 +9,9 @@
                 {{if .ClientName}}
                 <div class="text-muted small mt-2">{{t .Lang "oauth.connecting_client"}}: <strong>{{.ClientName}}</strong></div>
                 {{end}}
+                {{if .RedirectHost}}
+                <div class="text-muted small mt-1">{{t .Lang "oauth.redirect_target"}}: <code>{{.RedirectHost}}</code></div>
+                {{end}}
             </div>
 
             {{if .ErrorMessage}}
