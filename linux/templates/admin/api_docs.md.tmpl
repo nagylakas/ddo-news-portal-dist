@@ -18,6 +18,13 @@ REST API reference for authenticated administrative access to this news portal.
   - [Update status](#update-status)
   - [Restart portal](#restart-portal)
   - [MCP server](#mcp-server)
+- [Appearance](#appearance)
+  - [Read the appearance state](#read-the-appearance-state)
+  - [Change customizer values](#change-customizer-values)
+  - [Reset customizer values](#reset-customizer-values)
+  - [Schedule a skin](#schedule-a-skin)
+  - [Delete a skin schedule](#delete-a-skin-schedule)
+  - [Appearance audit trail](#appearance-audit-trail)
 - [Site Statistics](#site-statistics)
 - [Analytics](#analytics)
   - [Query parameters](#query-parameters)
@@ -92,7 +99,7 @@ REST API reference for authenticated administrative access to this news portal.
 
 Every administrative API endpoint documented here requires authentication. Two methods are accepted:
 
-- **Session cookie** — automatically used when you are logged in to the admin panel.
+- **Session cookie** — automatically used when you are logged in to the admin panel. For state-changing methods (`POST`, `PUT`, `PATCH`, `DELETE`) a cookie-authenticated request must also carry an `Origin` (or `Referer`) header matching this site, otherwise it is treated as unauthenticated (CSRF protection). Browsers send it automatically for same-site `fetch` calls; the API key method is not affected.
 - **API key header** — send `X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}<your-key>{{end}}` in the request. The key is set via the `API_KEY` environment variable.
 
 {{if eq .APIKey ""}}
@@ -162,7 +169,7 @@ All endpoints in this section require an admin session or `X-API-Key`. They are 
 | --- | --- | --- |
 | GET | `/api/system` | Required |
 
-Returns the running portal engine version, the configured icon package and the active theme. `icon_pack.loaded` is true only when that package version is available locally and is actually active. `theme.builtin` is true for the built-in `default` theme (version `builtin`); `theme.modules` lists the plugin modules (`forum`, `webshop`, `marketplace`, `aggregator`) the theme styles specially, on top of the shared frame every theme provides.
+Returns the running portal engine version, the configured icon package and the active theme. `icon_pack.loaded` is true only when that package version is available locally and is actually active. `theme.builtin` is true for the built-in `default` theme (version `builtin`); `theme.modules` lists the plugin modules (`forum`, `webshop`, `marketplace`, `aggregator`) the theme styles specially, on top of the shared frame every theme provides (a child theme also inherits its parent's modules). `theme.schemes` lists the colour schemes readers can choose from (`light`, `dark`; a theme that declares none reports `["light"]`). `theme.extends` is the parent theme of a child theme and `theme.skin` the id of the scheduled skin running right now (see [Appearance](#appearance)); both are omitted when empty. The MCP tool `get_system_info` returns the same `theme` object.
 
 ```json
 {
@@ -173,10 +180,13 @@ Returns the running portal engine version, the configured icon package and the a
     "loaded": true
   },
   "theme": {
-    "id": "aurora",
+    "id": "aurora-night",
     "version": "1.0.0",
     "builtin": false,
-    "modules": ["forum"]
+    "modules": ["forum"],
+    "schemes": ["light", "dark"],
+    "extends": "aurora",
+    "skin": "mourning"
   }
 }
 ```
@@ -194,7 +204,9 @@ curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/system/update/check
 ```
 
-`409 Conflict` means self-update is unavailable in this deployment; `502 Bad Gateway` means the update manifest could not be retrieved.
+`409 Conflict` means self-update is unavailable in this deployment; `502 Bad Gateway` means the update manifest could not be retrieved or failed verification.
+
+The manifest (`latest.json`) carries a `sha256` checksum for every package and an ed25519 `signature`. The portal accepts only a manifest signed with its built-in public key; an unsigned, foreign-key or tampered manifest, or a package entry without `sha256`, is answered with `502` (`update integrity check failed: …`). Every refusal writes a `SECURITY: self-update refused …` log line and a `system.update_rejected` audit event (alert rule `update_rejected`).
 
 ### Start an update
 
@@ -219,6 +231,8 @@ Starts the same asynchronous download, installation, and restart procedure as th
 | GET | `/api/system/update/status` | Required |
 
 Returns the current asynchronous update state (`in_progress`, `step`, `message`, `error`, `current_version`, `latest_version`, and `update_available`). The portal restarts shortly after a successful install, so a client should tolerate a temporary connection failure and then query `/api/system` again.
+
+The downloaded package is capped at 128 MiB and extracted only after its SHA-256 matches the signed manifest. On a mismatch nothing is installed and `error` reads `Update refused: …`.
 
 ### Restart portal
 
@@ -323,6 +337,256 @@ MCP tools: `list_aggregator_sources`, `get_aggregator_source`,
 `set_aggregator_item_visibility`, `get_aggregator_settings`, and
 `update_aggregator_settings`.
 
+## Appearance
+
+Run-time appearance of the public site: the **customizer** values of the active theme (design tokens such as the navigation bar colour or the card corner radius) and **scheduled skins** — temporary overlays such as mourning or a breaking-news bar that work with every theme. It is the API twin of the [Appearance](/admin/appearance) admin page; both call the same helpers. Every change takes effect on the next page load, **without a restart**.
+
+**Authentication:** admin session or `X-API-Key`. A cookie-authenticated `PUT`/`POST`/`DELETE` needs a matching `Origin` (or `Referer`) header — see [Authentication](#authentication).
+
+| Method | URL | Purpose |
+| --- | --- | --- |
+| GET | `/api/appearance` | Active theme with its options, running skin, schedules, available skins |
+| PUT | `/api/appearance/options` | Change customizer values (partial update) |
+| DELETE | `/api/appearance/options` | Reset the active theme to its defaults |
+| POST | `/api/appearance/skins` | Schedule a skin |
+| DELETE | `/api/appearance/skins/{id}` | Delete (and thereby stop) a schedule |
+
+Errors are returned as `{"error":"message"}` with `400` (invalid JSON, unknown body field, invalid value), `404` (unknown schedule or sub-path), `405` (unsupported method) or `500` (the settings could not be written during a `DELETE`; on `PUT`/`POST` such a failure is reported as `400`). The settings live in `THEME_PACK_STORAGE_DIR/appearance.json`, so self-updates keep them; like the session store, the file assumes one application instance per storage directory.
+
+### Read the appearance state
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | `/api/appearance` | Required |
+
+```json
+{
+  "theme": {
+    "id": "default",
+    "version": "builtin",
+    "name": "DDO Classic",
+    "builtin": true,
+    "schemes": ["light", "dark"],
+    "options": [
+      {
+        "id": "navbar",
+        "label": "Navigációs sáv színe",
+        "label_en": "Navigation bar colour",
+        "type": "select",
+        "token": "--theme-navbar-bg",
+        "default": "#0d0d0d",
+        "value": "#14213d",
+        "changed": true,
+        "choices": [
+          {"value": "#0d0d0d", "label": "Fekete", "label_en": "Black"},
+          {"value": "var(--primary-strong)", "label": "Az ikoncsomag színe", "label_en": "Icon pack colour"},
+          {"value": "#14213d", "label": "Éjkék", "label_en": "Midnight blue"},
+          {"value": "#2b2d31", "label": "Grafit", "label_en": "Graphite"}
+        ]
+      },
+      {
+        "id": "card-radius",
+        "label": "Kártyák lekerekítése",
+        "label_en": "Card corner radius",
+        "type": "range",
+        "token": "--theme-card-radius",
+        "default": "0px",
+        "value": "8px",
+        "changed": true,
+        "max": 24,
+        "step": 1,
+        "unit": "px"
+      }
+    ]
+  },
+  "active_skin": {
+    "id": "9f2c4e1a7b3d5c60",
+    "skin": "mourning",
+    "starts_at": "2026-11-01T23:00:00Z",
+    "ends_at": "2026-11-02T23:00:00Z",
+    "message": "Nemzeti gyásznap",
+    "created_by": "api_key",
+    "created_at": "2026-11-01T09:12:00Z",
+    "state": "running"
+  },
+  "schedules": [
+    {
+      "id": "9f2c4e1a7b3d5c60",
+      "skin": "mourning",
+      "starts_at": "2026-11-01T23:00:00Z",
+      "ends_at": "2026-11-02T23:00:00Z",
+      "message": "Nemzeti gyásznap",
+      "created_by": "api_key",
+      "created_at": "2026-11-01T09:12:00Z",
+      "state": "running"
+    }
+  ],
+  "skins": [
+    {"id": "mourning", "name": "Gyász", "name_en": "Mourning", "description": "…", "description_en": "…", "icon": "bi-flower1"},
+    {"id": "national", "name": "Nemzeti ünnep", "name_en": "National holiday", "description": "…", "description_en": "…", "icon": "bi-flag"}
+  ]
+}
+```
+
+**`theme`** — the running theme:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id`, `version`, `name` | string | The built-in theme is `default` / `builtin` / `DDO Classic`. |
+| `builtin` | bool | `true` for the built-in theme. |
+| `extends` | string | Parent theme id of a child theme; omitted when the theme has no parent. |
+| `schemes` | string array | Colour schemes readers can choose from on the public site (`light`, `dark`). A theme that declares none reports `["light"]`. |
+| `options` | array | Customizer options (a child theme's list starts with its parent's options); empty array when the theme exposes none. |
+
+**`theme.options[]`**:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | string | Key to use in `PUT /api/appearance/options`. The built-in theme has `navbar`, `heading-font` and `card-radius`. |
+| `label` / `label_en` | string | Hungarian / English label (`label_en` omitted when the theme gives none). |
+| `type` | string | `select` (one of `choices`) or `range` (a number between `min` and `max`). |
+| `token` | string | The CSS custom property the value is written to on every page. |
+| `default` | string | Default CSS value (range values include the unit, e.g. `0px`). |
+| `value` | string | Current CSS value: the saved value, otherwise the theme's own token value (select) or `default`. |
+| `changed` | bool | `true` when a value differing from the default is saved. |
+| `choices` | array | Select only: `value`, `label`, `label_en`. |
+| `min`, `max`, `step`, `unit` | number / string | Range only (zero values are omitted, so a missing `min` means `0`). `unit` is one of `px`, `rem`, `em`, `%`, `ch`, `vw` or omitted. |
+
+**`active_skin`** is the schedule running right now, or `null`. **`schedules`** lists every stored schedule, latest start first:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | string | 16 hex characters; use it with `DELETE /api/appearance/skins/{id}`. |
+| `skin` | string | Skin id (see below). |
+| `starts_at` / `ends_at` | RFC 3339 (UTC) | `ends_at` is omitted for an open-ended schedule (on until deleted). |
+| `message`, `link_url` | string | Text and target of the bar shown under the header; omitted when empty. |
+| `created_by` | string | Set by the server: the admin's e-mail address, or `api_key`. |
+| `created_at` | RFC 3339 (UTC) | |
+| `state` | string | `running` (shown now), `scheduled` (starts later), `ended`, or `overridden` (inside its period, but a schedule that started later wins). |
+
+**`skins`** lists the built-in skins (`id`, `name`, `name_en`, `description`, `description_en`, `icon`):
+
+| `id` | Effect |
+| --- | --- |
+| `mourning` | Greyscale images and logo, a muted grey accent and a mourning ribbon in the corner. |
+| `national` | A red-white-green band under the navigation bar (national holidays). |
+| `christmas` | A festive band and gentle snowfall (respects reduced motion). |
+| `election` | A highlighted live bar under the header with the message and link. |
+| `breaking` | A red, pulsing breaking-news bar under the header with the message and link. |
+
+With any skin, a non-empty `message` is shown in a bar under the header (linked when `link_url` is set).
+
+### Change customizer values
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| PUT | `/api/appearance/options` | Required |
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `values` | object | Yes | Option id → value, at least one entry. Range values are bare numbers (`"8"`; the unit is added, `"8px"` is also accepted) between `min` and `max`; select values must be one of the option's `choices[].value`. |
+
+A **partial update**: the given values are merged into the saved ones, options not in the body keep their current value. A value equal to the option's default is not stored (`changed` becomes `false`), so a later theme update that changes the default takes effect. The options belong to the **active** theme and are saved per theme id — values of another theme are kept and come back when that theme is activated again.
+
+```bash
+curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{
+    "values": {"navbar": "#14213d", "card-radius": "8"}
+  }' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/appearance/options
+```
+
+**Response 200:** the full state, as in [Read the appearance state](#read-the-appearance-state).
+
+**Response 400:** empty or missing `values` (use `DELETE` to reset), unknown option id for the active theme, a select value outside `choices`, a range value outside `min`–`max`, invalid JSON or an unknown body field. Nothing is saved on error. A value saved earlier that the current theme version no longer accepts also fails the request; reset with `DELETE` in that case.
+
+### Reset customizer values
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/appearance/options` | Required |
+
+Removes every saved value of the active theme, restoring its defaults. No body.
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/appearance/options
+```
+
+**Response 200:** the full state, as in [Read the appearance state](#read-the-appearance-state). **Response 500:** the settings could not be written.
+
+### Schedule a skin
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | `/api/appearance/skins` | Required |
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `skin` | string | Yes | `mourning`, `national`, `christmas`, `election` or `breaking`. |
+| `starts_at` | RFC 3339 | | Default: now. May lie in the past. |
+| `ends_at` | RFC 3339 | | Must be after `starts_at` and in the future. Omitted: the skin stays on until the schedule is deleted. |
+| `message` | string | | At most 200 characters, no control characters; shown in a bar under the header. |
+| `link_url` | string | | A site path (`/…`, not `//…`) or an `https://` URL without credentials; at most 500 characters, no whitespace. |
+
+When schedules overlap, the one that **started last** wins (on equal start, the one created last), so a later announcement overrides an earlier one; the others are reported as `overridden`. At most 100 schedules are stored; ended schedules are pruned 30 days after their end. Times are stored in UTC. `created_by` is always filled by the server.
+
+**Example — national day of mourning on every portal instance** (each instance has its own API key):
+
+```bash
+# portals.txt: one "<site URL> <API key>" pair per line
+while read -r site key; do
+  curl -sS -X POST -H "X-API-Key: $key" -H "Content-Type: application/json" \
+    -d '{"skin":"mourning","starts_at":"2026-11-02T00:00:00+01:00","ends_at":"2026-11-03T00:00:00+01:00","message":"Nemzeti gyásznap","link_url":"/article/nemzeti-gyasznap"}' \
+    "$site/api/appearance/skins"
+done < portals.txt
+```
+
+Single instance, breaking-news bar from now on until deleted:
+
+```bash
+curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
+  -d '{"skin":"breaking","message":"Rendkívüli hír: …","link_url":"/article/rendkivuli"}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/appearance/skins
+```
+
+**Response 201:** the stored schedule. Here `state` is `active` (inside its period) or `scheduled`; whether it is actually `running` or `overridden` is resolved by [Read the appearance state](#read-the-appearance-state).
+
+```json
+{
+  "id": "9f2c4e1a7b3d5c60",
+  "skin": "mourning",
+  "starts_at": "2026-11-01T23:00:00Z",
+  "ends_at": "2026-11-02T23:00:00Z",
+  "message": "Nemzeti gyásznap",
+  "link_url": "/article/nemzeti-gyasznap",
+  "created_by": "api_key",
+  "created_at": "2026-11-01T09:12:00Z",
+  "state": "scheduled"
+}
+```
+
+**Response 400:** unknown skin, `ends_at` not after `starts_at` or already in the past, a too long message or one with control characters, an invalid link, 100 schedules already stored, invalid JSON / time format or an unknown body field.
+
+### Delete a skin schedule
+
+| Method | URL | Auth |
+| --- | --- | --- |
+| DELETE | `/api/appearance/skins/{id}` | Required |
+
+Deleting a running schedule stops the skin immediately (an overridden schedule, if any, takes over). Ended schedules can be deleted too.
+
+```bash
+curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/appearance/skins/9f2c4e1a7b3d5c60
+```
+
+**Response 204:** no content. **Response 404:** `{"error":"schedule not found"}`. **Response 500:** the settings could not be written.
+
+### Appearance audit trail
+
+Every change is written to the audit log (module `theme`): `theme.options_update` (target: the theme, detail `changed_keys` — the ids of the saved options, never their values), `theme.options_reset` (detail `reset`), `theme.skin_schedule` (target: the skin, details `schedule_id`, `starts_at`, `ends_at`) and `theme.skin_delete` (target: the schedule, detail `skin`). The admin page writes the same events. `GET /api/appearance` is not logged.
+
 ## Site Statistics
 
 | Method | URL | Auth | Description |
@@ -380,7 +644,7 @@ The period and filters are interpreted identically by every endpoint.
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | `range` | string | `7d` | `today`, `yesterday`, `24h`, `7d`, `28d`, `30d`, `90d`, `mtd`, `ytd`, `12mo`, `custom` |
-| `from` | date | — | `YYYY-MM-DD`, with `range=custom` |
+| `from` | date | — | `YYYY-MM-DD`, with `range=custom`. A custom range is capped at 731 days and cannot end after today; a longer or future range is shortened. |
 | `to` | date | — | `YYYY-MM-DD`, inclusive |
 | `granularity` | string | auto | `hour`, `day` or `month` — overrides the bucket size |
 | `compare` | boolean | `true` | `false` skips the previous-period aggregations |
@@ -972,6 +1236,7 @@ curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
       "slug":          "technology",
       "description":   "Tech news and reviews",
       "icon":          "cpu",
+      "color":         "#0b7285",
       "og_image":      "https://cdn.example.com/category.png",
       "display_order": 1,
       "created_at":    "2025-01-01T00:00:00Z",
@@ -982,6 +1247,9 @@ curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
   ]
 }
 ```
+
+`color` is the optional accent colour of the category's labels on the public site, as lower-case
+`#rrggbb`; an empty string means the theme's default colour.
 
 `article_count` is the number of non-deleted articles (including drafts and scheduled ones)
 currently referencing this category. `deletable` is `true` only when `article_count` is `0` —
@@ -1007,16 +1275,21 @@ see [Delete category](#delete-category).
 | `name` | string | Yes | Slug is auto-generated from name (Hungarian accents handled). |
 | `description` | string | | |
 | `icon` | string | | Bootstrap Icons name without the `bi-` prefix, e.g. `cpu`. |
+| `color` | string | | Accent colour of the category's labels: `#rrggbb` or empty (theme default). The `#` is optional and the case is ignored on input (`0B7285` → `#0b7285`); it is stored in lower case. Any other value is rejected. |
 | `og_image` | string | | Public Open Graph image URL for the category page. |
 | `display_order` | int | | Lower = shown first (default: `0`). |
 
 ```bash
 curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
-  -d '{"name":"Technology","icon":"cpu","og_image":"https://cdn.example.com/category.png","display_order":1}' \
+  -d '{"name":"Technology","icon":"cpu","color":"#0b7285","og_image":"https://cdn.example.com/category.png","display_order":1}' \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories
 ```
 
 **Response 201:** created category object.
+
+**Response 400:** `{"error":"Érvénytelen szín: #rrggbb formátum szükséges"}` — invalid `color` (nothing is saved).
+
+**Response 500:** `{"error":"Nem sikerült létrehozni a kategóriát"}` — database error.
 
 ### Update category
 
@@ -1024,15 +1297,19 @@ curl -X POST -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H
 | --- | --- | --- |
 | PUT | `/api/categories/{id}` | Required |
 
-Same fields as Create. Slug is always regenerated from the updated name.
+Same fields as Create (full replacement: an omitted `color` clears the colour). Slug is always regenerated from the updated name.
 
 ```bash
 curl -X PUT -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" -H "Content-Type: application/json" \
-  -d '{"name":"Tech & Gadgets","icon":"cpu","display_order":1}' \
+  -d '{"name":"Tech & Gadgets","icon":"cpu","color":"#c92a2a","display_order":1}' \
   {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/categories/664a000000000000000000bb
 ```
 
 **Response 200:** updated category object.
+
+**Response 400:** `{"error":"Érvénytelen szín: #rrggbb formátum szükséges"}` — invalid `color` (nothing is saved).
+
+**Response 404:** `{"error":"A kategória nem található vagy nem sikerült frissíteni"}` — unknown id.
 
 ### Delete category
 
@@ -1770,7 +2047,7 @@ curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" 
 
 ## Galériák
 
-Nyilvános overlay-adat: `GET /api/galleries/{id}`. A válasz a galéria címét és teljes, rendezett `images` képsorát adja vissza.
+Nyilvános overlay-adat: `GET /api/galleries/{id}`. A válasz a galéria címét és teljes, rendezett `images` képsorát adja vissza. A nyilvános válasz csak a megjelenítéshez szükséges mezőket tartalmazza: `id`, `title` és `images[]` (`id`, `url`, `alt_text`, `title`, `width`, `height`); a belső médiametaadatok (pl. `object_key`, `md5_hash`, hivatkozásszámok) csak a kezelő végpontokon látszanak.
 
 Hitelesített kezelés:
 

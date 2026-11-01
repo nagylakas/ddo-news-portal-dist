@@ -54,7 +54,7 @@
         </nav>
         <!-- Badges -->
         <div class="art-hero-badges mb-3">
-            <span class="hero-badge hero-badge-cat"{{if .CategoryDescription}} data-bs-toggle="tooltip" data-bs-title="{{.CategoryDescription}}" tabindex="0"{{end}}>{{.Article.Category}}</span>
+            <span class="hero-badge hero-badge-cat" {{categoryStyle .Article.Category}}{{if .CategoryDescription}} data-bs-toggle="tooltip" data-bs-title="{{.CategoryDescription}}" tabindex="0"{{end}}>{{.Article.Category}}</span>
         </div>
         <!-- Title -->
         <h1 class="art-hero-title">{{.Article.Title}}</h1>
@@ -83,6 +83,7 @@
 				<input type="hidden" name="kind" value="{{.SuggestedFollowKind}}"><input type="hidden" name="id" value="{{.SuggestedFollowID}}"><input type="hidden" name="label" value="{{.SuggestedFollowLabel}}"><input type="hidden" name="return" value="/article/{{.Article.Slug}}">
 				<button class="btn btn-sm art-personal-action" type="submit"><i class="bi bi-rss me-1"></i>Követem: {{.SuggestedFollowLabel}}</button>
 			</form>
+			{{if .Article.Category}}<form method="POST" action="/api/personal/mute"><input type="hidden" name="kind" value="category"><input type="hidden" name="id" value="{{.Article.Category}}"><input type="hidden" name="label" value="{{.Article.Category}}"><input type="hidden" name="return" value="/article/{{.Article.Slug}}"><button class="btn btn-sm art-personal-action" type="submit" title="A kategória cikkei nem jelennek meg a címlapodon. A Neked oldalon visszavonható."><i class="bi bi-eye-slash me-1"></i>Kevesebb ilyet: {{.Article.Category}}</button></form>{{end}}
 			<form method="POST" action="/api/personal/save"><input type="hidden" name="article_id" value="{{.Article.ID.Hex}}"><input type="hidden" name="return" value="/article/{{.Article.Slug}}"><button class="btn btn-sm art-personal-action" type="submit"><i class="bi bi-bookmark{{if .ArticleSaved}}-check-fill{{end}} me-1"></i>{{if .ArticleSaved}}Mentés visszavonása{{else}}Mentés későbbre{{end}}</button></form>
 		</div>
 		{{end}}
@@ -308,7 +309,7 @@
                             {{end}}
                             <div class="art-rel-overlay"></div>
                             <div class="art-rel-content">
-                                <span class="hero-badge hero-badge-cat mb-1 d-inline-block">{{.Category}}</span>
+                                <span class="hero-badge hero-badge-cat mb-1 d-inline-block" {{categoryStyle .Category}}>{{.Category}}</span>
                                 <h3 class="art-rel-card-title">{{truncate .Title 65}}</h3>
                                 <div class="art-rel-meta">
                                     <span>szerző: {{upper .Author}}</span>
@@ -545,7 +546,7 @@
             '<textarea class="comment-edit-textarea" maxlength="2000">' + escHTML(original) + '</textarea>' +
             '<div class="comment-edit-actions">' +
               '<button class="btn btn-sm btn-primary" onclick="submitEdit(\'' + commentId + '\')"><i class="bi bi-check me-1"></i>Mentés</button>' +
-              '<button class="btn btn-sm btn-outline-secondary ms-1" onclick="cancelEdit(\'' + commentId + '\', ' + JSON.stringify(original) + ')"><i class="bi bi-x me-1"></i>Mégse</button>' +
+              '<button class="btn btn-sm btn-outline-secondary ms-1" onclick="cancelEdit(\'' + commentId + '\')"><i class="bi bi-x me-1"></i>Mégse</button>' +
             '</div>';
         contentEl.parentNode.insertBefore(editForm, contentEl.nextSibling);
         editForm.querySelector('textarea').focus();

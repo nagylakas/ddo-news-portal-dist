@@ -18,7 +18,7 @@
                     <div class="hero-content">
                         <div class="hero-badges mb-2">
                             <span class="hero-badge hero-badge-live">FRISS</span>
-                            <span class="hero-badge hero-badge-cat">{{.FeaturedNews.Category}}</span>
+                            <span class="hero-badge hero-badge-cat" {{categoryStyle .FeaturedNews.Category}}>{{.FeaturedNews.Category}}</span>
                         </div>
                         <h2 class="hero-title-main">{{.FeaturedNews.Title}}</h2>
                         <div class="hero-meta">
@@ -50,7 +50,7 @@
                         <div class="hero-overlay hero-overlay-side"></div>
                         <div class="hero-content">
                             <div class="hero-badges mb-2">
-                                <span class="hero-badge hero-badge-cat">{{$art.Category}}</span>
+                                <span class="hero-badge hero-badge-cat" {{categoryStyle $art.Category}}>{{$art.Category}}</span>
                             </div>
                             <h3 class="hero-title-side">{{$art.Title}}</h3>
                             <div class="hero-meta hero-meta-small">
@@ -69,6 +69,8 @@
 
 </section>
 {{end}}
+
+{{template "home/for-you" .}}
 
 <!-- ===== THE LATEST ===== -->
 <div class="container-fluid px-4 px-lg-5 py-5">
@@ -98,7 +100,7 @@
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
                         </div>
                         {{end}}
-                        <span class="latest-badge latest-badge-overlay">{{$art.Category}}</span>
+                        <span class="latest-badge latest-badge-overlay" {{categoryStyle $art.Category}}>{{$art.Category}}</span>
                     </div>
                     <div class="latest-main-body">
                         <h3 class="latest-main-title">{{$art.Title}}</h3>
@@ -184,7 +186,7 @@
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
                         </div>
                         {{end}}
-                        <span class="latest-badge latest-badge-overlay">{{$art.Category}}</span>
+                        <span class="latest-badge latest-badge-overlay" {{categoryStyle $art.Category}}>{{$art.Category}}</span>
                     </div>
                     <div class="latest-main-body">
                         <h3 class="latest-main-title">{{$art.Title}}</h3>
@@ -231,7 +233,7 @@
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
                         </div>
                         {{end}}
-                        <span class="latest-badge latest-badge-overlay">{{$art.Category}}</span>
+                        <span class="latest-badge latest-badge-overlay" {{categoryStyle $art.Category}}>{{$art.Category}}</span>
                     </div>
                     <div class="latest-main-body">
                         <h3 class="latest-main-title">{{$art.Title}}</h3>
@@ -278,7 +280,7 @@
                             <i class="bi bi-image text-white" style="font-size:4rem;"></i>
                         </div>
                         {{end}}
-                        <span class="latest-badge latest-badge-overlay">{{$art.Category}}</span>
+                        <span class="latest-badge latest-badge-overlay" {{categoryStyle $art.Category}}>{{$art.Category}}</span>
                     </div>
                     <div class="latest-main-body">
                         <h3 class="latest-main-title">{{$art.Title}}</h3>

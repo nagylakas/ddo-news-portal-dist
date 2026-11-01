@@ -1,0 +1,47 @@
+{{/*
+  Run-time appearance helpers. A theme that overrides "header" must call
+  "appearance/head" inside <head> and "appearance/skin-banner" right after
+  <main>; "appearance/reader-toggle" is optional (without it the reader
+  preferences open from a floating button). These names can not be overridden.
+*/}}
+{{define "appearance/head"}}
+    <script>
+        /* Reader preferences: applied before the first paint, so a dark page never flashes white. */
+        (function () {
+            var d = document.documentElement, p = {};
+            try { p = JSON.parse(localStorage.getItem('ddo.reader.v1') || '{}') || {}; } catch (e) { p = {}; }
+            var schemes = (d.getAttribute('data-schemes') || 'light').split(' ');
+            var scheme = p.scheme || 'auto';
+            if (scheme === 'auto') {
+                scheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            if (schemes.indexOf(scheme) < 0) { scheme = schemes[0]; }
+            d.setAttribute('data-bs-theme', scheme);
+            ['size', 'leading', 'font', 'width', 'focus', 'list', 'saver', 'motion'].forEach(function (k) {
+                if (typeof p[k] === 'string' && /^[a-z]{1,12}$/.test(p[k])) { d.setAttribute('data-reader-' + k, p[k]); }
+            });
+        })();
+    </script>
+    <script src="/static/js/reader-prefs.js?v={{assetVersion}}" defer></script>
+{{end}}
+
+{{define "appearance/skin-banner"}}
+{{with activeSkin}}
+{{if .Message}}
+<div class="skin-banner skin-banner-{{.ID}}" role="status">
+    <div class="container-fluid px-4 px-lg-5 skin-banner-inner">
+        <span class="skin-banner-label"><i class="bi {{.Icon}}" aria-hidden="true"></i>{{if eq .ID "breaking"}}Rendkívüli{{else if eq .ID "election"}}Élő{{else}}{{.Name}}{{end}}</span>
+        {{if .LinkURL}}<a class="skin-banner-text" href="{{.LinkURL}}">{{.Message}} <i class="bi bi-arrow-right-short" aria-hidden="true"></i></a>{{else}}<span class="skin-banner-text">{{.Message}}</span>{{end}}
+    </div>
+</div>
+{{end}}
+{{if eq .ID "mourning"}}<div class="skin-ribbon" aria-hidden="true"></div>{{end}}
+{{if eq .ID "christmas"}}<div class="skin-snow" aria-hidden="true"></div>{{end}}
+{{end}}
+{{end}}
+
+{{define "appearance/reader-toggle"}}
+<button type="button" class="btn reader-toggle" id="readerPrefsToggle" aria-haspopup="dialog" aria-controls="readerPrefsPanel" title="Megjelenés és olvasás" aria-label="Megjelenés és olvasás beállításai">
+    <i class="bi bi-type" aria-hidden="true"></i><i class="bi bi-circle-half reader-toggle-scheme" aria-hidden="true"></i>
+</button>
+{{end}}

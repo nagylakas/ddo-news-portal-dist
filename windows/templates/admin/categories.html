@@ -24,7 +24,7 @@
                 <tbody>
                     {{range .Categories}}
                     <tr>
-                        <td class="fw-semibold">{{.Name}}</td>
+                        <td class="fw-semibold">{{if .Color}}<span class="d-inline-block rounded-circle border me-2 align-middle" style="width:.8rem;height:.8rem;background:{{.Color}}" title="{{.Color}}"></span>{{end}}{{.Name}}</td>
                         <td><code class="text-muted">{{.Slug}}</code></td>
                         <td class="text-muted small">{{truncate .Description 50}}</td>
                         <td>

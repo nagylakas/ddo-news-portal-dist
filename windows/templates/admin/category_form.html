@@ -8,6 +8,16 @@
         <div class="form-text">{{t .Lang "cat.icon_hint"}}</div>
     </div>
     <div class="mb-3">
+        <label for="color_text" class="form-label">{{t .Lang "cat.field_color"}}</label>
+        <div class="input-group" style="max-width:22rem">
+            <input type="color" class="form-control form-control-color" id="color_picker" value="{{if .Category}}{{if .Category.Color}}{{.Category.Color}}{{else}}#0d6efd{{end}}{{else}}#0d6efd{{end}}" aria-label="{{t .Lang "cat.field_color"}}">
+            <input type="text" class="form-control font-monospace" id="color_text" name="color" value="{{if .Category}}{{.Category.Color}}{{end}}" placeholder="#rrggbb" pattern="#?[0-9A-Fa-f]{6}" maxlength="7">
+            <button type="button" class="btn btn-outline-secondary" id="color_clear">{{t .Lang "cat.color_clear"}}</button>
+        </div>
+        <div class="form-text">{{t .Lang "cat.color_hint"}}</div>
+        <script>(function(){var p=document.getElementById('color_picker'),t=document.getElementById('color_text'),c=document.getElementById('color_clear');if(!p||!t)return;p.addEventListener('input',function(){t.value=p.value;});t.addEventListener('input',function(){var v=t.value.trim();if(/^#?[0-9a-fA-F]{6}$/.test(v)){p.value=(v[0]==='#'?v:'#'+v).toLowerCase();}});c.addEventListener('click',function(){t.value='';});})();</script>
+    </div>
+    <div class="mb-3">
         <label for="og_image" class="form-label">{{t .Lang "cat.field_og_image"}}</label>
         <div class="input-group"><input type="text" class="form-control" id="og_image" name="og_image" value="{{if .Category}}{{.Category.OGImage}}{{end}}" placeholder="https://example.com/image.png">{{if .S3Enabled}}<button type="button" class="btn btn-outline-secondary" id="category_media_picker_btn"><i class="bi bi-images me-1"></i>{{t .Lang "media.pick_from_library"}}</button><button type="button" class="btn btn-outline-secondary" id="category_upload_btn"><i class="bi bi-upload me-1"></i>{{t .Lang "media.upload_to_library"}}</button>{{end}}</div>
         {{if .S3Enabled}}<input type="file" id="category_media_file" accept="image/*" hidden><button type="button" class="btn btn-sm btn-outline-primary mt-2" id="category_generate_btn"><i class="bi bi-magic me-1"></i>{{t .Lang "cat.generate_og_image"}}</button>{{end}}<span id="category_image_status" class="small ms-2" role="status"></span>
