@@ -20,6 +20,16 @@
             ['size', 'leading', 'font', 'width', 'focus', 'list', 'saver', 'motion'].forEach(function (k) {
                 if (typeof p[k] === 'string' && /^[a-z]{1,12}$/.test(p[k])) { d.setAttribute('data-reader-' + k, p[k]); }
             });
+            /* Live clock hook for themes: the reader's local time as CSS variables
+               (--ddo-clock "H:MM" string, --ddo-clock-h / --ddo-clock-m integers),
+               refreshed on every minute boundary. A theme without it falls back. */
+            (function tick() {
+                var now = new Date(), h = now.getHours(), m = now.getMinutes();
+                d.style.setProperty('--ddo-clock', '"' + h + ':' + (m < 10 ? '0' : '') + m + '"');
+                d.style.setProperty('--ddo-clock-h', String(h));
+                d.style.setProperty('--ddo-clock-m', String(m));
+                setTimeout(tick, 60000 - now.getSeconds() * 1000 - now.getMilliseconds() + 50);
+            })();
         })();
     </script>
     <script src="/static/js/reader-prefs.js?v={{assetVersion}}" defer></script>

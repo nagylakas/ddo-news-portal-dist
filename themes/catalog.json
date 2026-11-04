@@ -289,6 +289,19 @@
                          "sha256":  "ebc473ba44857019c0636f73197d5db6524f6f068fb46288ba7ca81965f7bcc4"
                      },
                      {
+                         "id":  "szenzor",
+                         "version":  "1.1.0",
+                         "name":  "Szenzor",
+                         "description":  "Product-launch look for smartphone, tablet and wearable news, in two platform styles. iOS (default): a frosted-glass navbar with a slim phone-style status bar on top and the logo sitting in a black Dynamic-Island pill, squircle cards with soft layered shadows, hero pictures framed like a device screen (thin dark bezel with a camera island), app-icon category chips, spec-sheet capsules for the date and reading time and iOS-style grouped lists. Android (Material You): tonal, accent-tinted surfaces instead of glass, 12-28px corners, a punch-hole camera, Android status-bar icons, the logo in a tonal container, outlined 8px Material chips with flat leading dots, circular icons, pill-shaped list indicators and a Google Sans / Roboto font stack. Both have widget-like sidebar boxes, message-bubble comments and a dock-shaped footer, in a crisp light scheme and a true OLED-black dark scheme; corner roundness, glass blur, device frame (phone, tablet or none), accent glow and density are adjustable, and the status bar clock shows the reader\u0027s live local time (or the classic 9:41, or nothing). Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-szenzor-1.1.0.zip",
+                         "sha256":  "06d6c0574a8958504a8aa2e77321a017a8c9c2bd13716d2384a84cef5cd49f48"
+                     },
+                     {
                          "id":  "terminal",
                          "version":  "1.0.0",
                          "name":  "Terminál",
