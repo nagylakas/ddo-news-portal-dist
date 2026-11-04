@@ -54,6 +54,19 @@
                          "sha256":  "3b705dd2a86b1b9a82fa3d5b78838340ddae376e41102e5d6bf3b7611459c477"
                      },
                      {
+                         "id":  "hutokor",
+                         "version":  "1.0.0",
+                         "name":  "Hűtőkör",
+                         "description":  "PC modding theme built like a custom water-cooling loop: a hot-pink to magenta-violet coolant flows slowly through glossy hard-line tubes that run under the navbar, along every section header and across the top of the footer, with tiny bubbles riding the flow, and glossy liquid drips hang from the navbar edge like a freshly poured paint job. Section headers start with chrome compression fittings, the home hero looks into a reservoir with coolant and rising bubbles at the bottom, the most-read list is a row of reservoir tubes with falling fill levels, the table of contents is a distribution plate with ports, list bullets are droplets, category labels drip, and the footer is a radiator with an AIO pump-head clock. Dark tinted-acrylic panels for the default \"lights off, RGB on\" build and a white build with silver surfaces, the navbar and footer staying dark in both so a white wordmark always reads. Coolant colour (pink-violet, icon pack colour, UV green or cyan), drips, flow speed, tube style (hard-line, soft tubing or sleeved cable) and panel material (tempered glass, acrylic or brushed aluminium) are adjustable, and every animation stops under reduced motion. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-hutokor-1.0.0.zip",
+                         "sha256":  "d0aeaed27fbeba351a28697fe1dab3382bf26daf15b10884edf05f562fcd6050"
+                     },
+                     {
                          "id":  "kepes",
                          "version":  "1.0.0",
                          "name":  "Képes",
@@ -300,6 +313,32 @@
                                      ],
                          "asset":  "theme-szenzor-1.1.0.zip",
                          "sha256":  "06d6c0574a8958504a8aa2e77321a017a8c9c2bd13716d2384a84cef5cd49f48"
+                     },
+                     {
+                         "id":  "szenzor",
+                         "version":  "1.2.0",
+                         "name":  "Szenzor",
+                         "description":  "Product-launch look for smartphone, tablet and wearable news, in two platform styles. iOS (default): a frosted-glass navbar with a slim phone-style status bar on top and the logo sitting in a black Dynamic-Island pill, squircle cards with soft layered shadows, hero pictures framed like a device screen (thin dark bezel with a camera island), app-icon category chips, spec-sheet capsules for the date and reading time and iOS-style grouped lists. Android (Material You): tonal, accent-tinted surfaces instead of glass, 12-28px corners, a punch-hole camera, Android status-bar icons, the logo in a tonal container, outlined 8px Material chips with flat leading dots, circular icons, pill-shaped list indicators and a Google Sans / Roboto font stack. Both have widget-like sidebar boxes, message-bubble comments and a dock-shaped footer, in a crisp light scheme and a true OLED-black dark scheme; corner roundness, glass blur, device frame (phone, tablet or none), accent glow and density are adjustable, and the status bar clock shows the reader\u0027s live local time (or the classic 9:41, or nothing), optionally with Swatch Internet Time (@000–@999) in the middle. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-szenzor-1.2.0.zip",
+                         "sha256":  "11c82b4c4a1d146f08708806ba693994ec5cd8b12efa7839ea7e6d72f436f76b"
+                     },
+                     {
+                         "id":  "sztori",
+                         "version":  "1.0.0",
+                         "name":  "Sztori",
+                         "description":  "Bright, playful creator-app look for influencer, YouTuber, TikToker, streamer and creator-economy news: a clean white feed on a soft candy gradient mesh, the logo in a dark capsule with a story ring, and a front page that opens with a horizontal stories strip (every new article as a round bubble in a gradient ring, the newest with a pulsing LIVE badge), rounded pill tabs, the lead story as a big social post next to a Trending list, vertical 9:16 reel cards, a grid of post cards with author rows, verified-style checks and @handles, and the sections as story highlights. Author pages become creator profiles with a big ringed avatar, @handle and honest profile chips; listings are post rows, hashtag chips, emoji sticker section labels, a gradient-ringed article hero with a caption-style meta row and comment bubbles. Rounded friendly headings fill the screen on every page. The light scheme is a sunny white feed; the dark scheme is the night mode of a social app with glowing gradients. Gradient palette (Candy, Sunset, Ocean, Lime, icon pack colour), story rings, post card shape, corner roundness and sticker labels are adjustable. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-sztori-1.0.0.zip",
+                         "sha256":  "e02149c7316f8da77c7c04718c26120d527427a3d09e7379f75ee6b8ddeaad64"
                      },
                      {
                          "id":  "terminal",
