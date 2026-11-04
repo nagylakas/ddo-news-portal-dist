@@ -21,14 +21,20 @@
                 if (typeof p[k] === 'string' && /^[a-z]{1,12}$/.test(p[k])) { d.setAttribute('data-reader-' + k, p[k]); }
             });
             /* Live clock hook for themes: the reader's local time as CSS variables
-               (--ddo-clock "H:MM" string, --ddo-clock-h / --ddo-clock-m integers),
-               refreshed on every minute boundary. A theme without it falls back. */
+               (--ddo-clock "H:MM" string, --ddo-clock-h / --ddo-clock-m integers) and
+               Swatch Internet Time (--ddo-beat 0..999 integer, --ddo-beat-text "@042";
+               1 beat = 86.4 s, @000 = midnight BMT = UTC+1, no time zones), refreshed on
+               every minute and beat boundary. A theme without it must fall back. */
             (function tick() {
                 var now = new Date(), h = now.getHours(), m = now.getMinutes();
+                var bmt = (now.getTime() + 3600000) % 86400000, beat = Math.floor(bmt / 86400);
                 d.style.setProperty('--ddo-clock', '"' + h + ':' + (m < 10 ? '0' : '') + m + '"');
                 d.style.setProperty('--ddo-clock-h', String(h));
                 d.style.setProperty('--ddo-clock-m', String(m));
-                setTimeout(tick, 60000 - now.getSeconds() * 1000 - now.getMilliseconds() + 50);
+                d.style.setProperty('--ddo-beat', String(beat));
+                d.style.setProperty('--ddo-beat-text', '"@' + ('00' + beat).slice(-3) + '"');
+                var toMinute = 60000 - now.getSeconds() * 1000 - now.getMilliseconds();
+                setTimeout(tick, Math.min(toMinute, 86400 - bmt % 86400) + 50);
             })();
         })();
     </script>
