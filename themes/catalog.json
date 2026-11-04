@@ -158,6 +158,19 @@
                          "sha256":  "22ea036c0829caa4792e1c29fbd770f2f0e56bf5f278b13fd517d824f5e6a91b"
                      },
                      {
+                         "id":  "muhely",
+                         "version":  "1.0.0",
+                         "name":  "Műhely",
+                         "description":  "PC specialist shop and service-centre theme: a bright, trustworthy computer store mixed with a repair bench. Candy pink leads (made for a pink logo), with graphite ink and electric cyan, lime and amber as the workshop\u0027s status colours. A scrolling deals-style ticker of the newest headlines runs under the navbar, category labels are price tags with a punched hole and a shine sweep and carry a service-ticket LED that cycles received, diagnosing, repairing and ready, listing rows are perforated service tickets with mono ticket numbers, cards lift and glow like products on a shelf, section headers start with a Torx screw head and a run of ribbon cable, the reading progress is a four-colour status bar along the navbar, article tables are spec sheets, the table of contents is a technician\u0027s checklist, blockquotes are amber workshop notes and the footer is an anti-static workbench mat with rulers and an LCD clock. The listing headers carry PCB traces with travelling signal pulses. With the webshop module enabled the shop is restyled too: shelf-style product cards with price tags and pulsing in-stock LEDs, a spec-sheet product page, a receipt-like cart and service-ticket orders. A bright shop (light) and a night workshop (dark) scheme; accent colour (DW pink, icon pack colour, cyan, lime or amber), animation level, background pattern (PCB traces, anti-static grid or none), card style, corner radius, price-tag style, the ticker and density are adjustable, and every animation stops under reduced motion. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+                                         "webshop"
+                                     ],
+                         "asset":  "theme-muhely-1.0.0.zip",
+                         "sha256":  "1ae7ac5c2df854270771433197bc714b5d6447bf112409b9bcdce3c1607c43d5"
+                     },
+                     {
                          "id":  "napilap",
                          "version":  "1.0.0",
                          "name":  "Napilap",
