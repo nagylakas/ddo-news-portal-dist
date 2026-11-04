@@ -1,14 +1,14 @@
 {
-  "version": "0.7.24",
-  "source_commit": "990ee26",
-  "build_time_utc": "2026-11-01T18:12:04Z",
+  "version": "0.7.25",
+  "source_commit": "78ab1cd",
+  "build_time_utc": "2026-11-04T15:53:27Z",
   "linux_archive": "linux.tar.gz",
   "artifacts": [
     {
       "name": "linux-amd64",
       "url": "linux.tar.gz",
-      "sha256": "3320e3e809cbc9e8a38ee322259482abbb4acd1f778419f5c38cba442b8412da"
+      "sha256": "00145cc11621809ebd63e2f25241f1c51415df001140bc40693cb1dcba25696e"
     }
   ],
-  "signature": "QxKx/RRRYfuVTtecXgflcgqmlwWha+KYFTKGEylaOJRm0RqOm45aVgmaVHNv4QuggmMyA/OeWkrju+HkrDLSBQ=="
+  "signature": "vAP+lTmdjy0zue/HLwN9Vpmz5ikGi/1menoZ+37uqSXqlA4AdDpTDQ3GGx5xSoPKP0k4RHgafNdGfT2uEphHAw=="
 }
