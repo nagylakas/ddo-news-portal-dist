@@ -28,6 +28,32 @@
                          "sha256":  "b34a1f2668461e35acaa2b1a98c5dea44fb6dbe6d487ef3b71209021f0e744e8"
                      },
                      {
+                         "id":  "boxutca",
+                         "version":  "1.0.0",
+                         "name":  "Boxutca",
+                         "description":  "Motorsport look for F1, WEC, rally and MotoGP news: bold condensed, slanted uppercase headlines, a racing-livery band along the navbar and across the top of every card, chequered-flag accents on the section headers and the footer, red-and-white kerb dividers, and timing-tower lists where the most-read stories line up like a live timing screen with position blocks and purple, green and yellow sector marks. A carbon-fibre \"night race\" dark scheme and a white-and-asphalt \"paddock\" light scheme; livery colour, chequered accents, heading slant, carbon texture strength and kerb dividers are adjustable. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-boxutca-1.0.0.zip",
+                         "sha256":  "00d41579f41c08414ef25ddce4bc2081803d685c1fff651cca44179d35079a6f"
+                     },
+                     {
+                         "id":  "framerate",
+                         "version":  "1.0.0",
+                         "name":  "Framerate",
+                         "description":  "PC gaming and hardware theme built like a windowed gaming rig: graphite tempered-glass panels with brushed-metal hairlines and corner thumbscrews, an RGB light strip that glows along the navbar, the cards and the footer and sweeps through the spectrum, and an in-game overlay feel: HUD corner brackets on the hero pictures, a FRAPS-style yellow counter for the reading time, benchmark bars under the most-read list, spec-sheet styled article tables, keyboard-keycap tags and pagination, and a faint motherboard trace pattern on the listing headers. A dark graphite build and a white build (silver case, soft RGB); RGB mode (sweep, static rainbow, icon pack colour or off), RGB brightness, panel material (glass, matte, carbon), keycap tags and HUD elements are adjustable, and every animation stops under reduced motion. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-framerate-1.0.0.zip",
+                         "sha256":  "3b705dd2a86b1b9a82fa3d5b78838340ddae376e41102e5d6bf3b7611459c477"
+                     },
+                     {
                          "id":  "kepes",
                          "version":  "1.0.0",
                          "name":  "Képes",
@@ -78,6 +104,19 @@
                                      ],
                          "asset":  "theme-kontraszt-1.1.0.zip",
                          "sha256":  "41021502c5f2be434f51ee84d4c264d924f63a3f5708d2aae7af7b9e3e39fdaf"
+                     },
+                     {
+                         "id":  "kozmosz",
+                         "version":  "1.0.0",
+                         "name":  "Kozmosz",
+                         "description":  "Deep-space look for space exploration and astronomy portals: a near-black indigo sky with a softly twinkling starfield and faint nebula glows behind translucent observation-panel cards with viewfinder corner brackets, plus a pale star-atlas light scheme printed on paper with fine coordinate-grid lines and ink constellations. Mission-control details everywhere: monospace telemetry labels (numbered observation and sector tags, coordinate-style datelines, UTC timestamps), thin orbital rings with a planet around the section headings, crisp hairline borders, a planet-limb glow over the footer and a glowing accent taken from the icon pack. Starfield density, nebula hue, panel corners, telemetry labels and the star-chart grid strength are adjustable; the twinkle stops under reduced motion. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-kozmosz-1.0.0.zip",
+                         "sha256":  "7ceec520285e3d322fbacadb63d8190dd19b14f596400e39db0ff6c206a39476"
                      },
                      {
                          "id":  "meridian",
@@ -158,6 +197,19 @@
                          "sha256":  "7438163e6630d9094c933601464d5d8ed22fce879c1f086ca01627a2367eb638"
                      },
                      {
+                         "id":  "nexus",
+                         "version":  "1.1.0",
+                         "name":  "Nexus",
+                         "description":  "Modern gaming-media look: near-black navy surfaces, rounded bento cards with hairline borders, eyebrow labels, a scrolling live ticker, a numbered top-5 list and an accent taken from your icon pack. Ships its own home page layout, including the reader\u0027s personal \"For you\" block. Dark colour scheme. Card corners, ticker speed and the ambient accent glow are adjustable.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-nexus-1.1.0.zip",
+                         "sha256":  "3d5f32c7f13ee51d6b232aee906e82786792063607b185f6ee91095c80532233"
+                     },
+                     {
                          "id":  "nexus-light",
                          "version":  "1.0.0",
                          "name":  "Nexus Light",
@@ -185,6 +237,19 @@
                          "sha256":  "fa338294e4f8fddc3bd5db3597c4a23a0d2ceabf0e2ae12acde615a8ec91477a"
                      },
                      {
+                         "id":  "overdrive",
+                         "version":  "1.1.0",
+                         "name":  "Overdrive",
+                         "description":  "Modern dark gaming theme: deep navy surfaces, a glowing accent taken from your icon pack, angled corners, a flowing gradient rail and subtle motion (staggered reveals, hover glow, shimmer buttons, reading progress bar). All animation respects reduced-motion. Glow strength, the angled corner cut and the background grid are adjustable.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-overdrive-1.1.0.zip",
+                         "sha256":  "00f92fafb1d2336ec7fb6627f3acb8399a5c4ed3b2d720ca8d4e09931fbc3582"
+                     },
+                     {
                          "id":  "papir",
                          "version":  "1.0.0",
                          "name":  "Papír",
@@ -209,6 +274,19 @@
                                      ],
                          "asset":  "theme-papir-1.1.0.zip",
                          "sha256":  "c42804f765c258412744255cb92b45b8a5968f49c0f2a6cca4705bad05342256"
+                     },
+                     {
+                         "id":  "szenzor",
+                         "version":  "1.0.0",
+                         "name":  "Szenzor",
+                         "description":  "Product-launch look for smartphone, tablet and wearable news: a frosted-glass navbar with a slim phone-style status bar on top and the logo sitting in a black Dynamic-Island pill, squircle cards with soft layered shadows, hero pictures framed like a device screen (thin dark bezel with a camera cut-out), app-icon category chips, spec-sheet pills for the date and reading time, iOS-style grouped lists for the listings and the search filters, widget-like sidebar boxes, message-bubble comments and a dock-shaped footer. Neutral greys in a crisp light scheme and a true OLED-black dark scheme; corner roundness, glass blur, device frame (phone, tablet or none), accent glow and density are adjustable. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-szenzor-1.0.0.zip",
+                         "sha256":  "ebc473ba44857019c0636f73197d5db6524f6f068fb46288ba7ca81965f7bcc4"
                      },
                      {
                          "id":  "terminal",
@@ -248,6 +326,45 @@
                                      ],
                          "asset":  "theme-tuesday-1.0.0.zip",
                          "sha256":  "278ea27277117b290c7eb94bcc3f361506a442fed6c514064f8b85f7fbad539d"
+                     },
+                     {
+                         "id":  "uriember",
+                         "version":  "1.0.0",
+                         "name":  "Úriember",
+                         "description":  "Glossy men\u0027s lifestyle magazine for style, watches, cars, grooming, whisky, travel and culture: a full-screen cover story with the headline set over the picture in a high-contrast didone face, a magazine masthead, a thin brass frame and numbered cover lines (\"In this issue\"), then numbered issue-style sections (N° 01, N° 02 ...) with feature spreads, refined cards with letter-spaced small-caps kickers, a ranked most-read column with large numerals and an index of departments. Articles get elegant drop caps, pull-quotes under a metal rule, thin double rules and generous whitespace. A dark espresso-and-charcoal scheme with a subtle leather grain and a warm ivory-paper light scheme in ink black; the metal accent (brass, gold, silver, copper or the icon pack colour), the texture (none, leather or tweed), the headline face (didone, slab or geometric sans), the drop caps and the cover height are adjustable. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-uriember-1.0.0.zip",
+                         "sha256":  "373bed3735f727c4d6e17c0d8b12259cd91b0e66ccfd052b46011249b5656a34"
+                     },
+                     {
+                         "id":  "vandor",
+                         "version":  "1.0.0",
+                         "name":  "Vándor",
+                         "description":  "Sunny, photo-first travel magazine look on warm sand and sea-foam: a big destination mosaic on the front page whose lead story is pinned under a boarding pass (destination, traveller, departure and a dashed tear-off stub), the latest stories as postcards on paper with perforated stamp edges and postmarks, the most-read list as an airport departure board and the sections as round passport stamps. Elegant humanist serif headings, boarding-pass category chips with punched notches, ticket-shaped listing rows, dotted flight-path dividers with a little plane, an itinerary-style table of contents and a wavy coastline above the footer. Generous rounded imagery fills the screen on every page. The light scheme is a bright Mediterranean afternoon; the dark scheme is a night flight over a deep ocean navy with warm reading-lamp accents and a faint starfield. Palette (Mediterranean, Nordic, Desert, Tropical), picture corner radius, card style (postcard or clean), stamp decorations and hero height are adjustable. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-vandor-1.0.0.zip",
+                         "sha256":  "5d728e8ce6d2fe942d6845445fdd813617d7ada03d09f811e86e1051d163d499"
+                     },
+                     {
+                         "id":  "vetites",
+                         "version":  "1.0.0",
+                         "name":  "Vetítés",
+                         "description":  "Cinematic look for film, TV series and streaming news and reviews: a near-black screening room lit by a soft projector beam and a vignette, a big letterboxed (2.39:1, black bars) hero still with the headline set over it like an opening title, streaming-catalogue shelves of 2:3 poster cards that fill even a 4K screen, a Top 5 row with huge outlined numerals, film-strip perforations as section dividers, ticket-stub category chips with notched edges, marquee-bulb labels used sparingly and tall condensed poster headings. A dark screening-room scheme and a warm light premiere-poster scheme; accent colour (marquee gold, popcorn red or the icon pack colour), card shape (poster or widescreen), projector glow, film-strip dividers and the letterbox bars are adjustable. Links, buttons, logo and icons come from the active icon pack.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-vetites-1.0.0.zip",
+                         "sha256":  "c20ea6ad397ca318ab2be30d9ab70245a59ce79177cf5e89bfa827bb362aa253"
                      }
                  ]
 }
