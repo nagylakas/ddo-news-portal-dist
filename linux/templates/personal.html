@@ -9,38 +9,12 @@
         <div class="search-cat-list">
           <a class="search-cat-item text-decoration-none {{if eq .ActiveTab "feed"}}search-cat-active{{end}}" href="/neked"><i class="bi bi-stars text-primary me-2"></i><span>Feed</span></a>
           <a class="search-cat-item text-decoration-none {{if eq .ActiveTab "follows"}}search-cat-active{{end}}" href="/neked?tab=follows"><i class="bi bi-rss text-primary me-2"></i><span>Követések és elrejtések</span><span class="search-cat-count ms-auto">{{len .Follows}}{{if .Mutes}} / {{len .Mutes}}{{end}}</span></a>
-          <a class="search-cat-item text-decoration-none {{if eq .ActiveTab "account"}}search-cat-active{{end}}" href="/neked?tab=account"><i class="bi bi-person-gear text-primary me-2"></i><span>Fiókom és adataim</span></a>
           <a class="search-cat-item text-decoration-none {{if eq .ActiveTab "saved"}}search-cat-active{{end}}" href="/neked?tab=saved"><i class="bi bi-bookmark text-primary me-2"></i><span>Mentések</span></a>
         </div>
       </div>
     </aside>
     <div class="search-results">
-  {{if eq .ActiveTab "account"}}
-    {{with .Account}}
-    <section class="mb-5">
-      <h2 class="h3">Saját adataim</h2>
-      <p>Egy fájlban letöltheted mindazt, amit a fiókodhoz kötve tárolunk: a profilodat, a hozzászólásaidat, követéseidet és mentett cikkeidet, valamint a fórumban, az apróhirdetésekben és a webshopban keletkezett adataidat.</p>
-      <a class="btn btn-outline-primary" href="/api/personal/export"><i class="bi bi-download me-2"></i>Adataim letöltése (JSON)</a>
-    </section>
-    <section>
-      <h2 class="h3">Fiók törlése</h2>
-      <p>A törlés végleges, nem vonható vissza:</p>
-      <ul>
-        <li>a profilod, követéseid, mentett cikkeid, kedvenceid, kosarad és értesítési feliratkozásod törlődik;</li>
-        <li>az apróhirdetéseid eltűnnek az oldalról, az elküldött privát üzeneteid szövege törlődik;</li>
-        <li>a nyilvános hozzászólásaid, fórumbejegyzéseid és értékeléseid szövege megmarad, de a neved nélkül, „Törölt felhasználó” jelöléssel. Ha ezek szövegét is törölni szeretnéd, előtte töröld őket egyenként, vagy írj a szerkesztőségnek;</li>
-        <li>a webshopos rendeléseidet a számviteli kötelezettségek miatt megőrizzük.</li>
-      </ul>
-      <p>Ez az oldal fiókját törli, a központi bejelentkezési fiókodat nem. Ha később újra belépsz, új, üres fiók jön létre.</p>
-      {{if eq .ErrorKind "confirm"}}<div class="alert alert-danger" role="alert">A megerősítő szó nem egyezett, a fiókod megmaradt.</div>{{end}}
-      {{if eq .ErrorKind "failed"}}<div class="alert alert-danger" role="alert">A törlés most nem sikerült teljesen. Kérlek, próbáld újra, vagy írj a szerkesztőségnek.</div>{{end}}
-      <form method="POST" action="/api/personal/delete-account" class="row g-2 align-items-end" style="max-width:32rem">
-        <div class="col-12 col-sm"><label class="form-label" for="account-delete-confirm">A megerősítéshez írd be: <strong>{{.Confirmation}}</strong></label><input class="form-control" id="account-delete-confirm" name="confirm" required autocomplete="off"></div>
-        <div class="col-12 col-sm-auto"><button type="submit" class="btn btn-danger"><i class="bi bi-trash me-2"></i>Fiók végleges törlése</button></div>
-      </form>
-    </section>
-    {{end}}
-  {{else if eq .ActiveTab "follows"}}
+  {{if eq .ActiveTab "follows"}}
     {{if .Follows}}<div class="list-group">{{range .Follows}}<div class="list-group-item d-flex justify-content-between align-items-center"><span><span class="badge text-bg-secondary me-2">{{.TargetKind}}</span>{{.Label}}</span><form method="POST" action="/api/personal/follow"><input type="hidden" name="kind" value="{{.TargetKind}}"><input type="hidden" name="id" value="{{.TargetID}}"><input type="hidden" name="label" value="{{.Label}}"><input type="hidden" name="return" value="/neked?tab=follows"><button class="btn btn-sm btn-outline-danger">Követés leállítása</button></form></div>{{end}}</div>{{else}}<div class="alert alert-light border">Még nincs követésed. Kövess egy kategóriát vagy a cikkekhez kötött témát.</div>{{end}}
     <h2 class="h5 mt-5 mb-2"><i class="bi bi-eye-slash me-2"></i>Elrejtve a címlapról</h2>
     <p class="text-muted small">Ezek a kategóriák, címkék és szerzők nem jelennek meg a címlapodon, amíg be vagy jelentkezve.</p>

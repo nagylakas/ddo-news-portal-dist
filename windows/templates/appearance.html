@@ -39,8 +39,6 @@
         })();
     </script>
     <script src="/static/js/reader-prefs.js?v={{assetVersion}}" defer></script>
-    {{with pushPublicKey}}<script>window.ddoPushKey = {{.}};</script>
-    <script src="/static/js/push-subscribe.js?v={{assetVersion}}" defer></script>{{end}}
 {{end}}
 
 {{define "appearance/skin-banner"}}
