@@ -1,0 +1,23 @@
+{{define "admin-passkey-script"}}
+<script>
+window.passkeyConfig = { expectedOrigin: {{siteURL}} };
+window.passkeyI18n = {
+    waiting: {{t .Lang "passkey.js_waiting"}},
+    success: {{t .Lang "passkey.js_success"}},
+    added: {{t .Lang "passkey.js_added"}},
+    cancelled: {{t .Lang "passkey.js_cancelled"}},
+    failed: {{t .Lang "passkey.err_failed"}},
+    unsupported: {{t .Lang "passkey.js_unsupported"}},
+    unsupportedIEMode: {{t .Lang "passkey.js_unsupported_iemode"}},
+    unsupportedInsecure: {{t .Lang "passkey.js_unsupported_insecure"}},
+    wrongOrigin: {{t .Lang "passkey.js_wrong_origin"}},
+    sessionExpired: {{t .Lang "passkey.js_session_expired"}},
+    timeout: {{t .Lang "passkey.js_timeout"}},
+    tlsError: {{t .Lang "passkey.js_tls_error"}},
+    notSupported: {{t .Lang "passkey.js_not_supported"}},
+    alreadyRegistered: {{t .Lang "passkey.err_duplicate"}},
+    securityError: {{t .Lang "passkey.js_security_error"}}
+};
+</script>
+<script src="/static/js/admin-passkeys.js?v={{assetVersion}}" defer></script>
+{{end}}

@@ -56,6 +56,12 @@
                     <a href="#aut-create" class="list-group-item list-group-item-action py-1 px-2 ms-2">Create</a>
                     <a href="#aut-update" class="list-group-item list-group-item-action py-1 px-2 ms-2">Update</a>
                     <a href="#aut-delete" class="list-group-item list-group-item-action py-1 px-2 ms-2">Delete</a>
+                    <a href="#editorial"  class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Bulk, front page, ads</a>
+                    <a href="#art-bulk"   class="list-group-item list-group-item-action py-1 px-2 ps-3">Bulk article actions</a>
+                    <a href="#home-page"  class="list-group-item list-group-item-action py-1 px-2 ps-3">Front page selection</a>
+                    <a href="#ad-settings" class="list-group-item list-group-item-action py-1 px-2 ps-3">Advertising settings</a>
+                    <a href="#push-api"   class="list-group-item list-group-item-action py-1 px-2 ps-3">Web push subscription</a>
+                    <a href="#reader-data" class="list-group-item list-group-item-action py-1 px-2 ps-3">Reader data and erasure</a>
                     <a href="#banners"    class="list-group-item list-group-item-action py-1 px-2 fw-semibold mt-2">Banners</a>
                     <a href="#ban-list"   class="list-group-item list-group-item-action py-1 px-2 ms-2">List</a>
                     <a href="#ban-get"    class="list-group-item list-group-item-action py-1 px-2 ms-2">Get one</a>
@@ -1523,6 +1529,113 @@ done &lt; portals.txt</code></pre>
             </section>
 
             <!-- ── Banners ────────────────────────────────────────────── -->
+            <section id="editorial" class="mb-2">
+                <h3 class="border-bottom border-2 pb-2 mt-4"><i class="bi bi-layers me-2"></i>Bulk actions, front page, advertising, reader rights</h3>
+            </section>
+
+            <section id="art-bulk" class="mb-5 ps-3">
+                <h5>Bulk article actions</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><tbody>
+                    <tr><th>Method</th><td><code>POST</code></td></tr>
+                    <tr><th>URL</th><td><code>/api/articles/bulk</code></td></tr>
+                    <tr><th>Auth</th><td>Required</td></tr>
+                </tbody></table></div>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered">
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>action</code></td><td>string</td><td>yes</td><td><code>publish</code>, <code>unpublish</code>, <code>delete</code> (to the trash), <code>set_category</code>, <code>set_author</code>, <code>add_tags</code></td></tr>
+                        <tr><td><code>ids</code></td><td>string[]</td><td>yes</td><td>Article IDs, at most 100.</td></tr>
+                        <tr><td><code>category_id</code></td><td>string</td><td>with <code>set_category</code></td><td>Category ID.</td></tr>
+                        <tr><td><code>author_id</code></td><td>string</td><td>with <code>set_author</code></td><td>Author ID.</td></tr>
+                        <tr><td><code>tags</code></td><td>string[]</td><td>with <code>add_tags</code></td><td>Added to the existing tags.</td></tr>
+                    </tbody>
+                </table></div>
+                <p>Each article is handled on its own, so the response is <code>200</code> even when some fail. The <code>failed[].reason</code> values are <code>not_found</code>, <code>locked</code> (open in another editor's browser), <code>ai_disclosure_required</code> and <code>write_failed</code>. A bulk edit of a centrally synced article marks it <code>locally_modified</code>.</p>
+                <pre class="bg-light p-3 rounded"><code>{
+  "action": "publish",
+  "requested": 2,
+  "succeeded": ["665f1c..."],
+  "failed": [ { "id": "665f1d...", "reason": "ai_disclosure_required" } ]
+}</code></pre>
+                <pre class="bg-dark text-light p-3 rounded"><code>curl -X POST -H "X-API-Key: {{.APIKey}}" -H "Content-Type: application/json" \
+  -d '{"action":"set_category","ids":["665f1c..."],"category_id":"665a..."}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/articles/bulk</code></pre>
+                <p class="mb-1">Errors: <code>400</code> invalid action, selection or unknown category/author; <code>503</code> no database.</p>
+            </section>
+
+            <section id="home-page" class="mb-5 ps-3">
+                <h5>Front page selection</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><tbody>
+                    <tr><th>Method</th><td><code>GET</code>, <code>PUT</code></td></tr>
+                    <tr><th>URL</th><td><code>/api/homepage</code></td></tr>
+                    <tr><th>Auth</th><td>Required</td></tr>
+                </tbody></table></div>
+                <p>The pinned articles appear first on the home page in the order given (at most 8); the first one is the lead story. The rest of the page fills up with the latest news. <code>PUT</code> replaces the whole list. An article that is not public is kept in the list but not shown.</p>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered">
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>slots[].article_id</code></td><td>string</td><td>yes</td><td>Article ID, once per list.</td></tr>
+                        <tr><td><code>slots[].pinned_until</code></td><td>string (RFC3339)</td><td></td><td>The pin ends by itself at this time. Must be in the future.</td></tr>
+                    </tbody>
+                </table></div>
+                <pre class="bg-dark text-light p-3 rounded"><code>curl -X PUT -H "X-API-Key: {{.APIKey}}" -H "Content-Type: application/json" \
+  -d '{"slots":[{"article_id":"665f1c...","pinned_until":"2026-12-01T08:00:00Z"}]}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/homepage</code></pre>
+                <p class="mb-1">Errors: <code>400</code> invalid or unknown article, duplicate, past end time, more than 8 slots.</p>
+            </section>
+
+            <section id="ad-settings" class="mb-5 ps-3">
+                <h5>Advertising settings</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><tbody>
+                    <tr><th>Method</th><td><code>GET</code>, <code>PUT</code></td></tr>
+                    <tr><th>URL</th><td><code>/api/ads/settings</code></td></tr>
+                    <tr><th>Auth</th><td>Required</td></tr>
+                </tbody></table></div>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered">
+                    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>ads_txt</code></td><td>string</td><td>Served at the public <code>/ads.txt</code>, at most 64 KB. Empty: the file answers 404.</td></tr>
+                        <tr><td><code>inline_enabled</code></td><td>bool</td><td>Automatic banners inside articles.</td></tr>
+                        <tr><td><code>inline_after_first</code></td><td>int</td><td>The <code>article-inline</code> slot appears after this paragraph (0&ndash;50, 0 = unused).</td></tr>
+                        <tr><td><code>inline_after_second</code></td><td>int</td><td>The same for the <code>article-inline-2</code> slot.</td></tr>
+                    </tbody>
+                </table></div>
+                <p>No banner is placed after an article's last paragraph. Assign banners to the two slots with the <a href="#banners">Banners</a> API.</p>
+                <pre class="bg-dark text-light p-3 rounded"><code>curl -X PUT -H "X-API-Key: {{.APIKey}}" -H "Content-Type: application/json" \
+  -d '{"ads_txt":"google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0","inline_enabled":true,"inline_after_first":3,"inline_after_second":8}' \
+  {{if .SiteURL}}{{.SiteURL}}{{else}}https://example.com{{end}}/api/ads/settings</code></pre>
+                <p class="mb-1">Errors: <code>400</code> paragraph number out of range, <code>ads_txt</code> too long or not text.</p>
+            </section>
+
+            <section id="session-limits" class="mb-5 ps-3">
+                <h5>Article endpoints called with an admin session</h5>
+                <p>With <code>ADMIN_PERMISSIONS_ENFORCE=true</code>, REST endpoints called with a session follow the account's roles: a missing permission is <code>403</code>, the article list returns only what the account can see, and other people's drafts need a separate permission. <code>X-API-Key</code> keeps full access and is not affected.</p>
+            </section>
+
+            <section id="push-api" class="mb-5 ps-3">
+                <h5>Web push subscription</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered"><tbody>
+                    <tr><th>Method</th><td><code>POST</code></td></tr>
+                    <tr><th>URL</th><td><code>/api/push/subscribe</code>, <code>/api/push/unsubscribe</code></td></tr>
+                    <tr><th>Auth</th><td>None; same-origin browser requests with a JSON body only.</td></tr>
+                </tbody></table></div>
+                <p>Used by the reader settings panel. The endpoint must belong to a browser vendor's push service. Success is <code>204</code>. Errors: <code>400</code>, <code>403</code> cross-origin, <code>404</code> push is off, <code>415</code>, <code>429</code>.</p>
+                <pre class="bg-light p-3 rounded"><code>{ "endpoint": "https://fcm.googleapis.com/fcm/send/...", "keys": { "p256dh": "...", "auth": "..." } }</code></pre>
+                <p class="mb-1">To send: set <code>publish_intents</code> on an article (<a href="#art-create">create</a>, update). It is sent once, when the article is public.</p>
+            </section>
+
+            <section id="reader-data" class="mb-5 ps-3">
+                <h5>Reader data and erasure</h5>
+                <div class="table-responsive mb-3"><table class="table table-sm table-bordered">
+                    <thead><tr><th>Method</th><th>URL</th><th>Auth</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>GET</code></td><td><code>/api/personal/export</code></td><td>Reader session</td><td>The signed-in reader's data as a JSON download.</td></tr>
+                        <tr><td><code>POST</code></td><td><code>/api/personal/delete-account</code></td><td>Reader session, same origin</td><td>Form field <code>confirm=TÖRLÉS</code>. Erases the account and redirects to sign-out; on failure to <code>/neked?tab=account&amp;error=...</code>.</td></tr>
+                    </tbody>
+                </table></div>
+                <p class="mb-1">These act on the reader's own account and cannot be called with the API key. Public comments, forum posts and reviews stay without the author's name, and webshop orders are kept as accounting records.</p>
+            </section>
+
             <section id="banners" class="mb-2">
                 <h3 class="border-bottom border-2 pb-2 mt-4">
                     <i class="bi bi-badge-ad me-2"></i>Banners

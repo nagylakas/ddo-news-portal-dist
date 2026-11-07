@@ -71,6 +71,8 @@
                             <li><a class="dropdown-item" href="/admin/articles"><i class="bi bi-file-earmark-text me-2"></i>{{t .Lang "nav.articles"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/create"><i class="bi bi-plus-circle me-2"></i>{{t .Lang "nav.new_article"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/articles/trash"><i class="bi bi-trash3 me-2"></i>{{t .Lang "nav.article_trash"}}</a></li>
+                            <li><a class="dropdown-item" href="/admin/homepage"><i class="bi bi-star me-2"></i>{{t .Lang "home.title"}}</a></li>
+                            <li><a class="dropdown-item" href="/admin/notifications"><i class="bi bi-bell me-2"></i>{{t .Lang "notify.title"}}</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/admin/categories"><i class="bi bi-folder2-open me-2"></i>{{t .Lang "nav.categories"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/authors"><i class="bi bi-people me-2"></i>{{t .Lang "nav.authors"}}</a></li>
@@ -89,6 +91,7 @@
                             <li><a class="dropdown-item" href="/admin/polls"><i class="bi bi-bar-chart me-2"></i>{{t .Lang "nav.polls"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/galleries"><i class="bi bi-images me-2"></i>Galériák</a></li>
                             <li><a class="dropdown-item" href="/admin/banners"><i class="bi bi-badge-ad me-2"></i>{{t .Lang "nav.banners"}}</a></li>
+                            <li><a class="dropdown-item" href="/admin/ads"><i class="bi bi-sliders me-2"></i>{{t .Lang "ads.title"}}</a></li>
                         </ul>
                     </li>
                 {{if or webshopEnabled webshopCatalogAPIEnabled marketplaceEnabled marketplaceAPIEnabled forumEnabled forumAPIEnabled aggregatorEnabled aggregatorAPIEnabled}}
@@ -119,6 +122,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/admin/general-settings"><i class="bi bi-gear-wide-connected me-2"></i>{{t .Lang "nav.general_settings"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/users"><i class="bi bi-person-gear me-2"></i>{{t .Lang "nav.users"}}</a></li>
+                            <li><a class="dropdown-item" href="/admin/account/security"><i class="bi bi-fingerprint me-2"></i>{{t .Lang "nav.account_security"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/audit"><i class="bi bi-shield-lock me-2"></i>{{t .Lang "nav.audit"}}<span id="auditNavBadge" class="badge bg-danger ms-2 d-none"></span></a></li>
                             <li><a class="dropdown-item" href="/admin/security"><i class="bi bi-shield-shaded me-2"></i>{{t .Lang "nav.security"}}</a></li>
                             <li><a class="dropdown-item" href="/admin/icon-packs"><i class="bi bi-palette me-2"></i>{{t .Lang "nav.icon_packs"}}</a></li>
@@ -152,6 +156,7 @@
             </div>
         </div>
     </nav>
+    {{if adminPermissionsEnforced}}<script src="/static/js/admin-nav-permissions.js?v={{assetVersion}}" defer></script>{{end}}
     <main class="py-4">
         {{end}}
 

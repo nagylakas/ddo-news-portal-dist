@@ -1,0 +1,143 @@
+{{define "admin/account_security"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4 px-lg-5">
+    {{template "admin-page-header" dict "Title" (t .Lang "account.security_title") "Subtitle" (t .Lang "account.security_subtitle") "Icon" "shield-lock"}}
+
+    {{template "admin-flash" .}}
+
+    {{if .EdgeBrowser}}
+    <div class="alert alert-warning d-flex align-items-center" role="alert" data-edge-notice>
+        <i class="bi bi-browser-edge me-2 fs-4"></i>
+        <div class="fw-semibold">{{t .Lang "account.edge_notice"}}</div>
+    </div>
+    {{end}}
+
+    {{if .LoadFailed}}
+    <div class="alert alert-warning"><i class="bi bi-arrow-clockwise me-2"></i>{{t .Lang "account.passkeys_load_failed"}}</div>
+    {{else if not .Available}}
+    <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>{{t .Lang "account.passkeys_unavailable"}}</div>
+    {{else}}
+    <noscript><div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "account.passkeys_need_js"}}</div></noscript>
+    <div class="alert alert-warning d-none" data-passkey-env-warning role="alert"></div>
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-1"><i class="bi bi-fingerprint me-2 text-primary"></i>{{t .Lang "account.passkeys_title"}}</h5>
+                    <p class="text-muted small mb-3">{{t .Lang "account.passkeys_intro"}}</p>
+
+                    {{if .Passkeys}}
+                    <div class="alert alert-success py-2 small"><i class="bi bi-shield-check me-2"></i>{{t .Lang "account.passkeys_required_on"}}</div>
+                    {{if eq (len .Passkeys) 1}}
+                    <div class="alert alert-warning py-2 small"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "account.passkeys_backup_hint"}}</div>
+                    {{end}}
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{{t .Lang "account.col_name"}}</th>
+                                    <th>{{t .Lang "account.col_type"}}</th>
+                                    <th>{{t .Lang "account.col_created"}}</th>
+                                    <th>{{t .Lang "account.col_last_used"}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Passkeys}}
+                                <tr>
+                                    <td style="min-width:14rem;">
+                                        <div class="d-flex gap-2">
+                                            <form action="/admin/account/passkeys/rename/{{.ID}}" method="POST" class="d-flex gap-2 flex-grow-1">
+                                                <input type="text" name="label" value="{{.Label}}" maxlength="64" required
+                                                       class="form-control form-control-sm flex-grow-1" aria-label="{{t $.Lang "account.col_name"}}">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="{{t $.Lang "account.rename"}}" aria-label="{{t $.Lang "account.rename"}}">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="collapse"
+                                                    data-bs-target="#del-{{.ID}}" aria-controls="del-{{.ID}}" aria-expanded="false"
+                                                    title="{{t $.Lang "common.delete"}}" aria-label="{{t $.Lang "common.delete"}}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="small">
+                                        {{if .Synced}}
+                                        <i class="bi bi-cloud-check me-1 text-primary"></i>{{t $.Lang "account.type_synced"}}
+                                        {{else}}
+                                        <i class="bi bi-key me-1 text-primary"></i>{{t $.Lang "account.type_device"}}
+                                        {{end}}
+                                    </td>
+                                    <td class="text-muted small">{{adminDateTime .CreatedAt}}</td>
+                                    <td class="text-muted small">{{if .LastUsedAt.IsZero}}—{{else}}{{adminDateTime .LastUsedAt}}{{end}}</td>
+                                </tr>
+                                <tr class="collapse" id="del-{{.ID}}">
+                                    <td colspan="4" class="bg-body-tertiary">
+                                        <form action="/admin/account/passkeys/delete/{{.ID}}" method="POST" class="row g-2 align-items-center" data-no-confirm data-passkey-delete>
+                                            <div class="col-md-6 small">
+                                                {{if eq (len $.Passkeys) 1}}{{t $.Lang "account.delete_last_warning"}}{{else}}{{t $.Lang "account.delete_confirm_text"}}{{end}}
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="password" name="password" class="form-control form-control-sm" required
+                                                       autocomplete="current-password" placeholder="{{t $.Lang "account.current_password"}}">
+                                            </div>
+                                            <div class="col-md-2 d-grid">
+                                                <button type="submit" class="btn btn-sm btn-danger">{{t $.Lang "common.delete"}}</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    {{else}}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-key" style="font-size:2.5rem;"></i>
+                        <p class="mt-2 mb-0">{{t .Lang "account.passkeys_none"}}</p>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title"><i class="bi bi-plus-circle me-2 text-primary"></i>{{t .Lang "account.add_title"}}</h5>
+                    {{if not .Enabled}}
+                    <div class="alert alert-warning small mb-0">{{t .Lang "passkey.err_unavailable"}}</div>
+                    {{else if not .CanAdd}}
+                    <div class="alert alert-secondary small mb-0">{{t .Lang "passkey.err_limit"}}</div>
+                    {{else}}
+                    <p class="text-muted small">{{t .Lang "account.add_text"}}</p>
+                    {{/* method=post + a submit button the script enables: without the
+                         script the form never sends the password in a URL. */}}
+                    <form id="passkey-register-form" method="post" action="/admin/account/security" data-begin="/admin/account/passkeys/register/begin" data-finish="/admin/account/passkeys/register/finish">
+                        <div class="mb-3">
+                            <label for="passkey-label" class="form-label fw-semibold">{{t .Lang "account.label"}}</label>
+                            <input type="text" class="form-control" id="passkey-label" name="label" maxlength="64" required
+                                   placeholder="{{t .Lang "account.label_placeholder"}}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="passkey-password" class="form-label fw-semibold">{{t .Lang "account.current_password"}}</label>
+                            <input type="password" class="form-control" id="passkey-password" name="password" required autocomplete="current-password">
+                            <div class="form-text">{{t .Lang "account.password_hint"}}</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" disabled>
+                            <i class="bi bi-fingerprint me-1"></i>{{t .Lang "account.add_btn"}}
+                        </button>
+                        <div data-passkey-status class="small mt-2" role="status" aria-live="polite" hidden></div>
+                    </form>
+                    {{end}}
+                    {{if .RPID}}
+                    <p class="text-muted small mt-3 mb-0"><i class="bi bi-globe me-1"></i>{{t .Lang "account.rp_hint"}} <code>{{.RPID}}</code></p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{if .Available}}{{template "admin-passkey-script" .}}{{end}}
+{{template "admin-footer" .}}
+{{end}}

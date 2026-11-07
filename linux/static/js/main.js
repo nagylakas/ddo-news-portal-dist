@@ -115,11 +115,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Confirm delete actions
-    const deleteForms = document.querySelectorAll('form[action*="/delete/"]');
+    // Confirm delete actions. A form may carry its own text (data-confirm) or
+    // opt out (data-no-confirm) when it already asks for confirmation itself,
+    // e.g. the passkey delete form, which requires the current password.
+    const deleteForms = document.querySelectorAll('form[action*="/delete/"]:not([data-no-confirm])');
     deleteForms.forEach(function(form) {
         form.addEventListener('submit', function(e) {
-            if (!confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
+            if (!confirm(form.dataset.confirm || 'Are you sure you want to delete this article? This action cannot be undone.')) {
                 e.preventDefault();
             }
         });

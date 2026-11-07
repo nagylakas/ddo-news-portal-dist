@@ -20,12 +20,27 @@
             </div>
             {{end}}
 
-            <form method="POST" action="/authorize">
+            {{if .SecondFactor}}
+            <div data-passkey-2fa data-begin="/authorize/passkey/begin" data-finish="/authorize/passkey/finish" data-flow-token="{{.FlowToken}}">
+                <div class="text-center mb-3">
+                    <i class="bi bi-fingerprint text-primary" style="font-size:2.5rem;"></i>
+                    <h5 class="mt-2 mb-1">{{t .Lang "passkey.second_factor_title"}}</h5>
+                    <div class="small text-muted">{{.Email}}</div>
+                </div>
+                <p class="small text-muted mb-3">{{t .Lang "passkey.second_factor_text"}}</p>
+                <button type="button" class="btn btn-primary w-100" data-passkey-retry>
+                    <i class="bi bi-key me-1"></i>{{t .Lang "passkey.use_passkey"}}
+                </button>
+                <div data-passkey-status class="small mt-2" role="status" aria-live="polite" hidden></div>
+                <p class="small text-muted mt-3 mb-0" data-passkey-restart hidden>{{t .Lang "passkey.err_oauth_expired"}}</p>
+            </div>
+            {{else}}
+            <form method="POST" action="/authorize"{{if .PasskeysEnabled}} data-passkey-autofill{{end}}>
                 <input type="hidden" name="flow_token" value="{{.FlowToken}}">
                 <div class="mb-3">
                     <label for="email" class="form-label fw-semibold">{{t .Lang "login.email"}}</label>
                     <input type="email" class="form-control" id="email" name="email"
-                           required autofocus value="{{.Email}}" autocomplete="username">
+                           required autofocus value="{{.Email}}" autocomplete="{{if .PasskeysEnabled}}username webauthn{{else}}username{{end}}">
                 </div>
                 <div class="mb-4">
                     <label for="password" class="form-label fw-semibold">{{t .Lang "login.password"}}</label>
@@ -36,8 +51,20 @@
                     <i class="bi bi-box-arrow-in-right me-1"></i>{{t .Lang "oauth.authorize_submit"}}
                 </button>
             </form>
+            {{if .PasskeysEnabled}}
+            <div class="d-flex align-items-center my-3 text-muted small">
+                <hr class="flex-grow-1 my-0"><span class="px-2">{{t .Lang "passkey.or"}}</span><hr class="flex-grow-1 my-0">
+            </div>
+            <button type="button" class="btn btn-outline-primary w-100" data-passkey-login
+                    data-begin="/authorize/passkey/begin" data-finish="/authorize/passkey/finish" data-flow-token="{{.FlowToken}}">
+                <i class="bi bi-fingerprint me-1"></i>{{t .Lang "passkey.sign_in_with"}}
+            </button>
+            <div data-passkey-status class="small mt-2" role="status" aria-live="polite" hidden></div>
+            {{end}}
+            {{end}}
         </div>
     </div>
 </div>
+{{if .PasskeysEnabled}}{{template "admin-passkey-script" .}}{{end}}
 {{template "admin-footer" .}}
 {{end}}

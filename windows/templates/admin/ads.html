@@ -1,0 +1,47 @@
+{{define "admin/ads"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-flash" .}}
+    {{template "admin-page-header" dict "Title" (t .Lang "ads.title") "Icon" "badge-ad" "Actions" (list (dict "URL" "/admin/banners" "Label" (t .Lang "nav.banners") "Icon" "images"))}}
+    <form method="POST" action="/admin/ads" class="row g-4">
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="h6 fw-bold">{{t .Lang "ads.inline_title"}}</h5>
+                    <p class="small text-muted">{{t .Lang "ads.inline_help"}}</p>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="inline_enabled" name="inline_enabled" value="on" {{if .Settings.InlineEnabled}}checked{{end}}>
+                        <label class="form-check-label fw-semibold" for="inline_enabled">{{t .Lang "ads.inline_enabled"}}</label>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label" for="inline_after_first">{{t .Lang "ads.inline_first"}}</label>
+                            <input class="form-control" type="number" min="0" max="{{.MaxAfter}}" id="inline_after_first" name="inline_after_first" value="{{.Settings.InlineAfterFirst}}">
+                            <div class="form-text"><code>article-inline</code></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="inline_after_second">{{t .Lang "ads.inline_second"}}</label>
+                            <input class="form-control" type="number" min="0" max="{{.MaxAfter}}" id="inline_after_second" name="inline_after_second" value="{{.Settings.InlineAfterSecond}}">
+                            <div class="form-text"><code>article-inline-2</code></div>
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">{{t .Lang "ads.inline_note"}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="h6 fw-bold">ads.txt</h5>
+                    <p class="small text-muted">{{t .Lang "ads.txt_help"}} <a href="/ads.txt" target="_blank" rel="noopener">/ads.txt</a></p>
+                    <textarea class="form-control font-monospace" name="ads_txt" rows="10" spellcheck="false" placeholder="google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0">{{.Settings.AdsTxt}}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-2"></i>{{t .Lang "common.save_changes"}}</button>
+        </div>
+    </form>
+</div>
+{{template "admin-footer" .}}
+{{end}}

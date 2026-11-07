@@ -161,6 +161,7 @@
             if (g.hint) { fs.appendChild(el('p', 'reader-group-hint', g.hint)); }
             body.appendChild(fs);
         });
+        if (window.ddoPush) { body.appendChild(window.ddoPush.section()); }
         var reset = el('button', 'reader-reset', 'Alapbeállítások visszaállítása');
         reset.type = 'button';
         reset.addEventListener('click', function () { prefs = {}; save(); apply(); });
