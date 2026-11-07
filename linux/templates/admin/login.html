@@ -91,11 +91,31 @@
             </div>
             {{end}}
 
-            <form method="POST" action="/admin/login">
+            {{if .SecondFactor}}
+            <div data-passkey-2fa data-begin="/admin/login/passkey/2fa/begin" data-finish="/admin/login/passkey/2fa/finish">
+                <div class="text-center mb-3">
+                    <i class="bi bi-fingerprint" style="font-size:3rem;"></i>
+                    <h5 class="mt-2 mb-1">{{t .Lang "passkey.second_factor_title"}}</h5>
+                    <div class="small login-version-tag">{{.Email}}</div>
+                </div>
+                <p class="small mb-3">{{t .Lang "passkey.second_factor_text"}}</p>
+                <button type="button" class="btn btn-primary w-100" data-passkey-retry>
+                    <i class="bi bi-key me-1"></i>{{t .Lang "passkey.use_passkey"}}
+                </button>
+                <a href="/admin/login" class="btn btn-outline-light w-100 mt-2" data-passkey-restart hidden>
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>{{t .Lang "passkey.restart_login"}}
+                </a>
+                <div data-passkey-status class="small mt-2" role="status" aria-live="polite" hidden></div>
+                <div class="text-center mt-3">
+                    <a href="/admin/login" class="small login-version-tag">{{t .Lang "passkey.cancel_login"}}</a>
+                </div>
+            </div>
+            {{else}}
+            <form method="POST" action="/admin/login"{{if .PasskeysEnabled}} data-passkey-autofill{{end}}>
                 <div class="mb-3">
                     <label for="email" class="form-label fw-semibold">{{t .Lang "login.email"}}</label>
                     <input type="email" class="form-control" id="email" name="email"
-                           required autofocus value="{{.Email}}" autocomplete="username">
+                           required autofocus value="{{.Email}}" autocomplete="{{if .PasskeysEnabled}}username webauthn{{else}}username{{end}}">
                 </div>
                 <div class="mb-4">
                     <label for="password" class="form-label fw-semibold">{{t .Lang "login.password"}}</label>
@@ -106,12 +126,24 @@
                     <i class="bi bi-box-arrow-in-right me-1"></i>{{t .Lang "login.submit"}}
                 </button>
             </form>
+            {{if .PasskeysEnabled}}
+            <div class="d-flex align-items-center my-3 login-version-tag small">
+                <hr class="flex-grow-1 my-0"><span class="px-2">{{t .Lang "passkey.or"}}</span><hr class="flex-grow-1 my-0">
+            </div>
+            <button type="button" class="btn btn-outline-light w-100" data-passkey-login
+                    data-begin="/admin/login/passkey/begin" data-finish="/admin/login/passkey/finish">
+                <i class="bi bi-fingerprint me-1"></i>{{t .Lang "passkey.sign_in_with"}}
+            </button>
+            <div data-passkey-status class="small mt-2" role="status" aria-live="polite" hidden></div>
+            {{end}}
+            {{end}}
 
             <div class="text-center mt-4 small login-version-tag">
                 {{.SiteNameLong}} &middot; v{{appVersion}}{{if appCodename}} "{{appCodename}}"{{end}}
             </div>
         </div>
     </div>
+    {{if .PasskeysEnabled}}{{template "admin-passkey-script" .}}{{end}}
 </body>
 
 </html>

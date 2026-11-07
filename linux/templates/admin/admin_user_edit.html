@@ -16,6 +16,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             {{end}}
+            {{if .FlashMessage}}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{.FlashMessage}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{end}}
 
             {{if .User}}
             <div class="card border-0 shadow-sm">
@@ -48,6 +54,26 @@
                             </div>
                         </div>
 
+                        {{if .CanManageRoles}}
+                        <fieldset class="mb-4">
+                            <legend class="form-label fw-semibold fs-6">{{t .Lang "roles.title"}}</legend>
+                            <input type="hidden" name="roles_present" value="1">
+                            {{range .RoleOptions}}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="role-{{.ID}}" name="role_ids" value="{{.ID}}" {{if .Checked}}checked{{end}}>
+                                <label class="form-check-label" for="role-{{.ID}}">{{.Name}}</label>
+                            </div>
+                            {{end}}
+                            <div class="form-text mb-3">{{t .Lang "roles.assign_form_hint"}} <a href="/admin/roles">{{t .Lang "roles.manage_link"}}</a></div>
+                            <label class="form-label fw-semibold" for="author_id">{{t .Lang "roles.account_author"}}</label>
+                            <select class="form-select" id="author_id" name="author_id">
+                                <option value="">{{t .Lang "roles.account_author_none"}}</option>
+                                {{range .AuthorOptions}}<option value="{{.ID}}" {{if .Selected}}selected{{end}}>{{.Name}}</option>{{end}}
+                            </select>
+                            <div class="form-text">{{t .Lang "roles.account_author_hint"}}</div>
+                        </fieldset>
+                        {{end}}
+
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="/admin/users" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
                             <button type="submit" class="btn btn-primary">
@@ -55,6 +81,36 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-fingerprint me-2"></i>{{t .Lang "account.passkeys_title"}}
+                    </h5>
+                    {{if .User.Passkeys}}
+                    <p class="card-text text-muted mb-2">{{t .Lang "adminuser.passkeys_count"}}: <strong>{{len .User.Passkeys}}</strong> &middot; {{t .Lang "adminuser.passkeys_required"}}</p>
+                    <ul class="list-unstyled small mb-3">
+                        {{range .User.Passkeys}}
+                        <li><i class="bi {{if .Synced}}bi-cloud-check{{else}}bi-usb-drive{{end}} me-1"></i>{{.Label}} <span class="text-muted">&middot; {{adminDate .CreatedAt}}</span></li>
+                        {{end}}
+                    </ul>
+                    {{if ne (.User.ID.Hex) .CurrentAdminID}}
+                    <p class="card-text text-muted small">{{t .Lang "adminuser.passkeys_reset_text"}}</p>
+                    <form action="/admin/users/passkeys/reset/{{.User.ID.Hex}}" method="POST">
+                        <button type="submit" class="btn btn-outline-danger"
+                                onclick="return confirm(this.dataset.confirm)"
+                                data-confirm="{{t .Lang "adminuser.passkeys_reset_confirm"}}">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>{{t .Lang "adminuser.passkeys_reset_btn"}}
+                        </button>
+                    </form>
+                    {{else}}
+                    <a href="/admin/account/security" class="btn btn-outline-primary btn-sm"><i class="bi bi-shield-lock me-1"></i>{{t .Lang "nav.account_security"}}</a>
+                    {{end}}
+                    {{else}}
+                    <p class="card-text text-muted mb-0">{{t .Lang "adminuser.passkeys_none"}}</p>
+                    {{end}}
                 </div>
             </div>
 

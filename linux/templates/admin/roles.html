@@ -1,0 +1,140 @@
+{{define "admin/roles"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-flash" .}}
+    {{template "admin-page-header" dict "Title" (t .Lang "roles.title") "Icon" "person-badge" "Subtitle" (t .Lang "roles.subtitle") "Actions" (list (dict "URL" "/admin/users" "Label" (t .Lang "nav.users") "Icon" "person-gear" "Class" "btn btn-outline-secondary btn-sm") (dict "URL" "/admin/roles/create" "Label" (t .Lang "roles.create_title") "Icon" "plus-circle"))}}
+    {{if .Enforcing}}<div class="alert alert-success" role="alert"><i class="bi bi-shield-check me-2"></i>{{t .Lang "roles.enforced"}}</div>
+    {{else}}<div class="alert alert-warning" role="alert"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "roles.not_enforced"}}</div>{{end}}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light"><tr><th>{{t .Lang "roles.col_name"}}</th><th>{{t .Lang "roles.col_permissions"}}</th><th>{{t .Lang "roles.col_members"}}</th><th class="text-end">{{t .Lang "dash.col_actions"}}</th></tr></thead>
+                <tbody>
+                {{range .Rows}}
+                <tr>
+                    <td>
+                        <div class="fw-semibold">{{.Name}}{{if .Builtin}} <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lock me-1"></i>{{t $.Lang "roles.builtin"}}</span>{{end}}</div>
+                        {{if .Description}}<div class="small text-muted">{{.Description}}</div>{{end}}
+                    </td>
+                    <td>{{if .Builtin}}{{t $.Lang "roles.all_permissions"}}{{else}}{{.Permissions}}{{if .Categories}} <span class="badge bg-secondary-subtle text-secondary border ms-1">{{.Categories}} {{t $.Lang "roles.categories_short"}}</span>{{end}}{{end}}</td>
+                    <td>{{.Members}}</td>
+                    <td class="text-end text-nowrap">
+                        {{if not .Builtin}}
+                        <a href="/admin/roles/edit/{{.ID}}" class="btn btn-sm btn-outline-secondary" title="{{t $.Lang "common.edit"}}" aria-label="{{t $.Lang "common.edit"}}"><i class="bi bi-pencil"></i></a>
+                        <form action="/admin/roles/delete/{{.ID}}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" {{if .Members}}disabled{{end}} onclick="return confirm(this.dataset.confirm)" data-confirm="{{t $.Lang "roles.confirm_delete"}}" title="{{if .Members}}{{t $.Lang "roles.err_in_use"}}{{else}}{{t $.Lang "common.delete"}}{{end}}" aria-label="{{t $.Lang "common.delete"}}"><i class="bi bi-trash"></i></button>
+                        </form>
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="small text-muted mt-3">{{t .Lang "roles.assign_hint"}}</p>
+
+    <h2 class="h5 fw-bold mt-5">{{if .Enforcing}}{{t .Lang "roles.enforce_title"}}{{else}}{{t .Lang "roles.observe_title"}}{{end}}</h2>
+    <p class="text-muted small">{{if .Enforcing}}{{t .Lang "roles.enforce_help"}}{{else}}{{t .Lang "roles.observe_help"}}{{end}}{{if not .ObservingSince.IsZero}} {{t .Lang "roles.observe_since"}} {{adminDateTime .ObservingSince}}{{end}}</p>
+    {{if .AccountsWithoutRole}}
+    <div class="alert alert-info" role="alert">
+        <div class="fw-semibold">{{t .Lang "roles.no_role_title"}}</div>
+        {{t .Lang "roles.no_role_help"}} {{join .AccountsWithoutRole ", "}}
+    </div>
+    {{end}}
+    {{if .Observations}}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light"><tr><th>{{t .Lang "roles.observe_account"}}</th><th>{{t .Lang "roles.observe_needs"}}</th><th>{{t .Lang "roles.observe_request"}}</th><th class="text-end">{{t .Lang "roles.observe_count"}}</th><th>{{t .Lang "roles.observe_last"}}</th></tr></thead>
+                <tbody>
+                {{range .Observations}}
+                <tr>
+                    <td>{{.Account}}</td>
+                    <td>{{if .Missing}}<span class="text-danger"><i class="bi bi-bug me-1"></i>{{.Needs}}</span>{{else}}{{.Needs}}{{end}}</td>
+                    <td class="small text-muted"><code>{{.Sample}}</code></td>
+                    <td class="text-end">{{.Count}}</td>
+                    <td class="small text-muted text-nowrap">{{adminDateTime .LastAt}}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{if .ObservationsDropped}}<p class="small text-muted">{{t .Lang "roles.observe_dropped"}} {{.ObservationsDropped}}</p>{{end}}
+    {{else}}
+    <p class="text-muted">{{t .Lang "roles.observe_none"}}</p>
+    {{end}}
+</div>
+{{template "admin-footer" .}}
+{{end}}
+
+{{define "admin/role_form"}}
+{{template "admin-header" .}}
+<div class="container-fluid px-4">
+    {{template "admin-flash" .}}
+    {{template "admin-page-header" dict "Title" .Heading "Subtitle" (t .Lang "roles.form_hint") "Icon" "person-badge" "Actions" (list (dict "URL" "/admin/roles" "Label" (t .Lang "common.back") "Icon" "arrow-left" "Class" "btn btn-outline-secondary btn-sm"))}}
+    <form method="POST" action="{{if .RoleID}}/admin/roles/edit/{{.RoleID}}{{else}}/admin/roles/create{{end}}" id="role-form">
+        <div class="card border-0 shadow-sm mb-4"><div class="card-body row g-3">
+            <div class="col-md-5">
+                <label class="form-label fw-semibold" for="role-name">{{t .Lang "roles.col_name"}} <span class="text-danger">*</span></label>
+                <input class="form-control" id="role-name" name="name" value="{{.Name}}" maxlength="60" required>
+            </div>
+            <div class="col-md-7">
+                <label class="form-label fw-semibold" for="role-description">{{t .Lang "roles.field_description"}}</label>
+                <input class="form-control" id="role-description" name="description" value="{{.Description}}" maxlength="300">
+            </div>
+        </div></div>
+        <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+            <div class="fw-semibold">{{t .Lang "roles.scope_title"}}</div>
+            <div class="form-text mb-2">{{t .Lang "roles.scope_help"}}</div>
+            <div class="d-flex flex-wrap gap-3">
+                {{range .Categories}}<div class="form-check"><input class="form-check-input" type="checkbox" id="scope-{{.ID}}" name="category_ids" value="{{.ID}}" {{if .Checked}}checked{{end}}><label class="form-check-label" for="scope-{{.ID}}">{{.Name}}</label></div>{{end}}
+            </div>
+        </div></div>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <h5 class="h6 fw-bold mb-0 me-auto">{{t .Lang "roles.col_permissions"}} <span class="text-muted fw-normal">(<span id="role-count">0</span>)</span></h5>
+            <input class="form-control form-control-sm w-auto" type="search" id="role-filter" placeholder="{{t .Lang "roles.filter"}}" aria-label="{{t .Lang "roles.filter"}}">
+        </div>
+        <div class="row g-3 mb-4">
+            {{range .Groups}}
+            <div class="col-12 col-md-6 col-xxl-4" data-role-group>
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="module-{{.Module}}" name="perm" value="{{.Module}}.*" data-role-all {{if .All}}checked{{end}}>
+                            <label class="form-check-label fw-semibold" for="module-{{.Module}}">{{.Label}}</label>
+                        </div>
+                    </div>
+                    <div class="card-body py-2">
+                        {{range .Rows}}
+                        <div class="form-check" data-role-row data-search="{{lower .Label}} {{.Key}}">
+                            <input class="form-check-input" type="checkbox" id="perm-{{.Key}}" name="perm" value="{{.Key}}" data-role-key {{if .Checked}}checked{{end}}>
+                            <label class="form-check-label" for="perm-{{.Key}}" title="{{.Key}}">{{.Label}}</label>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </div>
+        <div class="d-flex justify-content-end gap-2 mb-4">
+            <a href="/admin/roles" class="btn btn-outline-secondary">{{t .Lang "common.cancel"}}</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-2"></i>{{t .Lang "common.save"}}</button>
+        </div>
+    </form>
+</div>
+<script src="/static/js/admin-roles.js?v={{assetVersion}}"></script>
+{{template "admin-footer" .}}
+{{end}}
+
+{{define "admin/forbidden"}}
+{{template "admin-header" .}}
+<div class="container py-5 text-center">
+    <i class="bi bi-shield-lock text-muted" style="font-size:4rem"></i>
+    <h1 class="h4 mt-3">{{t .Lang "roles.forbidden_title"}}</h1>
+    <p class="text-muted">{{t .Lang "roles.forbidden_help"}}</p>
+    <a href="/admin" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>{{t .Lang "nav.dashboard"}}</a>
+</div>
+{{template "admin-footer" .}}
+{{end}}
