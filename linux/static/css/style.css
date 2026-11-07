@@ -4051,7 +4051,11 @@ html[data-reader-width] .article-content { text-align: left; }
 html[data-reader-focus="on"] .art-sidebar,
 html[data-reader-focus="on"] .art-banner,
 html[data-reader-focus="on"] .art-banner-horizontal,
-html[data-reader-focus="on"] .art-share { display: none !important; }
+html[data-reader-focus="on"] .art-share,
+html[data-reader-focus="on"] .article-inline-ad { display: none !important; }
+.article-inline-ad { margin: 1.75rem 0; text-align: center; }
+.article-inline-ad-label { display: block; margin-bottom: .35rem; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bs-secondary-color); }
+.article-inline-ad img { display: inline-block; max-width: 100%; height: auto; }
 html[data-reader-focus="on"] .art-main { max-width: 52rem; margin-left: auto; margin-right: auto; }
 
 /* List view */

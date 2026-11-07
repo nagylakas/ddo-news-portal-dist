@@ -24,8 +24,25 @@
                     </div>
                     {{end}}
 
-                    <form action="/admin/edit/{{.Article.ID.Hex}}" method="POST">
+                    <div id="article-lock-alert" class="alert alert-warning d-flex flex-wrap align-items-center gap-3 {{if not .ArticleLockHolder}}d-none{{end}}" role="alert">
+                        <div class="flex-grow-1"><i class="bi bi-lock me-2"></i><span id="article-lock-text">{{if .ArticleLockHolder}}{{printf (t .Lang "article.lock_held") .ArticleLockHolder}}{{end}}</span></div>
+                        <button type="button" class="btn btn-sm btn-warning" id="article-lock-takeover"><i class="bi bi-unlock me-1"></i>{{t .Lang "article.lock_takeover"}}</button>
+                    </div>
+                    <div id="article-changed-alert" class="alert alert-warning d-none" role="alert"><i class="bi bi-exclamation-triangle me-2"></i>{{t .Lang "article.lock_changed"}}</div>
+
+                    <form action="/admin/edit/{{.Article.ID.Hex}}" method="POST" id="article-edit-form"
+                          data-lock-url="/admin/articles/lock/{{.Article.ID.Hex}}" data-version="{{.ArticleVersion}}"
+                          data-lock-message="{{t .Lang "article.lock_held"}}" data-lock-confirm="{{t .Lang "article.lock_takeover_confirm"}}" data-lock-offline="{{t .Lang "article.lock_offline"}}">
+                        <input type="hidden" name="loaded_version" value="{{.ArticleVersion}}">
                         <div class="row g-4">
+                            {{if .ArticleEditConflict}}
+                            <div class="col-12">
+                                <div class="form-check border border-danger rounded p-3 ps-5">
+                                    <input class="form-check-input" type="checkbox" id="overwrite_conflict" name="overwrite_conflict" value="on">
+                                    <label class="form-check-label fw-semibold" for="overwrite_conflict">{{t .Lang "article.overwrite_conflict"}}</label>
+                                </div>
+                            </div>
+                            {{end}}
                             {{template "admin-google-news-checklist" .}}
                             <!-- Title -->
                             <div class="col-12">
@@ -106,9 +123,13 @@
                             <!-- Image URL -->
 							<div class="col-12">
 								<label for="entity_ids" class="form-label fw-semibold">Követhető témák</label>
-								<select class="form-select" id="entity_ids" name="entity_ids" multiple size="5">
-									{{range .Entities}}<option value="{{.ID.Hex}}">{{.Name}} ({{.TypeName}})</option>{{end}}
-								</select><div class="form-text">A mentés lecseréli a cikk témakapcsolatait.</div>
+								{{$linked := .LinkedEntityIDs}}
+								{{if .EntityLinksLoaded}}<input type="hidden" name="entity_links_present" value="1">
+								{{range .HiddenEntityIDs}}<input type="hidden" name="entity_ids" value="{{.}}">{{end}}{{end}}
+								<select class="form-select" id="entity_ids" name="entity_ids" multiple size="5" {{if not .EntityLinksLoaded}}disabled{{end}}>
+									{{range .Entities}}<option value="{{.ID.Hex}}" {{if index $linked .ID.Hex}}selected{{end}}>{{.Name}} ({{.TypeName}})</option>{{end}}
+								</select>
+								<div class="form-text">{{if .EntityLinksLoaded}}A mentés a kijelölésnek megfelelően frissíti a cikk témakapcsolatait.{{else}}{{t .Lang "article.entity_links_unavailable"}}{{end}}</div>
 							</div>
                             <div class="col-12">
                                 <div class="article-field-header">
@@ -209,6 +230,8 @@
                                        value="{{.PublishAtValue}}" min="{{.PublishAtMin}}">
                                 <div class="form-text">{{t .Lang "article.publish_at_hint"}}</div>
                             </div>
+
+                            {{template "admin-publish-intents" .}}
 
                             <!-- Metadata -->
                             <div class="col-12">
@@ -509,5 +532,6 @@ function importCurrentURL() {
 <script src="/static/js/md-editor.js"></script>
 <script src="/static/js/poll-picker.js"></script>
 <script src="/static/js/gallery-picker.js"></script>
+<script src="/static/js/article-lock.js?v={{assetVersion}}"></script>
 {{template "admin-footer" .}}
 {{end}}
