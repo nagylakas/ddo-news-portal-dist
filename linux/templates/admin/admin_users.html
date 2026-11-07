@@ -1,11 +1,7 @@
 {{define "admin/admin_users"}}
 {{template "admin-header" .}}
 <div class="container-fluid px-4">
-    {{if .CanManageRoles}}
-    {{template "admin-page-header" dict "Title" (t .Lang "adminuser.manage_title") "Icon" "person-gear" "Actions" (list (dict "URL" "/admin/roles" "Label" (t .Lang "roles.title") "Icon" "person-badge" "Class" "btn btn-outline-primary btn-sm") (dict "URL" "/admin/users/create" "Label" (t .Lang "adminuser.new_btn") "Icon" "plus-lg"))}}
-    {{else}}
     {{template "admin-page-header" dict "Title" (t .Lang "adminuser.manage_title") "Icon" "person-gear" "Actions" (list (dict "URL" "/admin/users/create" "Label" (t .Lang "adminuser.new_btn") "Icon" "plus-lg"))}}
-    {{end}}
 
     {{template "admin-flash" .}}
 
@@ -32,7 +28,6 @@
                             {{if .IsSuperAdmin}}
                             <span class="badge bg-warning text-dark ms-2"><i class="bi bi-shield-lock me-1"></i>{{t $.Lang "adminuser.badge_super"}}</span>
                             {{end}}
-                            {{range index $.UserRoleNames .ID.Hex}}<span class="badge bg-secondary-subtle text-secondary border ms-1">{{.}}</span>{{end}}
                         </td>
                         <td class="text-muted">{{.Email}}</td>
                         <td class="text-center">

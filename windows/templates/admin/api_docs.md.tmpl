@@ -55,7 +55,6 @@ REST API reference for authenticated administrative access to this news portal.
   - [Create author](#create-author)
   - [Update author](#update-author)
   - [Delete author](#delete-author)
-- [Bulk actions, front page, advertising, reader rights](#bulk-actions-front-page-advertising-reader-rights)
 - [Banners](#banners)
   - [List banners](#list-banners)
   - [Get one banner](#get-one-banner)
@@ -973,7 +972,6 @@ curl -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" \
 | `ai_image_disclosure` | string | Yes, if image_url is set | AI declaration for the featured image: `unmodified`, `modified`, or `generated`. For backward compatibility only, an omitted value is stored as `unmodified` when `image_url` is set. |
 | `published` | bool | | Publish immediately (default: `false`). |
 | `publish_at` | string (RFC3339) | | Scheduled publish time. Null or omit to use the current time when `published=true`. |
-| `publish_intents` | object | | What to send when the article is public: `{"push": true, "social": ["facebook", "x"]}`. Sent once, a scheduled article at its publish time. Omitted: the earlier request stays. Channels that are off are ignored; an unknown network is a `400`. Results: `push_sent_at`, `social_posts`. |
 | `sync_source` | string | | Identifies the central publishing system, e.g. `ivr`. Must be supplied together with `external_id` — see [Central publishing sync](#central-publishing-sync). |
 | `external_id` | string | | The central system's opaque identifier for this article. Together with `sync_source` forms a durable, unique external identity. |
 
@@ -1430,117 +1428,6 @@ curl -X DELETE -H "X-API-Key: {{if .APIKey}}{{.APIKey}}{{else}}YOUR_KEY{{end}}" 
 **Response 409:** `resource_in_use` when active articles reference the author.
 
 ---
-
-## Bulk actions, front page, advertising, reader rights
-
-### Bulk article actions
-
-| Method | URL | Auth |
-| --- | --- | --- |
-| POST | `/api/articles/bulk` | Required |
-
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `action` | string | yes | `publish`, `unpublish`, `delete` (to the trash), `set_category`, `set_author`, `add_tags` |
-| `ids` | string[] | yes | Article IDs, at most 100. |
-| `category_id` | string | with `set_category` | Category ID. |
-| `author_id` | string | with `set_author` | Author ID. |
-| `tags` | string[] | with `add_tags` | Added to the existing tags. |
-
-Each article is handled on its own, so the response is `200` even when some fail. The `failed[].reason` values are `not_found`, `locked` (open in another editor's browser), `ai_disclosure_required` and `write_failed`. A bulk edit of a centrally synced article marks it `locally_modified`.
-
-```json
-{
-  "action": "publish",
-  "requested": 2,
-  "succeeded": ["665f1c..."],
-  "failed": [
-    { "id": "665f1d...", "reason": "ai_disclosure_required" }
-  ]
-}
-```
-
-```bash
-curl -X POST -H "X-API-Key: {{.APIKey}}" -H "Content-Type: application/json" \
-  -d '{"action":"set_category","ids":["665f1c..."],"category_id":"665a..."}' \
-  {{.SiteURL}}/api/articles/bulk
-```
-
-Errors: `400` invalid action, selection or unknown category/author; `503` no database.
-
-### Front page selection
-
-| Method | URL | Auth |
-| --- | --- | --- |
-| GET, PUT | `/api/homepage` | Required |
-
-The pinned articles appear first on the home page in the order given (at most 8); the first one is the lead story. The rest of the page fills up with the latest news. `PUT` replaces the whole list. An article that is not public is kept in the list but not shown.
-
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `slots[].article_id` | string | yes | Article ID, once per list. |
-| `slots[].pinned_until` | string (RFC3339) | | The pin ends by itself at this time. Must be in the future. |
-
-```bash
-curl -X PUT -H "X-API-Key: {{.APIKey}}" -H "Content-Type: application/json" \
-  -d '{"slots":[{"article_id":"665f1c...","pinned_until":"2026-12-01T08:00:00Z"}]}' \
-  {{.SiteURL}}/api/homepage
-```
-
-Errors: `400` invalid or unknown article, duplicate, past end time, more than 8 slots.
-
-### Advertising settings
-
-| Method | URL | Auth |
-| --- | --- | --- |
-| GET, PUT | `/api/ads/settings` | Required |
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `ads_txt` | string | Served at the public `/ads.txt`, at most 64 KB. Empty: the file answers 404. |
-| `inline_enabled` | bool | Automatic banners inside articles. |
-| `inline_after_first` | int | The `article-inline` slot appears after this paragraph (0-50, 0 = unused). |
-| `inline_after_second` | int | The same for the `article-inline-2` slot. |
-
-No banner is placed after an article's last paragraph. Assign banners to the two slots with the Banners API.
-
-```bash
-curl -X PUT -H "X-API-Key: {{.APIKey}}" -H "Content-Type: application/json" \
-  -d '{"ads_txt":"google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0","inline_enabled":true,"inline_after_first":3,"inline_after_second":8}' \
-  {{.SiteURL}}/api/ads/settings
-```
-
-Errors: `400` paragraph number out of range, `ads_txt` too long or not text.
-
-### Article endpoints called with an admin session
-
-With `ADMIN_PERMISSIONS_ENFORCE=true`, REST endpoints called with a session follow the account's roles: a missing permission is `403`, the article list returns only what the account can see, and other people's drafts need a separate permission. `X-API-Key` keeps full access and is not affected.
-
-### Web push subscription
-
-| Method | URL | Auth |
-| --- | --- | --- |
-| POST | `/api/push/subscribe`, `/api/push/unsubscribe` | None; same-origin browser requests with a JSON body only. |
-
-Used by the reader settings panel. The endpoint must belong to a browser vendor's push service. Success is `204`. Errors: `400`, `403` cross-origin, `404` push is off, `415`, `429`.
-
-```json
-{
-  "endpoint": "https://fcm.googleapis.com/fcm/send/...",
-  "keys": { "p256dh": "...", "auth": "..." }
-}
-```
-
-To send: set `publish_intents` on an article (create, update). It is sent once, when the article is public.
-
-### Reader data and erasure
-
-| Method | URL | Auth | Description |
-| --- | --- | --- | --- |
-| GET | `/api/personal/export` | Reader session | The signed-in reader's data as a JSON download. |
-| POST | `/api/personal/delete-account` | Reader session, same origin | Form field `confirm=TÖRLÉS`. Erases the account and redirects to sign-out; on failure to `/neked?tab=account&error=...`. |
-
-These act on the reader's own account and cannot be called with the API key. Public comments, forum posts and reviews stay without the author's name, and webshop orders are kept as accounting records.
 
 ## Banners
 
