@@ -236,6 +236,19 @@
                          "sha256":  "3d5f32c7f13ee51d6b232aee906e82786792063607b185f6ee91095c80532233"
                      },
                      {
+                         "id":  "nexus",
+                         "version":  "1.1.1",
+                         "name":  "Nexus",
+                         "description":  "Modern gaming-media look: near-black navy surfaces, rounded bento cards with hairline borders, eyebrow labels, a scrolling live ticker, a numbered top-5 list and an accent taken from your icon pack. Ships its own home page layout, including the reader\u0027s personal \"For you\" block. Dark colour scheme. Card corners, ticker speed and the ambient accent glow are adjustable.",
+                         "author":  "DDO",
+                         "min_app_version":  "0.7.23",
+                         "modules":  [
+
+                                     ],
+                         "asset":  "theme-nexus-1.1.1.zip",
+                         "sha256":  "e50ff6d016b2c688ab0a399dac442aba33280969f8edb5686813de7569399dd3"
+                     },
+                     {
                          "id":  "nexus-light",
                          "version":  "1.0.0",
                          "name":  "Nexus Light",
